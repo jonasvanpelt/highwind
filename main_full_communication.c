@@ -4,6 +4,8 @@
 
 #include "communication_datatypes.h"
 #include "udp_communication.h"
+#include "uart_communication.h"
+
 
 typedef struct{
 		int port_number_lisa_to_pc;
@@ -16,28 +18,36 @@ void *lisa_to_pc(void *connection){
 /*-------------------------START OF SECOND THREAD: LISA TO PC------------------------*/	
 
 	Connection *conn=(Connection *)connection;
+	static UDP_client udp_client;
+
 
 	//read data from UART
 	
-	//send data to eth port using UDP
-	static UDP_client udp_client;
+	serial_stream=serial_port_new();
+	packets_clear(); //for debugging
 
-	Barometer barometer;
-	Lisa_message lisa_message;
+	if (!serial_port_setup())
+	{
+	#if DEBUG > 0
+		printf("Setup has failed, port couldn't be opened\n");
+	#endif
+		exit(1);
+	}
 	
-	barometer.abs=100;
-	barometer.diff=5;
-
-
-	lisa_message.start=0x99;
-	lisa_message.length=10;
-	lisa_message.aircraft_id=1;
-	lisa_message.checksum_A=10;
-	lisa_message.checksum_B=20;
-	lisa_message.barometer=barometer;
-
 	openUDPClientSocket(&udp_client,conn->server_ip,conn->port_number_lisa_to_pc);
-	sendUDPClientData(&udp_client,&lisa_message,sizeof(lisa_message));
+
+
+	while(1)
+	{
+		if(serial_input_check()==1){
+			//send data to eth port using UDP
+			sendUDPClientData(&udp_client,&serial_input.buffer,sizeof(serial_input.buffer));
+			serial_input_buffer_clear();
+		}
+	}
+
+	serial_port_close();
+	serial_port_free();
 	closeUDPClientSocket(&udp_client);
 	
 	//the function must return something - NULL will do 
@@ -73,8 +83,19 @@ int main(int argc, char *argv[]){
 	
 	
 	static UDP_server udp_server;
-	Barometer barometer;
-	Lisa_message lisa_message;
+	union Serial_input {
+		char buffer[14]; //must be set bigger
+		struct Serial_input_conversion{
+			uint8_t start;
+			uint8_t length;
+			uint8_t sender_id;
+			uint8_t message_id;
+			uint32_t baro_raw_abs;
+			uint32_t baro_raw_diff;
+			uint8_t checksum_1;
+			uint8_t checksum_2;
+		} converted;
+	} result;
 	
 	openUDPServerSocket(&udp_server,connection.port_number_pc_to_lisa);
 
@@ -82,19 +103,13 @@ int main(int argc, char *argv[]){
 
 		//1. retreive UDP data form PC from ethernet port.
 		
-		receiveUDPServerData(&udp_server,(void *)&lisa_message,sizeof(lisa_message)); //blocking !!!
+		receiveUDPServerData(&udp_server,(void *)&result,sizeof(result)); //blocking !!!
 		
 		//print details of the client/peer and the data received
-
-		printf("\nReceived packet from %s:%d\n", inet_ntoa(udp_server.si_other.sin_addr), ntohs(udp_server.si_other.sin_port));
-		printf("Received structure:\n");
-		printf("start: %x\n" , lisa_message.start);
-		printf("length: %d\n" , lisa_message.length);
-		printf("aircraft_id: %d\n" , lisa_message.aircraft_id);
-		printf("checksum_A: %d\n" , lisa_message.checksum_A);
-		printf("checksum_B: %d\n" , lisa_message.checksum_B);
-		printf("barometer abs: %d\n" , lisa_message.barometer.abs);
-		printf("barometer diff: %d\n" , lisa_message.barometer.diff);
+		printf("start: %X ", result.converted.start);
+		printf("length: %d ", result.converted.length);
+		printf("checksum_1: %d ", result.converted.checksum_1);
+		printf("checksum_2: %d ", result.converted.checksum_2);		
 		
 		//2. send data to Lisa through UART port.
 	}
