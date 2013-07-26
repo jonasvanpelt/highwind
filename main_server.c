@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include<stdlib.h> //exit(0);
 
 #include "udp_communication.h"
 #include "communication_datatypes.h"
@@ -8,13 +9,23 @@ static UDP_server udp_server;
  
 
 int main(int argc, char *argv[]){
+	
+	int port_number;
+	
+	if(argc == 2){
+		//first argument is always name of program or empty string
+		port_number=atoi(argv[1]);
+	}else{
+			printf("wrong parameters: enter port number\n");
+			exit(1);
+			
+	}
 
 	//create test struct to send test data
 	Barometer barometer;
 	Lisa_message lisa_message;
 
-	openUDPServerSocket(&udp_server,8888);
-
+	openUDPServerSocket(&udp_server,port_number);
 
 	while(1){
 	 	printf("\nWaiting for data...\n");
