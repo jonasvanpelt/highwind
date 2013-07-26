@@ -25,7 +25,7 @@ int main(int argc, char *argv[]){
 		
 		printf("\nReceived packet from %s:%d\n", inet_ntoa(udp_server.si_other.sin_addr), ntohs(udp_server.si_other.sin_port));
 		printf("Received structure:\n");
-		printf("start: 0x%x\n" , lisa_message.start);
+		printf("start: %x\n" , lisa_message.start);
 		printf("length: %d\n" , lisa_message.length);
 		printf("aircraft_id: %d\n" , lisa_message.aircraft_id);
 		printf("checksum_A: %d\n" , lisa_message.checksum_A);

@@ -16,6 +16,7 @@ int main(int argc, char *argv[]){
 	barometer.abs=100;
 	barometer.diff=5;
 
+
 	lisa_message.start=0x99;
 	lisa_message.length=10;
 	lisa_message.aircraft_id=1;
