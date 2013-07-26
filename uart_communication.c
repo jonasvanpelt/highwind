@@ -1,17 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
-#include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <stdint.h>
-#include <sys/time.h>
 #include <errno.h>
-#include <termios.h>
 #include <sys/ioctl.h>
 #include <time.h>
+
+#include "uart_communication.h"
 
 /**
  * debug:
@@ -28,158 +25,12 @@
 #define TRACE(type,fmt,args...)
 #define TRACE_ERROR 1
 
-typedef struct{
-	int fd;                        /* serial device fd          */
-	struct termios orig_termios;   /* saved tty state structure */
-	struct termios cur_termios;    /* tty state structure       */
-}serial_port;
 
-/**
- * PROTOTYPES
- * */
-
-int serial_port_setup(void);
-int serial_input_check(void);
-int serial_port_write(void);
-int serial_port_read(void);
-int serial_port_create(void);
-int serial_port_get_baud(void);
-int  serial_port_open_raw(const char* device, speed_t speed);
-int  serial_port_open(const char* device, void(*term_conf_callback)(struct termios*, speed_t*));
-serial_port* serial_port_new(void);
-void serial_port_free(void);
-void serial_port_flush(void);
-void serial_port_flush_input(void);
-void serial_port_flush_output(void);
-void serial_port_close(void);
-void serial_buffer_clear(void);
-void serial_output_buffer_clear(void);
-void serial_input_buffer_clear(void);
-void benchmark_start(int timer);
-void benchmark_stop(int timer);
-void packets_clear(void);
-
-
-/**
- * GLOBALS
- * */
-
-const char device[]="/dev/ttyO4";
+//config
 speed_t speed = B57600;
-
-
-
-struct Packets {
-	struct Serial {
-		uint32_t received;
-		uint32_t lost;
-	} serial;
-	struct UDP {
-		uint32_t received;
-		uint32_t lost;
-	} udp;
-} packets;
-
-union Serial_input {
-	char buffer[14];
-	struct Serial_input_conversion{
-		uint8_t start;
-		uint8_t length;
-		uint8_t sender_id;
-		uint8_t message_id;
-		uint32_t baro_raw_abs;
-		uint32_t baro_raw_diff;
-		uint8_t checksum_1;
-		uint8_t checksum_2;
-	} converted;
-} serial_input;
-
-union Serial_output {
-	char buffer[33];
-	uint32_t set_servo_buffer[8];
-} serial_output;
-
+const char device[]="/dev/ttyO4";
 int serial_input_buffer_size = sizeof(serial_input.buffer);
 int serial_output_buffer_size = sizeof(serial_output.buffer);
-
-
-// debug globals
-
-//timers
-
-#if DEBUG > 1
-
-struct timeval timers[10];
-
-#endif
-
-void set_servo (void)
-{
-serial_output.set_servo_buffer[7] = 0;
-int i;
-	for(i=0; i<7; i++)
-	{
-		serial_output.set_servo_buffer[7] ^= serial_output.set_servo_buffer[i];
-	}
-}
-
-
-
-/**
- * MAIN LOOP
- * */
- serial_port *serial_stream;
-
-
-main(int argc, char *argv[])
-{
-	serial_stream=serial_port_new();
-	
-	int count = 0;
-	char direction = 0;
-
-	system("clear"); // clear the screen
-
-	packets_clear();
-
-	if (!serial_port_setup())
-	{
-#if DEBUG > 0
-		printf("Setup has failed, port couldn't be opened\n");
-#endif
-		return 1;
-	}
-
-	while(1)
-	{
-		int i;
-		for(i=0; i<7; i++)
-		{
-			if (direction)
-			{
-				serial_output.set_servo_buffer[i] = 1000;
-			} else {
-				serial_output.set_servo_buffer[i] = 0;
-			}
-			
-			printf("servo %d: %d ", i+1, serial_output.set_servo_buffer[i]);
-		}
-		direction ^= 1;
-		set_servo();
-		printf("checksum: %d\n", serial_output.set_servo_buffer[7]);
-		serial_port_write();
-		sleep(2);
-
-		serial_input_check();
-		serial_input_buffer_clear();
-	}
-
-	serial_port_close();
-	serial_port_free();
-
-}
-
-
 
 /**
  * FUNCTIONS
