@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <iostream>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -29,11 +28,11 @@
 #define TRACE(type,fmt,args...)
 #define TRACE_ERROR 1
 
-struct serial_port {
+typedef struct{
 	int fd;                        /* serial device fd          */
 	struct termios orig_termios;   /* saved tty state structure */
 	struct termios cur_termios;    /* tty state structure       */
-};
+}serial_port;
 
 /**
  * PROTOTYPES
@@ -47,7 +46,7 @@ int serial_port_create(void);
 int serial_port_get_baud(void);
 int  serial_port_open_raw(const char* device, speed_t speed);
 int  serial_port_open(const char* device, void(*term_conf_callback)(struct termios*, speed_t*));
-struct serial_port* serial_port_new(void);
+serial_port* serial_port_new(void);
 void serial_port_free(void);
 void serial_port_flush(void);
 void serial_port_flush_input(void);
@@ -68,7 +67,6 @@ void packets_clear(void);
 const char device[]="/dev/ttyO4";
 speed_t speed = B57600;
 
-serial_port *serial_stream = serial_port_new();
 
 
 struct Packets {
@@ -118,19 +116,25 @@ struct timeval timers[10];
 void set_servo (void)
 {
 serial_output.set_servo_buffer[7] = 0;
-	for(int i=0; i<7; i++)
+int i;
+	for(i=0; i<7; i++)
 	{
 		serial_output.set_servo_buffer[7] ^= serial_output.set_servo_buffer[i];
 	}
 }
 
 
+
 /**
  * MAIN LOOP
  * */
+ serial_port *serial_stream;
+
 
 main(int argc, char *argv[])
 {
+	serial_stream=serial_port_new();
+	
 	int count = 0;
 	char direction = 0;
 
@@ -148,7 +152,8 @@ main(int argc, char *argv[])
 
 	while(1)
 	{
-		for(int i=0; i<7; i++)
+		int i;
+		for(i=0; i<7; i++)
 		{
 			if (direction)
 			{
@@ -248,8 +253,8 @@ void packets_clear(void)
 	packets.udp.lost=0;
 }
 
-struct serial_port* serial_port_new(void) {
-	struct serial_port* serial_stream = (serial_port*) malloc(sizeof(struct serial_port));
+serial_port* serial_port_new(void) {
+	serial_port* serial_stream = (serial_port*) malloc(sizeof(serial_port));
 	return serial_stream;
 }
 
