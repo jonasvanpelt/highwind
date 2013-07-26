@@ -17,8 +17,7 @@ int main(int argc, char *argv[]){
 		port_number=atoi(argv[1]);
 	}else{
 			printf("wrong parameters: enter port number\n");
-			exit(1);
-			
+			exit(1);		
 	}
 
 	//create test struct to send test data
