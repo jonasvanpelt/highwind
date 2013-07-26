@@ -16,7 +16,7 @@ int main(int argc, char *argv[]){
 	if(argc == 3){
 		//first argument is always name of program or empty string
 		ip_address=argv[1];
-		port_number=atoi(argv[2]);
+		port_number=atoi(argv[2]);		
 	}else{
 			printf("wrong parameters: enter destination ip adress and port number\n");
 			exit(1);

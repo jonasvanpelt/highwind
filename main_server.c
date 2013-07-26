@@ -21,8 +21,22 @@ int main(int argc, char *argv[]){
 	}
 
 	//create test struct to send test data
-	Barometer barometer;
-	Lisa_message lisa_message;
+	/*Barometer barometer;
+	Lisa_message lisa_message;*/
+	
+	union Serial_input {
+		char buffer[14]; //must be set bigger
+		struct Serial_input_conversion{
+			uint8_t start;
+			uint8_t length;
+			uint8_t sender_id;
+			uint8_t message_id;
+			uint32_t baro_raw_abs;
+			uint32_t baro_raw_diff;
+			uint8_t checksum_1;
+			uint8_t checksum_2;
+		} converted;
+	} result;
 
 	openUDPServerSocket(&udp_server,port_number);
 
@@ -30,18 +44,13 @@ int main(int argc, char *argv[]){
 	 	printf("\nWaiting for data...\n");
 		fflush(stdout);
 
-		receiveUDPServerData(&udp_server,(void *)&lisa_message,sizeof(lisa_message));
-		//print details of the client/peer and the data received
+		receiveUDPServerData(&udp_server,(void *)&result,sizeof(result)); //blocking !!!
 		
-		printf("\nReceived packet from %s:%d\n", inet_ntoa(udp_server.si_other.sin_addr), ntohs(udp_server.si_other.sin_port));
-		printf("Received structure:\n");
-		printf("start: %x\n" , lisa_message.start);
-		printf("length: %d\n" , lisa_message.length);
-		printf("aircraft_id: %d\n" , lisa_message.aircraft_id);
-		printf("checksum_A: %d\n" , lisa_message.checksum_A);
-		printf("checksum_B: %d\n" , lisa_message.checksum_B);
-		printf("barometer abs: %d\n" , lisa_message.barometer.abs);
-		printf("barometer diff: %d\n" , lisa_message.barometer.diff);
+		//print details of the client/peer and the data received
+		printf("start: %X ", result.converted.start);
+		printf("length: %d ", result.converted.length);
+		printf("checksum_1: %d ", result.converted.checksum_1);
+		printf("checksum_2: %d ", result.converted.checksum_2);	
 	}
 	
 	closeUDPServerSocket(&udp_server);

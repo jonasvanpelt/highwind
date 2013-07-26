@@ -82,7 +82,7 @@ int main(int argc, char *argv[]){
 	/*-------------------------START OF FIRST THREAD: PC TO LISA------------------------*/
 	
 	
-	static UDP_server udp_server;
+	/*static UDP_server udp_server;
 	union Serial_input {
 		char buffer[14]; //must be set bigger
 		struct Serial_input_conversion{
@@ -114,7 +114,7 @@ int main(int argc, char *argv[]){
 		//2. send data to Lisa through UART port.
 	}
 
-	closeUDPServerSocket(&udp_server);
+	closeUDPServerSocket(&udp_server);*/
 
 	
 	/*------------------------END OF FIRST THREAD------------------------*/

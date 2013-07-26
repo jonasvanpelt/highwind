@@ -30,7 +30,7 @@ struct Packets {
 } packets;
 
 union Serial_input {
-	char buffer[14];
+	char buffer[14]; //must be set bigger
 	struct Serial_input_conversion{
 		uint8_t start;
 		uint8_t length;
