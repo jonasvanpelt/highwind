@@ -31,14 +31,14 @@ int main(int argc, char *argv[]){
 	
 	while(1){
 		sleep(1);
-		serial_output.set_servo_buffer[0]=0;
+		serial_output.set_servo_buffer[0]=20;
 		serial_output.set_servo_buffer[1]=1000;
 		serial_output.set_servo_buffer[2]=0;
-		serial_output.set_servo_buffer[3]=1000;
+		serial_output.set_servo_buffer[3]=3000;
 		serial_output.set_servo_buffer[4]=0;
 		serial_output.set_servo_buffer[5]=0;
-		serial_output.set_servo_buffer[6]=1000;
-		serial_output.set_servo_buffer[7]=0;
+		serial_output.set_servo_buffer[6]=2000;
+		//serial_output.set_servo_buffer[7]=0;
 		
 		sendUDPClientData(&udp_client,&serial_output,sizeof(serial_output));
 	}

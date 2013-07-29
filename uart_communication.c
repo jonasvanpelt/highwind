@@ -19,7 +19,9 @@
  *
  * */
 
-#define DEBUG 0
+#ifndef DEBUG 
+#define DEBUG 3;
+#endif
 
 //#define TRACE(type,fmt,args...)    fprintf(stderr, fmt, args)
 #define TRACE(type,fmt,args...)
