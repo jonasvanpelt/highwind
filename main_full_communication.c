@@ -36,7 +36,7 @@ void *lisa_to_pc(void *connection){
 
 	while(1)
 	{
-		if(serial_input_check()==1){
+		if(serial_input_check()==0){
 			//send data to eth port using UDP
 			sendUDPClientData(&udp_client,&serial_input.buffer,sizeof(serial_input.buffer));
 			serial_input_buffer_clear();
@@ -62,7 +62,7 @@ int main(int argc, char *argv[]){
 		connection.port_number_lisa_to_pc=atoi(argv[2]);	
 		connection.port_number_pc_to_lisa=atoi(argv[3]);
 	}else{
-			printf("wrong parameters\n");
+			printf("wrong parameters: server ip - send port number - receive port number\n");
 			exit(1);		
 	}
 		

@@ -233,14 +233,14 @@ void serial_port_close(void) {
 
 int serial_port_setup(void)
 {
-	if(!serial_port_create())
+	if(serial_port_create()==-1)
 	{
 		return -1;
 	}
 	
 	log_write(FILENAME,"serial_port_setup()","Opening serial stream...");
 
-	if(!serial_port_open_raw(device, speed))
+	if(serial_port_open_raw(device, speed)==-1)
 	{
 		error_write(FILENAME,"serial_port_setup()","open_port: Unable to open /dev/ttyO4 ");
 		return -1;
@@ -319,7 +319,7 @@ int serial_port_create()
 
 	if (flag)
 	{
-		return 1;
+		return 0;
 	} else {
 		fd = open("/sys/devices/bone_capemgr.9/slots", O_RDWR);
 		
