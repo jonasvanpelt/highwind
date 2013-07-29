@@ -356,7 +356,7 @@ int serial_port_read()
 int serial_port_write() 
 {
 	//chars[len] = 0x0d; // stick a after the command        (0xd == 13 == ASCII CR)
-	serial_output.buffer[serial_output_buffer_size+1] = 0x00; // terminate the string properly
+	//serial_output.buffer[serial_output_buffer_size+1] = 0x00; // terminate the string properly
 	int n = write(serial_stream->fd, serial_output.buffer, serial_output_buffer_size);
 	if (n < 0) 
 	{
