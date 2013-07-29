@@ -86,9 +86,10 @@ int serial_input_check()
 				printf("checksum 1 calc: %d ", checksum_1);
 				printf("checksum 2 calc: %d ", checksum_2);
 				printf("lost / received: %d / %d ", packets.serial.lost, packets.serial.received);
+				printf("\n");
+
 #endif
 				benchmark_stop(0);
-				printf("\n");
 				return 0;
 			}
 		}
