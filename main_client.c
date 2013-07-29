@@ -24,21 +24,23 @@ int main(int argc, char *argv[]){
 	
 	union Serial_output {
 		char buffer[30];
-		uint32_t set_servo_buffer[8];
+		uint32_t set_servo_buffer[7];
 	} serial_output;
 	
 	openUDPClientSocket(&udp_client,ip_address,port_number);
 	
 	while(1){
 		sleep(1);
-		serial_output.set_servo_buffer[0]=0;
-		serial_output.set_servo_buffer[1]=0;
-		serial_output.set_servo_buffer[2]=0;
+		serial_output.set_servo_buffer[0]=1000;
+		serial_output.set_servo_buffer[1]=2000;
+		serial_output.set_servo_buffer[2]=3000;
 		serial_output.set_servo_buffer[3]=0;
 		serial_output.set_servo_buffer[4]=0;
 		serial_output.set_servo_buffer[5]=0;
 		serial_output.set_servo_buffer[6]=0;
-		serial_output.set_servo_buffer[7]=0;
+		serial_output.buffer[28]=0;
+		serial_output.buffer[29]=0;
+		
 		
 		sendUDPClientData(&udp_client,&serial_output,sizeof(serial_output));
 	}

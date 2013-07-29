@@ -39,6 +39,8 @@ void *lisa_to_pc(void *connection){
 		if(serial_input_check()==0){
 			//send data to eth port using UDP
 			sendUDPClientData(&udp_client,&serial_input.buffer,sizeof(serial_input.buffer));
+		    error_write(FILENAME,"lisa_to_pc()","Setup has failed, port couldn't be opened");
+
 		}
 	}
 
@@ -84,6 +86,14 @@ int main(int argc, char *argv[]){
 		//1. retreive UDP data form PC from ethernet port.
 		
 		receiveUDPServerData(&udp_server,(void *)&serial_output.buffer,sizeof(serial_output.buffer)); //blocking !!!
+		
+		int i;
+		printf("\n output buffer: ");
+		for(i=0;i<6;i++){
+			printf("%d ",serial_output.set_servo_buffer[i]);
+		}
+		printf("\n");
+
 			
 		//2. send data to Lisa through UART port.
 		
