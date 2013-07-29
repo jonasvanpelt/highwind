@@ -75,41 +75,22 @@ int main(int argc, char *argv[]){
 	}	
 	
 	/*-------------------------START OF FIRST THREAD: PC TO LISA------------------------*/
-	
-	
-	/*static UDP udp_server;
-	union Serial_input {
-		char buffer[14]; //must be set bigger
-		struct Serial_input_conversion{
-			uint8_t start;
-			uint8_t length;
-			uint8_t sender_id;
-			uint8_t message_id;
-			uint32_t baro_raw_abs;
-			uint32_t baro_raw_diff;
-			uint8_t checksum_1;
-			uint8_t checksum_2;
-		} converted;
-	} result;
-	
+	static UDP udp_server;
+
 	openUDPServerSocket(&udp_server,connection.port_number_pc_to_lisa);
 
 	while(1){
 
 		//1. retreive UDP data form PC from ethernet port.
 		
-		receiveUDPServerData(&udp_server,(void *)&result,sizeof(result)); //blocking !!!
-		
-		//print details of the client/peer and the data received
-		printf("start: %X ", result.converted.start);
-		printf("length: %d ", result.converted.length);
-		printf("checksum_1: %d ", result.converted.checksum_1);
-		printf("checksum_2: %d ", result.converted.checksum_2);		
-		
+		receiveUDPServerData(&udp_server,(void *)&serial_output.buffer,sizeof(serial_output.buffer)); //blocking !!!
+			
 		//2. send data to Lisa through UART port.
+		
+		serial_port_write();
 	}
 
-	closeUDPServerSocket(&udp_server);*/
+	closeUDPServerSocket(&udp_server);
 
 	
 	/*------------------------END OF FIRST THREAD------------------------*/
