@@ -19,7 +19,7 @@
  *
  * */
 
-#define DEBUG 2 
+#define DEBUG 0
 
 //#define TRACE(type,fmt,args...)    fprintf(stderr, fmt, args)
 #define TRACE(type,fmt,args...)
