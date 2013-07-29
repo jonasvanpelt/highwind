@@ -5,7 +5,9 @@
 #include "communication_datatypes.h"
 #include "udp_communication.h"
 #include "uart_communication.h"
+#include "log.h"
 
+static char FILENAME[] = "main_full_communication.c";
 
 typedef struct{
 		int port_number_lisa_to_pc;
@@ -18,24 +20,19 @@ void *lisa_to_pc(void *connection){
 /*-------------------------START OF SECOND THREAD: LISA TO PC------------------------*/	
 
 	Connection *conn=(Connection *)connection;
-	static UDP_client udp_client;
-
+	static UDP udp_client;
 
 	//read data from UART
 	
 	serial_stream=serial_port_new();
-	packets_clear(); //for debugging
-
-	if (!serial_port_setup())
+	
+	if (serial_port_setup()==-1)
 	{
-	#if DEBUG > 0
-		printf("Setup has failed, port couldn't be opened\n");
-	#endif
+		error_write(FILENAME,"lisa_to_pc()","Setup has failed, port couldn't be opened");
 		exit(1);
 	}
 	
 	openUDPClientSocket(&udp_client,conn->server_ip,conn->port_number_lisa_to_pc);
-
 
 	while(1)
 	{
@@ -68,8 +65,7 @@ int main(int argc, char *argv[]){
 			printf("wrong parameters\n");
 			exit(1);		
 	}
-	
-	
+		
 	//this variable is our reference to the second thread
 	pthread_t thread_lisa_to_pc;;
 
@@ -82,7 +78,7 @@ int main(int argc, char *argv[]){
 	/*-------------------------START OF FIRST THREAD: PC TO LISA------------------------*/
 	
 	
-	/*static UDP_server udp_server;
+	/*static UDP udp_server;
 	union Serial_input {
 		char buffer[14]; //must be set bigger
 		struct Serial_input_conversion{

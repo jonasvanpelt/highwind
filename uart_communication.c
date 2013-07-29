@@ -25,6 +25,7 @@
 #define TRACE(type,fmt,args...)
 #define TRACE_ERROR 1
 
+static const char FILENAME[] = "uart.c";
 
 //config
 speed_t speed = B57600;
@@ -54,10 +55,10 @@ int serial_input_check()
 		usleep((useconds_t) 10); // short sleep in while loop
 		serial_input_buffer_chars = serial_port_read(); //reads the port out and stores the number of chars red
 
-#if DEBUG > 0
 		if (serial_input_buffer_chars == -1) 
 		{
-			printf("read failed - serial_input_buffer: %s\n", serial_input.buffer);
+			error_write(FILENAME,"serial_input_check()","read failed - serial_input_buffer");
+
 		} else {
 			checksum_1 = 0;
 			checksum_2 = 0;
@@ -70,13 +71,14 @@ int serial_input_check()
 			if (serial_input.converted.start != 0x99 || serial_input.converted.checksum_1 != checksum_1 || serial_input.converted.checksum_2 != checksum_2)
 			{
 				serial_port_flush_input();
-#if DEBUG > 0
 				packets.serial.lost++;
-#endif
 				return -1;
+				
 			} else {
-#if DEBUG > 0
+				
 				packets.serial.received++;
+
+#if DEBUG > 0
 				printf("start: %X ", serial_input.converted.start);
 				printf("length: %d ", serial_input.converted.length);
 				printf("checksum_1: %d ", serial_input.converted.checksum_1);
@@ -87,10 +89,10 @@ int serial_input_check()
 #endif
 				benchmark_stop(0);
 				printf("\n");
-				return 1;
+				return 0;
 			}
 		}
-#endif
+
 	} else {
 		return 0;
 	}
@@ -127,8 +129,8 @@ void serial_port_flush_input(void) {
 	 * flush any input that might be on the port so we start fresh.
 	 */
 	if (tcflush(serial_stream->fd, TCIFLUSH)) {
-		TRACE(TRACE_ERROR,"%s, set term attr failed: %s (%d)\n", device, strerror(errno), errno);
-		fprintf(stderr, "flush (%d) failed: %s (%d)\n", serial_stream->fd, strerror(errno), errno);
+		error_write(FILENAME,"serial_port_flush_input()","flush input failed");
+
 	}
 }
 
@@ -137,20 +139,20 @@ void serial_port_flush_output(void) {
 	 * flush any input that might be on the port so we start fresh.
 	 */
 	if (tcflush(serial_stream->fd, TCOFLUSH)) {
-		TRACE(TRACE_ERROR,"%s, set term attr failed: %s (%d)\n", device, strerror(errno), errno);
-		fprintf(stderr, "flush (%d) failed: %s (%d)\n", serial_stream->fd, strerror(errno), errno);
+			error_write(FILENAME,"serial_port_flush_output()","flush output failed");
+
 	}
 }
 
 int  serial_port_open_raw(const char* device, speed_t speed) {
 	if ((serial_stream->fd = open(device, O_RDWR | O_NONBLOCK | O_NOCTTY)) < 0) {
-		TRACE(TRACE_ERROR,"%s, open failed: %s (%d)\n", device, strerror(errno), errno);
-		return 0;
+			error_write(FILENAME,"serial_port_open_raw()","opening serial port failed");
+		return -1;
 	}
 	if (tcgetattr(serial_stream->fd, &serial_stream->orig_termios) < 0) {
-		TRACE(TRACE_ERROR,"%s, get term settings failed: %s (%d)\n", device, strerror(errno), errno);
+		error_write(FILENAME,"serial_port_open_raw()","get term settings failed");
 		close(serial_stream->fd);
-		return 0;
+		return -1;
 	}
 	serial_stream->cur_termios = serial_stream->orig_termios;
 	/* input modes  */
@@ -164,40 +166,41 @@ int  serial_port_open_raw(const char* device, speed_t speed) {
 	serial_stream->cur_termios.c_lflag &= ~(ISIG|ICANON|IEXTEN|ECHO|FLUSHO|PENDIN);
 	serial_stream->cur_termios.c_lflag |= NOFLSH;
 	if (cfsetispeed(&serial_stream->cur_termios, speed)) {
-		TRACE(TRACE_ERROR,"%s, set term speed failed: %s (%d)\n", device, strerror(errno), errno);
+		error_write(FILENAME,"serial_port_open_raw()","set term attr failed");
 		close(serial_stream->fd);
-		return 0;
+		return -1;
 	}
 	if (tcsetattr(serial_stream->fd, TCSADRAIN, &serial_stream->cur_termios)) {
-		TRACE(TRACE_ERROR,"%s, set term attr failed: %s (%d)\n", device, strerror(errno), errno);
+		error_write(FILENAME,"serial_port_open_raw()","set term attr failed");
 		close(serial_stream->fd);
-		return 0;
+		return -1;
 	}
 	serial_port_flush();
-	return 1;
+	return 0;
 }
 
 int  serial_port_open(const char* device, void(*term_conf_callback)(struct termios*, speed_t*)) {
 
 	speed_t speed;
 	if ((serial_stream->fd = open(device, O_RDWR | O_NONBLOCK)) < 0) {
-		TRACE(TRACE_ERROR,"%s, open failed: %s (%d)\n", device, strerror(errno), errno);
+			error_write(FILENAME,"serial_port_open()","opening serial port failed");
 		return -1;
 	}
 	if (tcgetattr(serial_stream->fd, &serial_stream->orig_termios) < 0) {
-		TRACE(TRACE_ERROR,"%s, get term settings failed: %s (%d)\n", device, strerror(errno), errno);
+		error_write(FILENAME,"serial_port_open()","get term settings failed");
 		close(serial_stream->fd);
 		return -1;
 	}
 	serial_stream->cur_termios = serial_stream->orig_termios;
 	term_conf_callback(&serial_stream->cur_termios, &speed);
 	if (cfsetispeed(&serial_stream->cur_termios, speed)) {
-		TRACE(TRACE_ERROR,"%s, set term speed failed: %s (%d)\n", device, strerror(errno), errno);
+		error_write(FILENAME,"serial_port_open()","set term speed failed");
 		close(serial_stream->fd);
 		return -1;
 	}
 	if (tcsetattr(serial_stream->fd, TCSADRAIN, &serial_stream->cur_termios)) {
 		TRACE(TRACE_ERROR,"%s, set term attr failed: %s (%d)\n", device, strerror(errno), errno);
+		error_write(FILENAME,"serial_port_open()","set term attr failed");
 		close(serial_stream->fd);
 		return -1;
 	}
@@ -212,17 +215,17 @@ void serial_port_close(void) {
 	if (!serial_stream || serial_stream->fd < 0)
 		return;
 	if (tcflush(serial_stream->fd, TCIOFLUSH)) {
-		TRACE(TRACE_ERROR,"flushing (%s) (%d)\n", strerror(errno), errno);
+		//TRACE(TRACE_ERROR,"flushing (%s) (%d)\n", strerror(errno), errno);
 		close(serial_stream->fd);
 		return;
 	}
 	if (tcsetattr(serial_stream->fd, TCSADRAIN, &serial_stream->orig_termios)) {        // Restore modes.
-		TRACE(TRACE_ERROR,"restoring term attributes (%s) (%d)\n", strerror(errno), errno);
+		//TRACE(TRACE_ERROR,"restoring term attributes (%s) (%d)\n", strerror(errno), errno);
 		close(serial_stream->fd);
 		return;
 	}
 	if (close(serial_stream->fd)) {
-		TRACE(TRACE_ERROR,"closing %s (%d)\n", strerror(errno), errno);
+		//TRACE(TRACE_ERROR,"closing %s (%d)\n", strerror(errno), errno);
 		return;
 	}
 	return;
@@ -232,25 +235,19 @@ int serial_port_setup(void)
 {
 	if(!serial_port_create())
 	{
-		return 0;
+		return -1;
 	}
-#if DEBUG>0
-	printf("Opening serial stream... ");
-#endif
+	
+	log_write(FILENAME,"serial_port_setup()","Opening serial stream...");
 
 	if(!serial_port_open_raw(device, speed))
 	{
-#if DEBUG>0
-		printf("Unqble to open stream");
-#endif
-		perror("open_port: Unable to open /dev/ttyO4 - ");
-		return 0;
+		error_write(FILENAME,"serial_port_setup()","open_port: Unable to open /dev/ttyO4 ");
+		return -1;
 	} else {
-#if DEBUG>0
-		printf("Serial connection established on /dev/ttyO4 with speed: %d bps\n", serial_port_get_baud());
-#endif
+		log_write(FILENAME,"serial_port_setup()","Serial connection established on /dev/ttyO4");
 	}
-	return 1;
+	return 0;
 }
 
 int serial_port_get_baud() 
@@ -290,21 +287,18 @@ int serial_port_create()
 	char flag = 0;
 	FILE *fp ;
 	int fd;
-#if DEBUG>0
-	printf("Opening /sys/devices/bone_capemgr.9/slots... ");
-#endif
+
+	log_write(FILENAME,"serial_port_create()","Opening /sys/devices/bone_capemgr.9/slots... ");
+
 	fp = fopen("/sys/devices/bone_capemgr.9/slots", "r");
-#if DEBUG>0
-	if (fp != NULL){
-		printf("opened \n");
-	} else {
-		printf("Unable to open the file\n");
-	}
-	printf("Searching the file to check if uart5 is enabled... ");
-#endif
+	if (fp == NULL){
+		error_write(FILENAME,"serial_port_create()","Unable to open the file");
+	} 
+	log_write(FILENAME,"serial_port_create()","Searching the file to check if uart5 is enabled... ");
+
 	if (fp == NULL)
 	{
-		return 0;
+		return -1;
 	}
 
 	while(flag!=1 && fp!=NULL && fgets(tmp, sizeof(tmp), fp)!=NULL)
@@ -314,14 +308,12 @@ int serial_port_create()
 			flag = 1;
 		}
 	}
-#if DEBUG>0
 	if(flag)
 	{
-		printf("Uart5 is enabled\n");
+		log_write(FILENAME,"serial_port_create()","Uart5 is enabled");
 	} else {
-		printf("Uart5 is disabled\n");
+		log_write(FILENAME,"serial_port_create()","Uart5 is disabled");
 	}
-#endif
 
 	fclose(fp);
 
@@ -330,22 +322,18 @@ int serial_port_create()
 		return 1;
 	} else {
 		fd = open("/sys/devices/bone_capemgr.9/slots", O_RDWR);
-#if DEBUG>0
-		printf("Uart5 not enabled, trying to enable...\n");
-#endif
+		
+		log_write(FILENAME,"serial_port_create()","Uart5 not enabled, trying to enable...");
+
 		if (write(fd,"enable-uart5", 12)<0)
 		{
-#if DEBUG>0
-			printf("Unable to enable Uart5 on device\n");
-#endif
+			error_write(FILENAME,"serial_port_create()","failed to enable Uart5 on device");
+			close(fd);
+			return -1;
+		} else {
+		    log_write(FILENAME,"serial_port_create()","Enabled Uart5 on device");	
 			close(fd);
 			return 0;
-		} else {
-#if DEBUG>0
-			printf("Enabled Uart5 on device\n");
-#endif
-			close(fd);
-			return 1;
 		}
 	}
 }
@@ -369,10 +357,10 @@ int serial_port_write()
 	int n = write(serial_stream->fd, serial_output.buffer, serial_output_buffer_size);
 	if (n < 0) 
 	{
-		fputs("write failed!\n", stderr);
-		return 0;
+		error_write(FILENAME,"serial_port_write()","serial port write failed");
+		return -1;
 	}
-	return 1;                                                                                                           
+	return 0;                                                                                                           
 }
 
 void serial_buffer_clear(void)
@@ -399,6 +387,9 @@ void serial_input_buffer_clear(void)
 		serial_input.buffer[i]=0x00;
 	}
 }
+
+
+
 
 void benchmark_start(int timer)
 {

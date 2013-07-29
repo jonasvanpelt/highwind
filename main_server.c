@@ -5,7 +5,7 @@
 #include "communication_datatypes.h"
 
 
-static UDP_server udp_server;
+static UDP udp_server;
  
 
 int main(int argc, char *argv[]){
@@ -50,7 +50,8 @@ int main(int argc, char *argv[]){
 		printf("start: %X ", result.converted.start);
 		printf("length: %d ", result.converted.length);
 		printf("checksum_1: %d ", result.converted.checksum_1);
-		printf("checksum_2: %d ", result.converted.checksum_2);	
+		printf("checksum_2: %d ", result.converted.checksum_2);
+		
 	}
 	
 	closeUDPServerSocket(&udp_server);
