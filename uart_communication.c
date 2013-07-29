@@ -20,7 +20,7 @@
  * */
 
 #ifndef DEBUG 
-#define DEBUG 3;
+#define DEBUG 3
 #endif
 
 //#define TRACE(type,fmt,args...)    fprintf(stderr, fmt, args)
