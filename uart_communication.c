@@ -52,7 +52,7 @@ int serial_input_check()
 	if(serial_input_buffer_chars > 13)//tweak this number to gain performance - lower equals faster read but more likely to have erroneous strings
 	{
 		serial_input.buffer[0] = 0x00;
-		usleep((useconds_t) 10); // short sleep in while loop
+		serial_input_buffer_clear();
 		serial_input_buffer_chars = serial_port_read(); //reads the port out and stores the number of chars red
 
 		if (serial_input_buffer_chars == -1) 

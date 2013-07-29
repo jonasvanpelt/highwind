@@ -47,7 +47,7 @@ int main(int argc, char *argv[]){
 		receiveUDPServerData(&udp_server,(void *)&result,sizeof(result)); //blocking !!!
 		
 		//print details of the client/peer and the data received
-		printf("start: %X ", result.converted.start);
+		printf("start: %x ", result.converted.start);
 		printf("length: %d ", result.converted.length);
 		printf("checksum_1: %d ", result.converted.checksum_1);
 		printf("checksum_2: %d ", result.converted.checksum_2);

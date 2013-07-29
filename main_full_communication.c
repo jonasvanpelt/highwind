@@ -39,7 +39,6 @@ void *lisa_to_pc(void *connection){
 		if(serial_input_check()==0){
 			//send data to eth port using UDP
 			sendUDPClientData(&udp_client,&serial_input.buffer,sizeof(serial_input.buffer));
-			serial_input_buffer_clear();
 		}
 	}
 
