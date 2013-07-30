@@ -49,6 +49,8 @@ int main(int argc, char *argv[]){
 		//print details of the client/peer and the data received
 		printf("start: %x ", result.converted.start);
 		printf("length: %d ", result.converted.length);
+		printf("send id: %d ", result.converted.sender_id);
+		printf("message id: %d ", result.converted.message_id);
 		printf("checksum_1: %d ", result.converted.checksum_1);
 		printf("checksum_2: %d ", result.converted.checksum_2);
 		

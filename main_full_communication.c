@@ -24,14 +24,6 @@ void *lisa_to_pc(void *connection){
 
 	//read data from UART
 	
-	serial_stream=serial_port_new();
-	
-	if (serial_port_setup()==-1)
-	{
-		error_write(FILENAME,"lisa_to_pc()","Setup has failed, port couldn't be opened");
-		exit(1);
-	}
-	
 	openUDPClientSocket(&udp_client,conn->server_ip,conn->port_number_lisa_to_pc);
 
 	while(1)
@@ -39,7 +31,6 @@ void *lisa_to_pc(void *connection){
 		if(serial_input_check()==0){
 			//send data to eth port using UDP
 			sendUDPClientData(&udp_client,&serial_input.buffer,sizeof(serial_input.buffer));
-		    error_write(FILENAME,"lisa_to_pc()","Setup has failed, port couldn't be opened");
 
 		}
 	}
@@ -65,6 +56,15 @@ int main(int argc, char *argv[]){
 	}else{
 			printf("wrong parameters: server ip - send port number - receive port number\n");
 			exit(1);		
+	}
+	
+	//OPEN UART PORT
+	serial_stream=serial_port_new();
+	
+	if (serial_port_setup()==-1)
+	{
+		error_write(FILENAME,"lisa_to_pc()","Setup has failed, port couldn't be opened");
+		exit(1);
 	}
 		
 	//this variable is our reference to the second thread
