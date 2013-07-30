@@ -33,8 +33,8 @@ int main(int argc, char *argv[]){
 	while(1){
 		sleep(1);
 		serial_output.set_servo_buffer[0]=1000;
-		serial_output.set_servo_buffer[1]=2000;
-		serial_output.set_servo_buffer[2]=3000;
+		serial_output.set_servo_buffer[1]=0;
+		serial_output.set_servo_buffer[2]=0;
 		serial_output.set_servo_buffer[3]=0;
 		serial_output.set_servo_buffer[4]=0;
 		serial_output.set_servo_buffer[5]=0;

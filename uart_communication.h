@@ -6,6 +6,11 @@
 #include <unistd.h>
 #include <stdint.h>
 
+#define INPUT_BUFFER 14
+#define OUTPUT_BUFFER 33
+
+
+
 /**
  * GLOBALS
  * */
@@ -30,7 +35,7 @@ struct Packets {
 } packets;
 
 union Serial_input {
-	char buffer[14]; //must be set bigger
+	char buffer[INPUT_BUFFER]; //must be set bigger
 	struct Serial_input_conversion{
 		uint8_t start;
 		uint8_t length;
@@ -44,7 +49,7 @@ union Serial_input {
 } serial_input;
 
 union Serial_output {
-	char buffer[33];
+	char buffer[OUTPUT_BUFFER];
 	uint32_t set_servo_buffer[8];
 } serial_output;
 
