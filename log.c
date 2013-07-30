@@ -4,6 +4,15 @@
 
 FILE *lisa_log_file,*groundstation_log_file,*boneplane_log_file;
 
+static const char FILE_PATH_LISA_LOG = "/media/sdcard/data_lisa_log.txt";
+static const char FILE_PATH_GROUND_LOG = "/media/sdcard/data_groundstation_log.txt";
+static const char FILE_PATH_BONEPLANE_LOG = "/media/sdcard/data_boneplane_log.txt";
+
+/*static const char FILE_PATH_LISA_LOG[] = "data_lisa_log.txt";
+static const char FILE_PATH_GROUND_LOG[] = "data_groundstation_log.txt";
+static const char FILE_PATH_BONEPLANE_LOG[] = "data_boneplane_log.txt";*/
+
+
 int init_log(){
 	//check if sdcard is present
 	FILE *file;
@@ -21,7 +30,7 @@ LOG FOR DATA COMING FROM LISA
 ***********************************/
 int open_data_lisa_log(){
 	//open data log file
-	lisa_log_file = fopen("/media/sdcard/data_lisa_log.txt","a+"); 
+	lisa_log_file = fopen(FILE_PATH_LISA_LOG,"a+"); 
 	if(lisa_log_file==NULL){
 			return -1;
 	}
@@ -41,7 +50,7 @@ LOG FOR DATA COMING FROM GROUNDSTATION
 ***********************************/
 int open_data_groundstation_log(){
 	//open data log file
-	groundstation_log_file = fopen("/media/sdcard/data_groundstation_log.txt","a+"); 
+	groundstation_log_file = fopen(FILE_PATH_GROUND_LOG,"a+"); 
 	if(groundstation_log_file==NULL){
 			return -1;
 	}
@@ -62,7 +71,7 @@ LOG FOR DATA COMING FROM BONEPLANE
 ***********************************/
 int open_data_boneplane_log(){
 	//open data log file
-	boneplane_log_file = fopen("/media/sdcard/data_boneplane_log.txt","a+"); 
+	boneplane_log_file = fopen(FILE_PATH_BONEPLANE_LOG,"a+"); 
 	if(boneplane_log_file==NULL){
 			return -1;
 	}
