@@ -42,11 +42,11 @@ int init_log(){
 }
 
 int mount_sd_card(){
-	char str[80];
+	char str[256];
 	strcpy (str,"mount ");
-	strcpy (str,SD_CARD_DEVICE_LOCATION);
-	strcpy (str," ");
-	strcpy (str,SD_CARD_MOUNT_LOCATION);
+	strcat (str,SD_CARD_DEVICE_LOCATION);
+	strcat (str," ");
+	strcat (str,SD_CARD_MOUNT_LOCATION);
 
 	return system(str);
 }
