@@ -55,8 +55,16 @@ int main(int argc, char *argv[]){
 		connection.port_number_pc_to_lisa=atoi(argv[3]);
 	}else{
 			printf("wrong parameters: server ip - send port number - receive port number\n");
-			exit(1);		
+			exit(EXIT_FAILURE);		
 	}
+	
+	//init log (mount sd card if necessary)
+	if(init_log()==-1){
+		error_write(FILENAME,"main()","Init log failed");
+		exit(EXIT_FAILURE);
+
+	}
+
 	//init cirucal data log buffers
 	 cbInit(&cb_data_lisa, CBSIZE);
 	 cbInit(&cb_data_ground, CBSIZE);
@@ -66,7 +74,7 @@ int main(int argc, char *argv[]){
 		
 	if (serial_port_setup()==-1)
 	{
-		error_write(FILENAME,"lisa_to_pc()","Setup has failed, uart port couldn't be opened");
+		error_write(FILENAME,"main()","Setup has failed, uart port couldn't be opened");
 		exit(EXIT_FAILURE);
 	}
 
@@ -193,7 +201,6 @@ void *data_logging_lisa(void *arg){
 /*-------------------------START OF THIRD THREAD: LISA TO PC LOGGING------------------------*/	
 
 	ElemType cb_elem = {0};
-	init_log();
 	open_data_lisa_log();
 	
 	while(1){
@@ -210,7 +217,6 @@ void *data_logging_groundstation(void *arg){
 /*-------------------------START OF FOURTH THREAD: GROUNDSTATION TO LISA LOGGING------------------------*/	
 
 	ElemType cb_elem = {0};
-	init_log();
 	open_data_groundstation_log();
 	
 	while(1){
