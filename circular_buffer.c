@@ -1,3 +1,8 @@
+/*
+ * AUTHOR: Jonas Van Pelt
+ * source: wikipedia
+ */
+
 /* Circular buffer example, keeps one slot open */
  
 #include <stdio.h>

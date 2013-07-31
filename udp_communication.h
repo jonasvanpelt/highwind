@@ -1,3 +1,7 @@
+/*
+ * AUTHOR: Jonas Van Pelt
+ */
+
 #ifndef UDP_COMMUNCATION_H_ 
 #define UDP_COMMUNCATION_H_
 

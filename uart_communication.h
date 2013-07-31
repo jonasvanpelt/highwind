@@ -1,3 +1,7 @@
+/*
+ * AUTHOR: Maarten Arits
+ */
+
 #ifndef UART_COMMUNCATION_H_ 
 #define UART_COMMUNCATION_H_
 

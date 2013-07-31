@@ -1,3 +1,8 @@
+/*
+ * AUTHOR: Jonas Van Pelt
+ * source: wikipedia
+ */
+
 #ifndef CIRCULAR_BUFFER_H_ 
 #define CIRCULAR_BUFFER_H_
 

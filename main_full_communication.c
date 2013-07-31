@@ -1,3 +1,7 @@
+/*
+ * AUTHOR: Jonas Van Pelt
+ */
+
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -59,11 +63,10 @@ int main(int argc, char *argv[]){
 
 	//open uart port
 	serial_stream=serial_port_new();
-	
 		
 	if (serial_port_setup()==-1)
 	{
-		error_write(FILENAME,"lisa_to_pc()","Setup has failed, port couldn't be opened");
+		error_write(FILENAME,"lisa_to_pc()","Setup has failed, uart port couldn't be opened");
 		exit(EXIT_FAILURE);
 	}
 
@@ -76,13 +79,13 @@ int main(int argc, char *argv[]){
 		exit(EXIT_FAILURE);
 	}	
 	
-	//create a third thread for lisa data loggin
+	//create a third thread which executes data_logging_lisa
 	if(pthread_create(&thread_data_logging_lisa, NULL, data_logging_lisa,NULL)) {
 		error_write(FILENAME,"main()","error creating lisa logging thread");
 		exit(EXIT_FAILURE);
 	}
 	
-	//create a fourth thread for groundstation data logging
+	//create a fourth thread which executes data_logging_groundstation
 	if(pthread_create(&thread_data_logging_ground, NULL, data_logging_groundstation,NULL)) {
 		error_write(FILENAME,"main()","error creating groundstation logging thread");
 		exit(EXIT_FAILURE);
@@ -91,7 +94,6 @@ int main(int argc, char *argv[]){
 	/*-------------------------START OF FIRST THREAD: PC TO LISA------------------------*/
 	static UDP udp_server;
 	ElemType cb_elem = {0};
-
 
 	openUDPServerSocket(&udp_server,connection.port_number_pc_to_lisa);
 
@@ -103,13 +105,19 @@ int main(int argc, char *argv[]){
 		//write the data to circular buffer for log thread
 		memcpy (&cb_elem.value, &serial_output.buffer, sizeof(serial_output.buffer));	
 		cbWrite(&cb_data_ground, &cb_elem);
-		
-		int i;
+			
+		//FOR DEBUGGING: REMOVE ME!!!
+		if(cbIsFull(&cb_data_ground)){
+			printf("groundstation buffer is full\n") ;
+		}
+			
+		//FOR DEBUGGING: REMOVE ME!!!
+		/*int i;
 		printf("\n output buffer: ");
 		for(i=0;i<6;i++){
 			printf("%d ",serial_output.set_servo_buffer[i]);
 		}
-		printf("\n");
+		printf("\n");*/
 
 			
 		//2. send data to Lisa through UART port.
@@ -164,6 +172,11 @@ void *lisa_to_pc(void *connection){
 			//write the data to circual buffer for log thread
 			 memcpy (&cb_elem.value, &serial_input.buffer, sizeof(serial_input.buffer));	
 			 cbWrite(&cb_data_lisa, &cb_elem);
+			 
+			 //FOR DEBUGGING: REMOVE ME!!!
+			 if(cbIsFull(&cb_data_lisa)){
+				printf("lisa buffer is full\n") ;
+			}
 		}
 	}
 	serial_port_close();
