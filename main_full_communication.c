@@ -227,6 +227,8 @@ void *lisa_to_pc(void *connection){
 
 }	
 
+#if LOGGING > 0
+
 void *data_logging_lisa(void *arg){
 /*-------------------------START OF THIRD THREAD: LISA TO PC LOGGING------------------------*/	
 
@@ -259,6 +261,8 @@ void *data_logging_groundstation(void *arg){
 /*-------------------------END OF FOURTH THREAD: GROUNDSTATION TO LISA LOGGING------------------------*/	
 
 }
+
+#endif
 
 
 
