@@ -13,6 +13,8 @@
 #include "log.h"
 #include "circular_buffer.h"
 
+#define LOGGING 1
+
 #define CBSIZE 256
 
 /************************************
@@ -35,11 +37,14 @@ typedef struct{
 		char *server_ip;
 } Connection;
 
+#if LOGGING > 0
 //log buffer for data from lisa
  CircularBuffer cb_data_lisa;
 
 //log buffer for data from groundstation
  CircularBuffer cb_data_ground;
+ 
+#endif
 
  /***********************************
   * MAIN
@@ -62,12 +67,15 @@ int main(int argc, char *argv[]){
 	if(init_log()==-1){
 		error_write(FILENAME,"main()","Init log failed");
 		exit(EXIT_FAILURE);
-
 	}
+	
+	#if LOGGING > 0
 
-	//init cirucal data log buffers
+	//init circular data log buffers
 	 cbInit(&cb_data_lisa, CBSIZE);
 	 cbInit(&cb_data_ground, CBSIZE);
+	 
+	 #endif
 
 	//open uart port
 	serial_stream=serial_port_new();
@@ -87,6 +95,8 @@ int main(int argc, char *argv[]){
 		exit(EXIT_FAILURE);
 	}	
 	
+	#if LOGGING > 0 
+
 	//create a third thread which executes data_logging_lisa
 	if(pthread_create(&thread_data_logging_lisa, NULL, data_logging_lisa,NULL)) {
 		error_write(FILENAME,"main()","error creating lisa logging thread");
@@ -99,6 +109,7 @@ int main(int argc, char *argv[]){
 		exit(EXIT_FAILURE);
 	}
 	
+	#endif
 	/*-------------------------START OF FIRST THREAD: PC TO LISA------------------------*/
 	static UDP udp_server;
 	ElemType cb_elem = {0};
@@ -110,6 +121,13 @@ int main(int argc, char *argv[]){
 		//1. retreive UDP data form PC from ethernet port.
 		
 		receiveUDPServerData(&udp_server,(void *)&serial_output.buffer,sizeof(serial_output.buffer)); //blocking !!!
+		
+		
+		//2. send data to Lisa through UART port.
+		serial_port_write();
+		
+		#if LOGGING > 0
+		
 		//write the data to circular buffer for log thread
 		memcpy (&cb_elem.value, &serial_output.buffer, sizeof(serial_output.buffer));	
 		cbWrite(&cb_data_ground, &cb_elem);
@@ -126,11 +144,9 @@ int main(int argc, char *argv[]){
 			printf("%d ",serial_output.set_servo_buffer[i]);
 		}
 		printf("\n");*/
+		
+		#endif
 
-			
-		//2. send data to Lisa through UART port.
-			
-		serial_port_write();
 	}
 
 	closeUDPServerSocket(&udp_server);
@@ -143,11 +159,14 @@ int main(int argc, char *argv[]){
 		exit(EXIT_FAILURE);
 	}
 	
+	#if LOGGING > 0 
+	
 	//wait for the third thread to finish
 	if(pthread_join(thread_data_logging_lisa, NULL)) {
 		error_write(FILENAME,"main()","error joining thread_data_logging_lisa");
 		exit(EXIT_FAILURE);
 	}
+	
 	
 	//wait for the fourth thread to finish
 	if(pthread_join(thread_data_logging_ground, NULL)) {
@@ -155,9 +174,12 @@ int main(int argc, char *argv[]){
 		exit(EXIT_FAILURE);
 	}
 	
+	
 	//free circular buffers
 	cbFree(&cb_data_lisa);
 	cbFree(&cb_data_ground);
+	
+	#endif
 	
 	return 0;
 }
@@ -177,6 +199,9 @@ void *lisa_to_pc(void *connection){
 		if(serial_input_check()==0){
 			//send data to eth port using UDP
 			sendUDPClientData(&udp_client,&serial_input.buffer,sizeof(serial_input.buffer));
+			
+			#if LOGGING > 0
+
 			//write the data to circual buffer for log thread
 			 memcpy (&cb_elem.value, &serial_input.buffer, sizeof(serial_input.buffer));	
 			 cbWrite(&cb_data_lisa, &cb_elem);
@@ -185,6 +210,8 @@ void *lisa_to_pc(void *connection){
 			 if(cbIsFull(&cb_data_lisa)){
 				printf("lisa buffer is full\n") ;
 			}
+			
+			#endif
 		}
 	}
 	serial_port_close();
