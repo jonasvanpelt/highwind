@@ -29,7 +29,7 @@ static const char FILE_PATH_BONEPLANE_LOG[] = "data_boneplane_log.txt";*/
 int init_log(){
 	//check if sdcard is present
 	FILE *file;
-	file = fopen("/media/sdcard/sdcard_present.txt","r"); 
+	file = fopen("/media/sdcard/sdcard_present","r"); 
 	if(file==NULL){	
 			//SD CARD IS NOT PRESENT!, try mounting it
 			if(mount_sd_card()==-1)
