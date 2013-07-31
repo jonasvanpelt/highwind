@@ -31,7 +31,7 @@ int main(int argc, char *argv[]){
 	
 	
 	while(1){
-		sleep(1);
+		usleep(10);
 		serial_output.set_servo_buffer[0]=1000;
 		serial_output.set_servo_buffer[1]=0;
 		serial_output.set_servo_buffer[2]=0;

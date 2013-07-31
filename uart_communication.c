@@ -96,13 +96,13 @@ int serial_input_check()
 
 #endif
 				benchmark_stop(0);
-				return 0;
 			}
 		}
 
-	} else {
-		return 0;
+	}else{
+			return -1;
 	}
+	return 0;
 }
 
 void packets_clear(void)
