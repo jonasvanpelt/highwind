@@ -124,10 +124,8 @@ int main(int argc, char *argv[]){
 		//1. retreive UDP data form PC from ethernet port.
 		
 		receiveUDPServerData(&udp_server,(void *)&serial_output.buffer,sizeof(serial_output.buffer)); //blocking !!!
-		
-		
+			
 		//2. send data to Lisa through UART port.
-		serial_port_write();
 		
 		#if LOGGING > 0
 		
