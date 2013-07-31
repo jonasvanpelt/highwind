@@ -13,7 +13,10 @@
 #include "log.h"
 #include "circular_buffer.h"
 
+#ifndef LOGGING 
 #define LOGGING 1
+#endif
+
 
 #define CBSIZE 256
 
