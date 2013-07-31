@@ -13,7 +13,7 @@
 #include "log.h"
 #include "circular_buffer.h"
 
-#define CBSIZE 64
+#define CBSIZE 5
 
 /************************************
  * PROTOTYPES
