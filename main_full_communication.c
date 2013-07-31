@@ -18,7 +18,7 @@
 #endif
 
 
-#define CBSIZE 256
+#define CBSIZE 1024
 
 /************************************
  * PROTOTYPES
