@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 #include <time.h>
+#include <string.h>
 #include "log.h"
 
 FILE *lisa_log_file,*groundstation_log_file,*boneplane_log_file;
