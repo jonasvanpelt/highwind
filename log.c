@@ -11,6 +11,13 @@ FILE *lisa_log_file,*groundstation_log_file,*boneplane_log_file;
 static const char FILE_PATH_LISA_LOG[] = "/media/sdcard/data_lisa_log.txt";
 static const char FILE_PATH_GROUND_LOG[] = "/media/sdcard/data_groundstation_log.txt";
 static const char FILE_PATH_BONEPLANE_LOG[] = "/media/sdcard/data_boneplane_log.txt";
+
+/*static const char FILE_PATH_PROGRAM_LOG[]="/media/sdcard/log.txt";
+static const char FILE_PATH_PROGRAM_ERROR[]="/media/sdcard/error.txt";*/
+
+static const char FILE_PATH_PROGRAM_LOG[]="log.txt";
+static const char FILE_PATH_PROGRAM_ERROR[]="error.txt";
+
 static const char SD_CARD_MOUNT_LOCATION[] = "/media/sdcard/";
 static const char SD_CARD_DEVICE_LOCATION[] = "/dev/mmcblk0p2";
 
@@ -26,7 +33,7 @@ int init_log(){
 			//SD CARD IS NOT PRESENT!, try mounting it
 			if(mount_sd_card()==-1)
 			{
-				//sd card cannot be mount :end error message to server
+				//sd card cannot be mount
 				return -1;
 			}	
 	}
@@ -34,7 +41,13 @@ int init_log(){
 }
 
 int mount_sd_card(){
-	return system("mount %s %s",SD_CARD_DEVICE_LOCATION,SD_CARD_MOUNT_LOCATION);
+	char str[80];
+	strcpy (str,"mount ");
+	strcpy (str,SD_CARD_DEVICE_LOCATION);
+	strcpy (str," ");
+	strcpy (str,SD_CARD_MOUNT_LOCATION);
+
+	return system(str);
 }
 
 /**********************************
@@ -108,7 +121,7 @@ void error_write(char *file_name,char *function,char *message){
 	time_t now = time(0);
 	char* time_string;
 	time_string = ctime(&now);
-    file = fopen("/media/sdcard/error.txt","a+"); 
+    file = fopen(FILE_PATH_PROGRAM_ERROR,"a+"); 
 	fprintf(file,"%s%s-%s\t%s\n\n",time_string,file_name,function,message); 
 	fclose(file); 	
 }
@@ -120,7 +133,7 @@ void log_write(char *file_name,char *function,char *message)
 	time_t now = time(0);
 	char* time_string;
 	time_string = ctime(&now);
-    file = fopen("/media/sdcard/log.txt","a+"); 
+    file = fopen(FILE_PATH_PROGRAM_LOG,"a+"); 
 	fprintf(file,"%s%s-%s\t%s\n\n",time_string,file_name,function,message); 
 	fclose(file); 	
 }
