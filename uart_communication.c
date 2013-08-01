@@ -82,10 +82,10 @@ int serial_input_check() //returns the number of red bytes
 
 		serial_input_buffer_chars = serial_port_read(message_length-2); //reads the port out and stores the number of chars red
 
-		for(i=0;i<message_length-2;i++){
+		/*for(i=0;i<message_length-2;i++){
 			printf("%d ",serial_input.buffer[i]);
 		}
-		printf("\n");
+		printf("\n");*/
 				
 		
 		if (serial_input_buffer_chars == -1) 

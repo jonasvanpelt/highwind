@@ -10,7 +10,7 @@
 #include <unistd.h>
 #include <stdint.h>
 
-#define INPUT_BUFFER 1024 
+#define INPUT_BUFFER 255 
 #define OUTPUT_BUFFER 34
 
 /**
