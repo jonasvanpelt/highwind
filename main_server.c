@@ -25,17 +25,7 @@ int main(int argc, char *argv[]){
 	Lisa_message lisa_message;*/
 	
 	union Serial_input {
-		char buffer[14]; //must be set bigger
-		struct Serial_input_conversion{
-			uint8_t start;
-			uint8_t length;
-			uint8_t sender_id;
-			uint8_t message_id;
-			uint32_t baro_raw_abs;
-			uint32_t baro_raw_diff;
-			uint8_t checksum_1;
-			uint8_t checksum_2;
-		} converted;
+		char buffer[255]; //must be set bigger
 	} result;
 
 	openUDPServerSocket(&udp_server,port_number);
@@ -47,12 +37,11 @@ int main(int argc, char *argv[]){
 		receiveUDPServerData(&udp_server,(void *)&result,sizeof(result)); //blocking !!!
 		
 		//print details of the client/peer and the data received
-		printf("start: %x ", result.converted.start);
-		printf("length: %d ", result.converted.length);
-		printf("send id: %d ", result.converted.sender_id);
-		printf("message id: %d ", result.converted.message_id);
-		printf("checksum_1: %d ", result.converted.checksum_1);
-		printf("checksum_2: %d ", result.converted.checksum_2);
+		printf("start: %x ", result.buffer[0]);
+		printf("length: %d ", result.buffer[1]);
+		printf("send id: %d ", result.buffer[2]);
+		printf("message id: %d ", result.buffer[3]);
+
 		
 	}
 	
