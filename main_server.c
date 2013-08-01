@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdint.h>
 #include<stdlib.h> //exit(0);
 
 #include "udp_communication.h"
@@ -19,11 +20,7 @@ int main(int argc, char *argv[]){
 			printf("wrong parameters: enter port number\n");
 			exit(1);		
 	}
-
-	
-	union Serial_input {
-		char buffer[255]; 
-	} result;
+	uint8_t result[255]; 
 
 	openUDPServerSocket(&udp_server,port_number);
 
@@ -31,13 +28,13 @@ int main(int argc, char *argv[]){
 	 	printf("\nWaiting for data...\n");
 		fflush(stdout);
 
-		receiveUDPServerData(&udp_server,(void *)&result.buffer,sizeof(result.buffer)); //blocking !!!
+		receiveUDPServerData(&udp_server,(void *)&result,sizeof(result)); //blocking !!!
 		
 		//print details of the client/peer and the data received
-		printf("start: %x\n", result.buffer[0]);
-		printf("length: %d\n", result.buffer[1]);
-		printf("send id: %d\n", result.buffer[2]);
-		printf("message id: %d\n", result.buffer[3]);
+		printf("start: %x\n", result[0]);
+		printf("length: %d\n", result[1]);
+		printf("send id: %d\n", result[2]);
+		printf("message id: %d\n", result[3]);
 
 		
 	}
