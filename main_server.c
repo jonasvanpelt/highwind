@@ -20,12 +20,9 @@ int main(int argc, char *argv[]){
 			exit(1);		
 	}
 
-	//create test struct to send test data
-	/*Barometer barometer;
-	Lisa_message lisa_message;*/
 	
 	union Serial_input {
-		char buffer[255]; //must be set bigger
+		char buffer[255]; 
 	} result;
 
 	openUDPServerSocket(&udp_server,port_number);
@@ -34,13 +31,13 @@ int main(int argc, char *argv[]){
 	 	printf("\nWaiting for data...\n");
 		fflush(stdout);
 
-		receiveUDPServerData(&udp_server,(void *)&result,sizeof(result)); //blocking !!!
+		receiveUDPServerData(&udp_server,(void *)&result.buffer,sizeof(result.buffer)); //blocking !!!
 		
 		//print details of the client/peer and the data received
-		printf("start: %x ", result.buffer[0]);
-		printf("length: %d ", result.buffer[1]);
-		printf("send id: %d ", result.buffer[2]);
-		printf("message id: %d ", result.buffer[3]);
+		printf("start: %x\n", result.buffer[0]);
+		printf("length: %d\n", result.buffer[1]);
+		printf("send id: %d\n", result.buffer[2]);
+		printf("message id: %d\n", result.buffer[3]);
 
 		
 	}

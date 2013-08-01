@@ -200,12 +200,12 @@ void *lisa_to_pc(void *connection){
 	{
 		if(serial_input_check()==0){
 			//send data to eth port using UDP
-			sendUDPClientData(&udp_client,&serial_input.buffer,sizeof(serial_input.buffer));
+			sendUDPClientData(&udp_client,&(serial_input.buffer),sizeof(serial_input.buffer));
 			
 			#if LOGGING > 0
 
 			//write the data to circual buffer for log thread
-			 memcpy (&cb_elem.value, &serial_input.buffer, sizeof(serial_input.buffer));	
+			 memcpy (&cb_elem.value, &(serial_input.buffer), sizeof(serial_input.buffer));	
 			 cbWrite(&cb_data_lisa, &cb_elem);
 			 
 			 //FOR DEBUGGING: REMOVE ME!!!
