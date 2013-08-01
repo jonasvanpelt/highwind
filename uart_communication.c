@@ -43,66 +43,97 @@ int serial_output_buffer_size = sizeof(serial_output.buffer);
  * FUNCTIONS
  * */
 
-int serial_input_check()
+int serial_input_check() //returns the number of red bytes
 {
 	int i;
-	int serial_input_buffer_chars = 0;
+	int serial_input_buffer_chars;
 	uint8_t checksum_1;
 	uint8_t checksum_2;
+	uint8_t message_length;
+	struct timeval start;
+	struct timeval current;
+	int flag_time=0;
 
 	benchmark_start(0);
-	usleep((useconds_t) 1); // short sleep to slow the loop down
 	//Find number of bytes in buffer and read when enough
 
 	ioctl(serial_stream->fd, FIONREAD, &serial_input_buffer_chars);        //set bytes to number of bytes in buffer
-	if(serial_input_buffer_chars > 13)//tweak this number to gain performance - lower equals faster read but more likely to have erroneous strings
+	if(serial_input_buffer_chars > 0) //look for char in buffer
 	{
-		serial_input.buffer[0] = 0x00;
+		message_length = serial_port_get_length();
+
+		if(message_length < 5){ //the input was invalid
+			serial_port_flush_input();
+			packets.serial.lost++;
+			return -1;
+		}
 		serial_input_buffer_clear();
-		serial_input_buffer_chars = serial_port_read(); //reads the port out and stores the number of chars red
-
-		if (serial_input_buffer_chars == -1) 
+		gettimeofday(&start, NULL);
+		
+		// to be sure the message is in the buffer before reading it, lower for higher performance
+		while((current.tv_sec*1000000+current.tv_usec)-(start.tv_sec*1000000+start.tv_usec) < (18*message_length-3) && (serial_input_buffer_chars < message_length-2))
 		{
-			error_write(FILENAME,"serial_input_check()","read failed - serial_input_buffer");
+		usleep(5); // slow down the while loop
+		gettimeofday(&current, NULL);
+		ioctl(serial_stream->fd, FIONREAD, &serial_input_buffer_chars);        //set bytes to number of bytes in buffer
+		}
+		if(serial_input_buffer_chars > message_length-3) //the number of bytes expected to be in the message
+		{
+			serial_input_buffer_chars = serial_port_read(message_length-2); //reads the port out and stores the number of chars red
 
-		} else {
-			checksum_1 = 0;
-			checksum_2 = 0;
-			for(i=1;i<serial_input.buffer[1]-2;i++)
+			if (serial_input_buffer_chars == -1) 
 			{
-				checksum_1 += (uint8_t) serial_input.buffer[i];
-				checksum_2 += checksum_1;
-			}
+				error_write(FILENAME,"serial_input_check()","read failed - serial_input_buffer");
 
-			if (serial_input.converted.start != 0x99 || serial_input.converted.checksum_1 != checksum_1 || serial_input.converted.checksum_2 != checksum_2)
-			{
-				serial_port_flush_input();
-				packets.serial.lost++;
-				return -1;
-				
 			} else {
-				
-				packets.serial.received++;
+				checksum_1 = message_length; //part of the checksum
+				checksum_2 = checksum_1; // add checksum_0 to 0
+				for(i=0;i<serial_input.buffer[1]-4;i++) // count until checksum 1 --> length - 2 (checksums) - 2 (ofset)
+				{
+					checksum_1 += (uint8_t) serial_input.buffer[i];
+					checksum_2 += checksum_1;
+				}
+
+				if (serial_input.buffer[message_length-4]!= checksum_1 || serial_input.buffer[message_length-3] != checksum_2)
+				{
+					serial_port_flush_input();
+					packets.serial.lost++;
+					return -1;
+
+				} else {
+					//first two bits (start and length ) should be in buffer, now
+					char temp[INPUT_BUFFER];
+					int i;
+					for(i=0;i<INPUT_BUFFER;i++)
+					{
+						temp[i]=serial_input.buffer[i];	
+					}
+					serial_input.buffer[0]=0x99;
+					serial_input.buffer[1]=message_length;
+					for(i=2;i<INPUT_BUFFER;i++)
+					{
+						serial_input.buffer[i]=temp[i];	
+					}
+					
+					packets.serial.received++;
 
 #if DEBUG > 0
-				printf("start: %X ", serial_input.converted.start);
-				printf("length: %d ", serial_input.converted.length);
-				printf("checksum_1: %d ", serial_input.converted.checksum_1);
-				printf("checksum_2: %d ", serial_input.converted.checksum_2);
-				printf("checksum 1 calc: %d ", checksum_1);
-				printf("checksum 2 calc: %d ", checksum_2);
-				printf("lost / received: %d / %d ", packets.serial.lost, packets.serial.received);
-				printf("\n");
+					printf("length: %d ", serial_input.buffer[1]);
+					printf("sender_id: %d ", serial_input.buffer[2]);
+					printf("lost / received: %d / %d ", packets.serial.lost, packets.serial.received);
+					printf("\n");
 
 #endif
-				benchmark_stop(0);
+					benchmark_stop(0);
+				}
 			}
 		}
 
+
 	}else{
-			return -1;
+		return -1;
 	}
-	return 0;
+	return message_length;
 }
 
 void packets_clear(void)
@@ -238,6 +269,37 @@ void serial_port_close(void) {
 	return;
 }
 
+uint8_t serial_port_get_length(void){
+	int i = 0;
+	int serial_input_buffer_chars =0;
+	int flag = 0;
+	while(!flag && i<8)
+	{
+		usleep(20); // time to give the change for character to enter
+		serial_input_buffer_chars = serial_port_read(1); //reads the port out and stores the number of chars red
+		if (serial_input_buffer_chars == -1) 
+		{
+			error_write(FILENAME,"serial_port_get_length()","read failed - serial_input_buffer");
+
+		}
+		if(serial_input.buffer[0] == 0x99){
+			flag = 1;
+		}
+		i++;
+	}
+	if(flag){
+		usleep(20); // gives character the change to enter the buffer;
+		serial_input_buffer_chars = serial_port_read(1); //reads the port out and stores the number of chars red
+		if(serial_input_buffer_chars == 1){
+			if(serial_input.buffer[0] > 4){ // minimum length of message
+				return serial_input.buffer[0];
+			}
+		}
+	}
+	return 1; //  smaller than 4 means error, 0 means nothing found
+}
+	
+
 int serial_port_setup(void)
 {
 	if(serial_port_create()==-1)
@@ -345,9 +407,9 @@ int serial_port_create()
 	}
 }
 
-int serial_port_read() 
+int serial_port_read(uint32_t length) 
 {
-	int n = read(serial_stream->fd, serial_input.buffer, serial_input_buffer_size);
+	int n = read(serial_stream->fd, serial_input.buffer, length);
 	serial_input.buffer[n] = 0x00;                //This is needed or the previous contents of the string will appear after the changed characters. 
 	serial_port_flush_input();
 	if (n < 1) 

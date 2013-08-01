@@ -7,7 +7,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "communication_datatypes.h"
 #include "udp_communication.h"
 #include "uart_communication.h"
 #include "log.h"
@@ -19,6 +18,9 @@
 
 
 #define CBSIZE 1024
+
+#define MAX_STREAM_SIZE 255
+
 
 /************************************
  * PROTOTYPES
@@ -89,7 +91,6 @@ int main(int argc, char *argv[]){
 		exit(EXIT_FAILURE);
 	}
 
-	//this variable is our reference to the second thread
 	pthread_t thread_lisa_to_pc,thread_data_logging_lisa,thread_data_logging_ground;
 
 	//create a second thread which executes lisa_to_pc
