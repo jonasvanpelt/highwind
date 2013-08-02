@@ -218,9 +218,8 @@ int data_encode_commands(int32_t commands[]){
 		checksum_2 += checksum_1;
 	}
 
-	write_data->commands_lisa_format.commands.raw[29] = checksum_1;
-	write_data->commands_lisa_format.commands.raw[30] = checksum_2;
+	write_data->commands_lisa_format.commands.raw[28] = checksum_1;
+	write_data->commands_lisa_format.commands.raw[29] = checksum_2;
 	return 0;
 
 }
-

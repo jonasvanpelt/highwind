@@ -1,0 +1,14 @@
+ssh 192.168.7.2 -l root
+
+
+https://github.com/jonasvanpelt/highwind.git
+
+gitstatus
+git commit filename
+git push origin master
+
+gcc main_full_communication.c udp_communication.c uart_communication.c log.c circular_buffer.c data_decoding.c  -pthread -DDEBUG=0
+
+gcc main_full_server.c log.c udp_communication.c data_decoding.c -pthread -o full_server -DDEBUG=1
+
+
