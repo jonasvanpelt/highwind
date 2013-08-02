@@ -6,52 +6,6 @@
 #define DEBUG 3
 #endif
 
-/*int main(int argc, char *argv[])
-{
-	int i;
-	
-	//fill output buffer with random test data
-	for(i=0;i<7;i++)
-	{
-		output.raw[i]=i; //creating random message
-	}
-			
-	uint8_t test[34];
-	
-	//encode test data buffer in test
-	data_encode(test);
-	
-	//print encoded test data
-	for(i=0;i<34;i++)
-	{
-		printf("%d ", test[i]);
-	}
-	printf("\n");
-	
-	switch_read_write();
-	
-	if(data_update(test)!=-1)
-	{ 
-		printf("succeded\n");
-		//try print the sended data as a struct
-		printf("servo command 1: %d\n",data->groundstation.commands.message.servo_commands[0]);
-		printf("servo command 2: %d\n",data->groundstation.commands.message.servo_commands[1]);
-		printf("servo command 3: %d\n",data->groundstation.commands.message.servo_commands[2]);
-		char* time_string;
-		time_string = ctime(&(data->groundstation.commands.message.time));
-		printf("time: %s",time_string);
-		//printf("timeval: %d\n",data->groundstation.commands.message.tv);
-		printf("new data: %d\n",data->groundstation.commands.message.new_data);	
-	}
-	else {
-		printf("failed\n");
-	}
-	
-	//print struct
-	
-	return 0;
-}*/
-
 void init_decoding(){
 	#if DEBUG
 		printf("Entering init_decoding\n");
@@ -243,4 +197,31 @@ int data_encode(char buffer[])
 	buffer[32] = checksum_1;
 	buffer[33] = checksum_2;
 }
+
+int data_encode_commands(int32_t commands[]){
+	#if DEBUG
+		printf("Entering data_encode_commands\n");
+	#endif
+	
+	int i = 0; 
+	int checksum_1 = 0;
+	int checksum_2 = 0;
+	
+	for(i=0;i<7;i++)
+	{
+		write_data->commands_lisa_format.commands.message.servo_commands[i]=commands[i];
+	}
+	
+	for (i=0;i<28;i++)
+	{
+		checksum_1 += write_data->commands_lisa_format.commands.raw[i];
+		checksum_2 += checksum_1;
+	}
+
+	write_data->commands_lisa_format.commands.raw[29] = checksum_1;
+	write_data->commands_lisa_format.commands.raw[30] = checksum_2;
+	return 0;
+
+}
+
 

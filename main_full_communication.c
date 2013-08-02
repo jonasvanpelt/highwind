@@ -139,9 +139,12 @@ int main(int argc, char *argv[]){
 				error_write(FILENAME,"main()",str);	
 				printf("decoding failed\n"); //NOG WEG DOEN
 
-		}else{					
-			//3. send data to Lisa through UART port.
-			serial_port_write(read_data->groundstation.commands.raw); 
+		}else{		
+			switch_read_write();	
+			//3. encode data again in format for lisa
+			data_encode_commands(read_data->groundstation.commands.message.servo_commands);		
+			//4. send data to Lisa through UART port.
+			serial_port_write(read_data->commands_lisa_format.commands.raw); 
 		}
 		
 		#if LOGGING > 0

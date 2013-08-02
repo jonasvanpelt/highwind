@@ -29,6 +29,16 @@ struct Data {
 			} message;
 		} commands;
 	} groundstation;
+	struct Commands_lisa_format{
+		union Commands_send{
+			uint8_t raw[30];
+			struct{
+				int32_t servo_commands[7];
+				uint8_t checksum1;
+				uint8_t checksum2;
+			}message;
+		}commands;	
+	}commands_lisa_format;
 	//for status and error messages coming from beaglebone on plane
 	struct Bone_plane { // sender id = 2
 		union Status { // id = 1
@@ -177,5 +187,6 @@ int data_update(uint8_t stream[]);
 int data_decode(uint32_t pos, uint8_t sender,uint8_t stream[], int length);
 int32_t data_write(uint8_t stream[], uint8_t data[], int length, int pos);
 void switch_read_write(void);
+int data_encode_commands(int32_t buffer[]);
 
 #endif /*DATA_DECODING_H_*/
