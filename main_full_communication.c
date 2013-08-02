@@ -201,7 +201,7 @@ void *lisa_to_pc(void *connection){
 		if(serial_input_check()==0){
 			//send data to eth port using UDP
 			sendUDPClientData(&udp_client,&(serial_input.buffer),sizeof(serial_input.buffer));
-			
+			printf("here\n");
 			#if LOGGING > 0
 
 			//write the data to circual buffer for log thread

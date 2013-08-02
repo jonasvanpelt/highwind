@@ -105,11 +105,6 @@ int serial_input_check() //returns the number of red bytes
 				checksum_2 += checksum_1;
 			}
 
-			printf("check1 %d\n",serial_input.buffer[message_length-4]);
-			printf("check2 %d\n",serial_input.buffer[message_length-3]);
-			printf("check %d\n",checksum_1);
-			printf("check %d\n",checksum_2);
-
 
 			if (serial_input.buffer[message_length-4]!= checksum_1 || serial_input.buffer[message_length-3] != checksum_2)
 			{
@@ -120,26 +115,27 @@ int serial_input_check() //returns the number of red bytes
 			} else {
 
 				//first two bits (start and length ) should be in buffer, now
-				char temp[message_length];
+				char temp[message_length-2];
 				int i;
-				for(i=0;i<message_length;i++)
+				for(i=0;i<message_length-2;i++)
 				{
 					temp[i]=serial_input.buffer[i];	
 				}
+				serial_input_buffer_clear();
 				serial_input.buffer[0]=0x99;
 				serial_input.buffer[1]=message_length;
-				for(i=2;i<INPUT_BUFFER;i++)
+				for(i=2;i<message_length;i++)
 				{
-					serial_input.buffer[i]=temp[i];	
+					serial_input.buffer[i]=temp[i-2];	
 				}
 				
 
 				packets.serial.received++;
 
 #if DEBUG > 0
-				printf("raw: ");
+				printf("\nraw: ");
 				for(i=0;i<message_length;i++){
-					printf("%x ",serial_input.buffer[i]);
+					printf("%d ",serial_input.buffer[i]);
 				}
 				printf("\n");	
 
@@ -160,7 +156,7 @@ int serial_input_check() //returns the number of red bytes
 	}else{
 		return -1;
 	}
-	return message_length;
+	return 0;
 }
 
 void packets_clear(void)
