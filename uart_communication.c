@@ -70,6 +70,7 @@ int serial_input_check() //returns the number of red bytes
 
 		if(message_length == 0){
 			error_write(FILENAME,"serial_input_check()","read failed - message_length is zero");
+			packets.serial.lost++;
 		}
 
 		gettimeofday(&start, NULL);
@@ -91,6 +92,7 @@ int serial_input_check() //returns the number of red bytes
 		if (serial_input_buffer_chars == -1) 
 		{
 			error_write(FILENAME,"serial_input_check()","read failed - serial_input_buffer");
+			packets.serial.lost++;
 
 		} else {
 
@@ -135,6 +137,12 @@ int serial_input_check() //returns the number of red bytes
 				packets.serial.received++;
 
 #if DEBUG > 0
+				printf("raw: ");
+				for(i=0;i<message_length;i++){
+					printf("%x ",serial_input.buffer[i]);
+				}
+				printf("\n");	
+
 				printf("start: %X ", serial_input.buffer[0]);
 				printf("length: %d ", serial_input.buffer[1]);
 				printf("checksum 1 calc: %d ", checksum_1);
