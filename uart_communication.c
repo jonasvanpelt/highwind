@@ -37,7 +37,6 @@ static const char FILENAME[] = "uart.c";
 speed_t speed = B57600;
 const char device[]="/dev/ttyO4";
 int serial_input_buffer_size = sizeof(serial_input.buffer);
-int serial_output_buffer_size = sizeof(serial_output.buffer);
 
 /**
  * FUNCTIONS
@@ -439,11 +438,11 @@ int serial_port_read(uint32_t length)
 	return n;
 }
 
-int serial_port_write() 
+int serial_port_write(uint8_t output[]) 
 {
 	//chars[len] = 0x0d; // stick a after the command        (0xd == 13 == ASCII CR)
 	//serial_output.buffer[serial_output_buffer_size+1] = 0x00; // terminate the string properly
-	int n = write(serial_stream->fd, serial_output.buffer, serial_output_buffer_size);
+	int n = write(serial_stream->fd, output, sizeof(output));
 	if (n < 0) 
 	{
 		error_write(FILENAME,"serial_port_write()","serial port write failed");
@@ -455,18 +454,7 @@ int serial_port_write()
 void serial_buffer_clear(void)
 {
 	serial_input_buffer_clear();
-	serial_output_buffer_clear();
 }
-
-void serial_output_buffer_clear(void)
-{
-	int i;
-	for(i=0;i<serial_output_buffer_size;i++)
-	{
-		serial_output.buffer[i]=0x00;
-	}
-}
-
 
 void serial_input_buffer_clear(void)
 {
@@ -476,8 +464,6 @@ void serial_input_buffer_clear(void)
 		serial_input.buffer[i]=0x00;
 	}
 }
-
-
 
 
 void benchmark_start(int timer)

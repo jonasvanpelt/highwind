@@ -11,7 +11,6 @@
 #include <stdint.h>
 
 #define INPUT_BUFFER 255 
-#define OUTPUT_BUFFER 34
 
 /**
  * GLOBALS
@@ -40,12 +39,6 @@ union Serial_input {
 	char buffer[INPUT_BUFFER]; //must be set bigger
 } serial_input;
 
-union Serial_output {
-	char buffer[OUTPUT_BUFFER];
-	uint32_t set_servo_buffer[8];
-} serial_output;
-
-
 //timers
 
 struct timeval timers[10];
@@ -56,7 +49,7 @@ struct timeval timers[10];
 
 extern int serial_port_setup(void);
 extern int serial_input_check(void);
-extern int serial_port_write(void);
+extern int serial_port_write(uint8_t output[]);
 extern int serial_port_read(uint32_t length);
 extern int serial_port_create(void);
 extern int serial_port_get_baud(void);

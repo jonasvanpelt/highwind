@@ -11,6 +11,7 @@
 #include "uart_communication.h"
 #include "log.h"
 #include "circular_buffer.h"
+#include "data_decoding.h"
 
 #ifndef LOGGING 
 #define LOGGING 1
@@ -18,7 +19,7 @@
 
 
 #define CBSIZE 2048
-
+#define OUTPUT_BUFFER 34
 #define MAX_STREAM_SIZE 255
 
 
@@ -116,7 +117,12 @@ int main(int argc, char *argv[]){
 	#endif
 	/*-------------------------START OF FIRST THREAD: PC TO LISA------------------------*/
 	static UDP udp_server;
+	uint8_t input_stream[OUTPUT_BUFFER];
+
 	ElemType cb_elem = {0};
+	
+	//init the data decode pointers
+	init_decoding();
 
 	openUDPServerSocket(&udp_server,connection.port_number_pc_to_lisa);
 
@@ -124,33 +130,37 @@ int main(int argc, char *argv[]){
 
 		//1. retreive UDP data form PC from ethernet port.
 		
-		receiveUDPServerData(&udp_server,(void *)&serial_output.buffer,sizeof(serial_output.buffer)); //blocking !!!
+		receiveUDPServerData(&udp_server,(void *)&input_stream,sizeof(input_stream)); //blocking !!!
 			
-		//2. send data to Lisa through UART port.
+		//2.decode command
+		if(data_update(input_stream)==-1){ 
+				char str[50];
+				sprintf(str, "error decoding data package with length = %d and sender_id = %d and message_id = %d",input_stream[1],input_stream[2], input_stream[3]);
+				error_write(FILENAME,"main()",str);	
+				printf("decoding failed\n"); //NOG WEG DOEN
+
+		}else{					
+			//3. send data to Lisa through UART port.
+			serial_port_write(read_data->groundstation.commands.raw); 
+		}
 		
 		#if LOGGING > 0
 		
 		//write the data to circular buffer for log thread
-		memcpy (&cb_elem.value, &serial_output.buffer, sizeof(serial_output.buffer));	
+		memcpy (&cb_elem.value, &input_stream, sizeof(input_stream));	
 		cbWrite(&cb_data_ground, &cb_elem);
 			
 		//FOR DEBUGGING: REMOVE ME!!!
 		if(cbIsFull(&cb_data_ground)){
 			printf("groundstation buffer is full\n") ;
 		}
-			
-		//FOR DEBUGGING: REMOVE ME!!!
-		/*int i;
-		printf("\n output buffer: ");
-		for(i=0;i<6;i++){
-			printf("%d ",serial_output.set_servo_buffer[i]);
-		}
-		printf("\n");*/
 		
 		#endif
 
 	}
-
+	
+	serial_port_close();
+	serial_port_free();
 	closeUDPServerSocket(&udp_server);
 	/*------------------------END OF FIRST THREAD------------------------*/
 	
@@ -242,7 +252,7 @@ void *data_logging_lisa(void *arg){
 			cbRead(&cb_data_lisa, &cb_elem);
 			write_data_lisa_log(cb_elem.value);
 		}
-		usleep(20);
+		usleep(10);
 	}
 	close_data_lisa_log();
 /*-------------------------END OF THIRD THREAD: LISA TO PC LOGGING------------------------*/	
