@@ -55,7 +55,7 @@ int data_update(uint8_t stream[])
 	
 	//checksum1 is voorlaatste byte, checksu2 is last byte
 	if(checksum_1 != stream[length-2] || checksum_2 != stream[length-1] || sender == 0)
-	{
+	{	
 
 		return -1;
 	}
@@ -188,7 +188,7 @@ int data_encode(char buffer[])
 		buffer[4+i] = output.message[i];
 	}
 
-	for (i=2;i<length - 2;i++)
+	for (i=1;i<length - 2;i++)
 	{
 		checksum_1 += buffer[i];
 		checksum_2 += checksum_1;
@@ -223,5 +223,4 @@ int data_encode_commands(int32_t commands[]){
 	return 0;
 
 }
-
 
