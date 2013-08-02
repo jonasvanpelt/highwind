@@ -105,10 +105,10 @@ int serial_input_check() //returns the number of red bytes
 				checksum_2 += checksum_1;
 			}
 
-			/*printf("check1 %d\n",serial_input.buffer[message_length-4]);
+			printf("check1 %d\n",serial_input.buffer[message_length-4]);
 			printf("check2 %d\n",serial_input.buffer[message_length-3]);
 			printf("check %d\n",checksum_1);
-			printf("check %d\n",checksum_2);*/
+			printf("check %d\n",checksum_2);
 
 
 			if (serial_input.buffer[message_length-4]!= checksum_1 || serial_input.buffer[message_length-3] != checksum_2)
@@ -120,9 +120,9 @@ int serial_input_check() //returns the number of red bytes
 			} else {
 
 				//first two bits (start and length ) should be in buffer, now
-				char temp[INPUT_BUFFER];
+				char temp[message_length];
 				int i;
-				for(i=0;i<INPUT_BUFFER;i++)
+				for(i=0;i<message_length;i++)
 				{
 					temp[i]=serial_input.buffer[i];	
 				}
