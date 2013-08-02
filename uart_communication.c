@@ -156,7 +156,7 @@ int serial_input_check() //returns the number of red bytes
 	}else{
 		return -1;
 	}
-	return 0;
+	return message_length;
 }
 
 void packets_clear(void)

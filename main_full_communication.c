@@ -17,7 +17,7 @@
 #endif
 
 
-#define CBSIZE 1024
+#define CBSIZE 2048
 
 #define MAX_STREAM_SIZE 255
 
@@ -190,6 +190,7 @@ void *lisa_to_pc(void *connection){
 
 	Connection *conn=(Connection *)connection;
 	static UDP udp_client;
+	int message_length;
 	ElemType cb_elem = {0};
 
 	//read data from UART
@@ -198,14 +199,16 @@ void *lisa_to_pc(void *connection){
 
 	while(1)
 	{
-		if(serial_input_check()==0){
+		message_length = serial_input_check();
+		if(message_length !=-1){
+		
 			//send data to eth port using UDP
-			sendUDPClientData(&udp_client,&(serial_input.buffer),sizeof(serial_input.buffer));
-			printf("here\n");
+			sendUDPClientData(&udp_client,&(serial_input.buffer),message_length);
+	
 			#if LOGGING > 0
 
 			//write the data to circual buffer for log thread
-			 memcpy (&cb_elem.value, &(serial_input.buffer), sizeof(serial_input.buffer));	
+			 memcpy (&cb_elem.value, &(serial_input.buffer), message_length);	
 			 cbWrite(&cb_data_lisa, &cb_elem);
 			 
 			 //FOR DEBUGGING: REMOVE ME!!!
@@ -264,6 +267,5 @@ void *data_logging_groundstation(void *arg){
 }
 
 #endif
-
 
 
