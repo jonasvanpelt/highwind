@@ -239,6 +239,7 @@ void *data_logging_lisa(void *arg){
 			cbRead(&cb_data_lisa, &cb_elem);
 			write_data_lisa_log(cb_elem.value);
 		}
+		usleep(20);
 	}
 	close_data_lisa_log();
 /*-------------------------END OF THIRD THREAD: LISA TO PC LOGGING------------------------*/	
@@ -255,6 +256,7 @@ void *data_logging_groundstation(void *arg){
 			cbRead(&cb_data_ground, &cb_elem);
 			write_data_groundstation_log(cb_elem.value);
 		}
+		usleep(20);
 	}
 	close_data_groundstation_log();
 /*-------------------------END OF FOURTH THREAD: GROUNDSTATION TO LISA LOGGING------------------------*/	
