@@ -9,27 +9,26 @@
  * GLOBALS
  * ******************************/
  
+// Decoding error codes 
+enum dec_errCode { DEC_ERR_NONE = 0,DEC_ERR_START_BYTE,DEC_ERR_CHECKSUM,DEC_ERR_UNKNOWN_BONE_PACKAGE,DEC_ERR_UNKNOWN_LISA_PACKAGE,DEC_ERR_UNKNOWN_SENDER,DEC_ERR_UNDEFINED};
+typedef enum dec_errCode DEC_errCode;
+
+ 
 enum Library {UDP_L,UART_L,DECODE_L,LOG_L,CIRCULAR_BUFFER_L};
 typedef enum Library library; 
 
 //OUTPUT 
-typedef union Output{
-	uint8_t raw[28]; // number of servos times 4
-	int32_t servo_commands[7];
+typedef union Output{ //message id 52
+	uint8_t raw[6]; 
+	struct Output_message {
+			uint8_t dummy;
+			uint8_t mode;
+			uint8_t flap;
+			int8_t aileron;
+			int8_t elevator;
+			int8_t rudder;
+		} message;
 } Output;
-
-
-//INPUT	
-typedef struct {
-		union Commands_send{
-			uint8_t raw[30];
-			struct{
-				int32_t servo_commands[7];
-				uint8_t checksum1;
-				uint8_t checksum2;
-			}message;
-		}commands;	
-	}Commands_lisa_format;
 	
 typedef union { // id = 1
 		uint8_t raw[155];
@@ -184,7 +183,6 @@ typedef union { // id = 205
 //INPUT
 typedef struct
 {
-	Commands_lisa_format commands_lisa_format;
 	Bone_plane bone_plane;
 	Lisa_plane lisa_plane;
 } Data;
@@ -193,9 +191,11 @@ typedef struct
  * PROTOTYPES PUBLIC
  * ******************************/
 void init_decoding(void);
-int data_update(uint8_t stream[]);
+DEC_errCode data_update(uint8_t stream[]);
 int32_t data_write(uint8_t stream[], uint8_t data[], int length, int pos);
 void switch_read_write(void);
+DEC_errCode data_encode(uint8_t message[],long unsigned int message_length,uint8_t encoded_data[],int sender_id,int message_id);
 Data* get_read_pointer();
+
 
 #endif /*DATA_DECODING_H_*/

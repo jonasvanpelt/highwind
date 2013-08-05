@@ -132,7 +132,7 @@ int close_data_groundstation_log(){
 /**********************************
 LOG FOR ERRORS FROM PROGRAM 
 ***********************************/
-void error_write(char *file_name,char *function,char *message){
+void error_write(char *file_name,char *message){
 	#if DEBUG  > 1
 		printf("Entering error_write\n");
 	#endif
@@ -143,11 +143,11 @@ void error_write(char *file_name,char *function,char *message){
 	char* time_string;
 	time_string = ctime(&now);
     file = fopen(FILE_PATH_PROGRAM_ERROR,"a+"); 
-	fprintf(file,"%s%s-%s\t%s\n\n",time_string,file_name,function,message); 
+	fprintf(file,"%s%s\t%s\n\n",time_string,file_name,message); 
 	fclose(file); 	
 }
 
-void log_write(char *file_name,char *function,char *message){
+void log_write(char *file_name,char *message){
 	#if DEBUG  > 1
 		printf("Entering log_write\n");
 	#endif
@@ -158,8 +158,7 @@ void log_write(char *file_name,char *function,char *message){
 	char* time_string;
 	time_string = ctime(&now);
     file = fopen(FILE_PATH_PROGRAM_LOG,"a+"); 
-	fprintf(file,"%s%s-%s\t%s\n\n",time_string,file_name,function,message); 
+	fprintf(file,"%s%s\t%s\n\n",time_string,file_name,message); 
 	fclose(file); 	
 }
 
-//NOG BOODSCHAPPEN KUNNNEN DOORSTUREN NAAR SERVER OOK, ERRORS VB

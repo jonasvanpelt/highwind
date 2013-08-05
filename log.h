@@ -19,9 +19,8 @@ extern int open_data_groundstation_log();
 extern int write_data_groundstation_log(char *data);
 extern int close_data_groundstation_log();
 
-
 //for logging program
-extern void log_write(char *file_name,char *function,char *message);
-extern void error_write(char *file_name,char *function,char *message);
+extern void log_write(char *file_name,char *message);
+extern void error_write(char *file_name,char *message);
 
 #endif /*LOG_H_*/

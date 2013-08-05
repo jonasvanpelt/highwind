@@ -19,7 +19,7 @@
 
 
 #define CBSIZE 2048
-#define OUTPUT_BUFFER 34
+#define OUTPUT_BUFFER 12
 #define MAX_STREAM_SIZE 255
 
 
@@ -78,7 +78,7 @@ int main(int argc, char *argv[]){
 	
 	//init log (mount sd card if necessary)
 	if(init_log()==-1){
-		error_write(FILENAME,"main()","Init log failed");
+		error_write(FILENAME,"Init log failed");
 		exit(EXIT_FAILURE);
 	}
 	
@@ -99,7 +99,7 @@ int main(int argc, char *argv[]){
 
 	//create a second thread which executes lisa_to_pc
 	if(pthread_create(&thread_lisa_to_pc, NULL, lisa_to_pc,&connection)) {
-		error_write(FILENAME,"main()","error creating lisa thread");
+		error_write(FILENAME,"error creating lisa thread");
 		exit(EXIT_FAILURE);
 	}	
 	
@@ -107,13 +107,13 @@ int main(int argc, char *argv[]){
 
 	//create a third thread which executes data_logging_lisa
 	if(pthread_create(&thread_data_logging_lisa, NULL, data_logging_lisa,NULL)) {
-		error_write(FILENAME,"main()","error creating lisa logging thread");
+		error_write(FILENAME,"error creating lisa logging thread");
 		exit(EXIT_FAILURE);
 	}
 	
 	//create a fourth thread which executes data_logging_groundstation
 	if(pthread_create(&thread_data_logging_ground, NULL, data_logging_groundstation,NULL)) {
-		error_write(FILENAME,"main()","error creating groundstation logging thread");
+		error_write(FILENAME,"error creating groundstation logging thread");
 		exit(EXIT_FAILURE);
 	}
 	
@@ -134,6 +134,15 @@ int main(int argc, char *argv[]){
 		//1. retreive UDP data form PC from ethernet port.
 		
 		UDP_err_handler(receiveUDPServerData(&udp_server,(void *)&input_stream,sizeof(input_stream))); //blocking !!!
+		
+		printf("INCOMING OUTPUT RAW:");
+		int j;
+			for(j=0;j<input_stream[1];j++){
+				printf("%d ",input_stream[j]);
+			}
+		printf("\n");
+
+		
 		UART_err_handler(serial_port_write(input_stream)); 
 		
 		#if LOGGING > 0
@@ -158,7 +167,7 @@ int main(int argc, char *argv[]){
 	
 	//wait for the second thread to finish
 	if(pthread_join(thread_lisa_to_pc, NULL)) {
-		error_write(FILENAME,"main()","error joining thread_lisa_to_pc");
+		error_write(FILENAME,"error joining thread_lisa_to_pc");
 		exit(EXIT_FAILURE);
 	}
 	
@@ -166,14 +175,14 @@ int main(int argc, char *argv[]){
 	
 	//wait for the third thread to finish
 	if(pthread_join(thread_data_logging_lisa, NULL)) {
-		error_write(FILENAME,"main()","error joining thread_data_logging_lisa");
+		error_write(FILENAME,"error joining thread_data_logging_lisa");
 		exit(EXIT_FAILURE);
 	}
 	
 	
 	//wait for the fourth thread to finish
 	if(pthread_join(thread_data_logging_ground, NULL)) {
-		error_write(FILENAME,"main()","error joining thread_data_logging_ground");
+		error_write(FILENAME,"error joining thread_data_logging_ground");
 		exit(EXIT_FAILURE);
 	}
 	
@@ -270,33 +279,35 @@ void *data_logging_groundstation(void *arg){
 
 static void UDP_err_handler( UDP_errCode err )  
 {
+	static char SOURCEFILE[] = "udp_communication.c";
+
 	//it makes no sence to send UDP errors to server when there is a UDP problem.
 	//write error to local log
 	switch( err ) {
 		case UDP_ERR_NONE:
 			break;
 		case  UDP_ERR_INET_ATON:
-			error_write(FILENAME,"main()","failed decoding ip address");
+			error_write(SOURCEFILE,"failed decoding ip address");
 			exit(EXIT_FAILURE);
 			break;
 		case UDP_ERR_SEND:
-			error_write(FILENAME,"main()","failed sending UDP data");
+			error_write(SOURCEFILE,"failed sending UDP data");
 			break;
 		case UDP_ERR_CLOSE_SOCKET:
-			error_write(FILENAME,"main()","failed closing UDP socket");
+			error_write(SOURCEFILE,"failed closing UDP socket");
 			break;
 		case UDP_ERR_OPEN_SOCKET:
-			error_write(FILENAME,"main()","failed inserting UDP socket");
+			error_write(SOURCEFILE,"failed inserting UDP socket");
 			exit(EXIT_FAILURE);
 			break;
 		case UDP_ERR_BIND_SOCKET_PORT:
-			error_write(FILENAME,"main()","failed binding port to socket");
+			error_write(SOURCEFILE,"failed binding port to socket");
 			break;
 		case UDP_ERR_RECV:
-			error_write(FILENAME,"main()","failed receiving UDP data");
+			error_write(SOURCEFILE,"failed receiving UDP data");
 			break;
 		case UDP_ERR_UNDEFINED:
-			error_write(FILENAME,"main()","undefined UDP error");
+			error_write(SOURCEFILE,"undefined UDP error");
 			break;
 		default: break;// should never come here
 	
@@ -305,38 +316,39 @@ static void UDP_err_handler( UDP_errCode err )
 
 static void UART_err_handler( UART_errCode err )  
 {
+	static char SOURCEFILE[] = "uart_communication.c";
+
 	//write error to local log
 	switch( err ) {
 			case UART_ERR_NONE:
 				break;
 			case  UART_ERR_READ:
-				error_write(FILENAME,"main()","failed reading data from UART");
+				error_write(SOURCEFILE,"failed reading data from UART");
 				break;
 			case UART_ERR_SERIAL_PORT_FLUSH_INPUT:
-				error_write(FILENAME,"main()","serial port flush input failed");
+				error_write(SOURCEFILE,"serial port flush input failed");
 				break;
 			case UART_ERR_SERIAL_PORT_FLUSH_OUTPUT:
-				error_write(FILENAME,"main()","serial port flush output failed");
+				error_write(SOURCEFILE,"serial port flush output failed");
 				break;
 			case UART_ERR_SERIAL_PORT_OPEN:
-				error_write(FILENAME,"main()","serial port open failed");
+				error_write(SOURCEFILE,"serial port open failed");
 				exit(EXIT_FAILURE);
 				break;
 			case UART_ERR_SERIAL_PORT_CLOSE:
-				error_write(FILENAME,"main()","serial port close failed");
+				error_write(SOURCEFILE,"serial port close failed");
 				break;
 			case UART_ERR_SERIAL_PORT_CREATE:
-				error_write(FILENAME,"main()","serial port create failed");
+				error_write(SOURCEFILE,"serial port create failed");
 				exit(EXIT_FAILURE);
 				break;
 			case UART_ERR_SERIAL_PORT_WRITE:
-				error_write(FILENAME,"main()","serial port write failed");
+				error_write(SOURCEFILE,"serial port write failed");
 				break;
 			case UART_ERR_UNDEFINED:
-				error_write(FILENAME,"main()","undefined UART error");
+				error_write(SOURCEFILE,"undefined UART error");
 				break;
-			default: break;// should never come here
-		
+			default: break;// should never come here	
 		}
 	
 	if(!UART_ERR_NONE){
@@ -349,7 +361,7 @@ static void UART_err_handler( UART_errCode err )
 		//encode an error package
 		error_message.message.library=UART_L;
 		error_message.message.error=err;
-		data_encode(error_message.raw,encoded_data,2,2);
+		data_encode(error_message.raw,sizeof(error_message.raw),encoded_data,2,2);
 		
 		//send errorcode to server
 		UDP_err_handler(openUDPClientSocket(&udp_client,connection.server_ip,connection.port_number_error_message));

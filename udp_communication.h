@@ -8,7 +8,7 @@
 #include<sys/socket.h>
 #include<arpa/inet.h>
 
-/*-- UDP error codes --*/
+// UDP error codes 
 enum udp_errCode { UDP_ERR_NONE = 0, UDP_ERR_INET_ATON, UDP_ERR_SEND, UDP_ERR_CLOSE_SOCKET,UDP_ERR_OPEN_SOCKET,UDP_ERR_BIND_SOCKET_PORT,UDP_ERR_RECV, UDP_ERR_UNDEFINED };
 
 typedef enum udp_errCode UDP_errCode;

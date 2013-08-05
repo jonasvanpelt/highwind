@@ -17,7 +17,6 @@
 extern UDP_errCode openUDPSocket(UDP *udp);
 
 
-
 UDP_errCode openUDPClientSocket(UDP *udp_client,char *server_ip,int port){
 	#if DEBUG  > 1
 		printf("Entering openUDPClientSocket\n");

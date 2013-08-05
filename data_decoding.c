@@ -11,8 +11,7 @@
 /********************************
  * PROTOTYPES PRIVATE
  * ******************************/
-int data_decode(uint32_t pos, uint8_t sender,uint8_t stream[], int length);
-int data_encode(char message[],char encoded_data[],int sender_id,int message_id);
+DEC_errCode data_decode(uint32_t pos, uint8_t sender,uint8_t stream[], int length);
 
 
 /********************************
@@ -51,7 +50,7 @@ void switch_read_write()
 	write_data = temp;
 }
 
-int data_update(uint8_t stream[])
+DEC_errCode data_update(uint8_t stream[])
 {
 	#if DEBUG  > 1
 		printf("Entering data_update\n");
@@ -67,7 +66,7 @@ int data_update(uint8_t stream[])
 	if(stream[0] != 0x99)
 	{
 		//unknown package !!!
-		return -1;
+		return DEC_ERR_START_BYTE;
 	}
 	
 	//check checksums
@@ -81,14 +80,14 @@ int data_update(uint8_t stream[])
 	if(checksum_1 != stream[length-2] || checksum_2 != stream[length-1] || sender == 0)
 	{	
 
-		return -1;
+		return DEC_ERR_CHECKSUM;
 	}
 	
 	
 	return data_decode(0, sender, stream, length);
 }
 
-int data_decode(uint32_t pos, uint8_t sender,uint8_t stream[], int length) // start = 0
+DEC_errCode data_decode(uint32_t pos, uint8_t sender,uint8_t stream[], int length) // start = 0
 {
 	#if DEBUG  > 1
 		printf("Entering data_decode\n");
@@ -113,7 +112,7 @@ int data_decode(uint32_t pos, uint8_t sender,uint8_t stream[], int length) // st
 					pos = data_write(stream, write_data->bone_plane.error.raw, 1, pos);
 					write_data->bone_plane.error.message.new_data = 0;
 					break;
-				default: return -1; break;
+				default: return DEC_ERR_UNKNOWN_BONE_PACKAGE; break;
 			}
 		break;
 		case 165: //sender_id of lisa
@@ -151,14 +150,14 @@ int data_decode(uint32_t pos, uint8_t sender,uint8_t stream[], int length) // st
 					pos = data_write(stream, write_data->lisa_plane.baro_raw.raw, 8, pos);
 					write_data->lisa_plane.baro_raw.message.new_data = 0;
 					break;
-				default: return -1;break;
+				default: return DEC_ERR_UNKNOWN_LISA_PACKAGE;break;
 			}
 		 break;
-				default: return -1; break;
+				default: return DEC_ERR_UNKNOWN_SENDER; break;
 	}
 	if (pos == length-2)
 	{
-		return 0; //data encoding succeeded
+		return DEC_ERR_NONE; //data encoding succeeded
 	} else {
 		
 		return data_decode(pos, sender, stream, length);
@@ -180,7 +179,7 @@ int data_write(uint8_t stream[],uint8_t transfer[], int length, int pos)
 	return pos + 1;
 }
 
-int data_encode(char message[],char encoded_data[],int sender_id,int message_id)
+DEC_errCode data_encode(uint8_t message[],long unsigned int message_length,uint8_t encoded_data[],int sender_id,int message_id)
 {
 	#if DEBUG  > 1
 		printf("Entering data_encode\n");
@@ -189,9 +188,8 @@ int data_encode(char message[],char encoded_data[],int sender_id,int message_id)
 	int i = 0; 
 	int checksum_1 = 0;
 	int checksum_2 = 0;
-	uint8_t length = sizeof(message)+6;
-	uint8_t message_length = sizeof(message);
-	
+	uint8_t length = message_length+6;
+		
 	encoded_data[0] = 0x99;
 	encoded_data[1] = length;
 	encoded_data[2] = sender_id; // sender id of server
@@ -210,33 +208,10 @@ int data_encode(char message[],char encoded_data[],int sender_id,int message_id)
 	
 	encoded_data[length-2] = checksum_1;
 	encoded_data[length-1] = checksum_2;
+	
+	return DEC_ERR_NONE;
 }
-/*
-int data_encode_commands(int32_t commands[]){
-	#if DEBUG  > 1
-		printf("Entering data_encode_commands\n");
-	#endif
-	
-	int i = 0; 
-	int checksum_1 = 0;
-	int checksum_2 = 0;
-	
-	for(i=0;i<7;i++)
-	{
-		write_data->commands_lisa_format.commands.message.servo_commands[i]=commands[i];
-	}
-	
-	for (i=0;i<28;i++)
-	{
-		checksum_1 += write_data->commands_lisa_format.commands.raw[i];
-		checksum_2 += checksum_1;
-	}
 
-	write_data->commands_lisa_format.commands.raw[28] = checksum_1;
-	write_data->commands_lisa_format.commands.raw[29] = checksum_2;
-	return 0;
-
-}*/
 
 Data* get_read_pointer()
 {
