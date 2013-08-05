@@ -14,7 +14,7 @@
 
 
 UDP_errCode openUDPClientSocket(UDP *udp_client,char *server_ip,int port){
-	#if DEBUG
+	#if DEBUG  > 1
 		printf("Entering openUDPClientSocket\n");
 	#endif
 	
@@ -35,7 +35,7 @@ UDP_errCode openUDPClientSocket(UDP *udp_client,char *server_ip,int port){
 }
 
 UDP_errCode sendUDPClientData(UDP *udp_client,void *data,size_t data_len){
-	#if DEBUG
+	#if DEBUG  > 1
 		printf("Entering sendUDPClientData\n");
 	#endif
 	
@@ -48,7 +48,7 @@ UDP_errCode sendUDPClientData(UDP *udp_client,void *data,size_t data_len){
 }
 
 UDP_errCode closeUDPClientSocket(UDP *udp_client){
-	#if DEBUG
+	#if DEBUG  > 1
 		printf("Entering closeUDPClientSocket\n");
 	#endif
 	
@@ -59,7 +59,7 @@ UDP_errCode closeUDPClientSocket(UDP *udp_client){
 }
 
 UDP_errCode openUDPSocket(UDP *udp){
-	#if DEBUG
+	#if DEBUG  > 1
 		printf("Entering openUDPSocket\n");
 	#endif
 	
@@ -78,7 +78,7 @@ UDP_errCode openUDPSocket(UDP *udp){
 
 
 UDP_errCode openUDPServerSocket(UDP *udp_server,int port){
-	#if DEBUG
+	#if DEBUG  > 1
 		printf("Entering openUDPServerSocket\n");
 	#endif
 	
@@ -100,7 +100,7 @@ UDP_errCode openUDPServerSocket(UDP *udp_server,int port){
 }
 
 UDP_errCode receiveUDPServerData(UDP *udp_server,void *data,size_t data_len){
-	#if DEBUG
+	#if DEBUG  > 1
 		printf("Entering receiveUDPServerData\n");
 	#endif
 	int recv_len;
@@ -116,7 +116,7 @@ UDP_errCode receiveUDPServerData(UDP *udp_server,void *data,size_t data_len){
 
 
 UDP_errCode closeUDPServerSocket(UDP *udp_server){
-	#if DEBUG
+	#if DEBUG  > 1
 		printf("Entering closeUDPServerSocket\n");
 	#endif
 	

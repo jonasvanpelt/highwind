@@ -32,7 +32,7 @@ static const char FILE_PATH_GROUND_LOG[] = "data_groundstation_log.txt";
 static const char FILE_PATH_BONEPLANE_LOG[] = "data_boneplane_log.txt";*/
 
 int init_log(){
-	#if DEBUG
+	#if DEBUG  > 1
 		printf("Entering init_log\n");
 	#endif
 	
@@ -51,7 +51,7 @@ int init_log(){
 }
 
 int mount_sd_card(){
-	#if DEBUG
+	#if DEBUG  > 1
 		printf("Entering mount_sd_card\n");
 	#endif
 	
@@ -68,7 +68,7 @@ int mount_sd_card(){
 LOG FOR DATA COMING FROM LISA
 ***********************************/
 int open_data_lisa_log(){
-	#if DEBUG
+	#if DEBUG  > 1
 		printf("Entering open_data_lisa_log\n");
 	#endif
 	
@@ -81,7 +81,7 @@ int open_data_lisa_log(){
 }
 
 int write_data_lisa_log(char *data){
-	#if DEBUG
+	#if DEBUG  > 1
 		printf("Entering write_data_lisa_log\n");
 	#endif
 	
@@ -89,7 +89,7 @@ int write_data_lisa_log(char *data){
 }
 
 int close_data_lisa_log(){
-	#if DEBUG
+	#if DEBUG  > 1
 		printf("Entering close_data_lisa_log\n");
 	#endif
 	
@@ -100,7 +100,7 @@ int close_data_lisa_log(){
 LOG FOR DATA COMING FROM GROUNDSTATION
 ***********************************/
 int open_data_groundstation_log(){
-	#if DEBUG
+	#if DEBUG  > 1
 		printf("Entering open_data_groundstation_log\n");
 	#endif
 	
@@ -113,7 +113,7 @@ int open_data_groundstation_log(){
 }
 
 int write_data_groundstation_log(char *data){
-	#if DEBUG
+	#if DEBUG  > 1
 		printf("Entering write_data_groundstation_log\n");
 	#endif
 	
@@ -121,7 +121,7 @@ int write_data_groundstation_log(char *data){
 }
 
 int close_data_groundstation_log(){
-	#if DEBUG
+	#if DEBUG  > 1
 		printf("Entering close_data_groundstation_log\n");
 	#endif
 	
@@ -133,7 +133,7 @@ int close_data_groundstation_log(){
 LOG FOR ERRORS FROM PROGRAM 
 ***********************************/
 void error_write(char *file_name,char *function,char *message){
-	#if DEBUG
+	#if DEBUG  > 1
 		printf("Entering error_write\n");
 	#endif
 	
@@ -148,7 +148,7 @@ void error_write(char *file_name,char *function,char *message){
 }
 
 void log_write(char *file_name,char *function,char *message){
-	#if DEBUG
+	#if DEBUG  > 1
 		printf("Entering log_write\n");
 	#endif
 	

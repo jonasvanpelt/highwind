@@ -14,15 +14,6 @@
 
 #include "uart_communication.h"
 
-/**
- * debug:
- *
- * 0: nog output on screen
- * 1: feedback on screen
- * 2: benchmarking on screen
- *
- * */
-
 #ifndef DEBUG 
 #define DEBUG 0
 #endif
@@ -40,7 +31,7 @@ int serial_input_buffer_size = sizeof(serial_input.buffer);
 
 int serial_input_check() //returns the number of read bytes
 {
-	#if DEBUG
+	#if DEBUG  > 1
 		printf("Entering serial_input_check\n");
 	#endif
 	
@@ -147,7 +138,7 @@ int serial_input_check() //returns the number of read bytes
 
 void packets_clear(void)
 {
-	#if DEBUG
+	#if DEBUG  > 1
 		printf("Entering packets_clear\n");
 	#endif
 	
@@ -158,7 +149,7 @@ void packets_clear(void)
 }
 
 serial_port* serial_port_new(void) {
-	#if DEBUG
+	#if DEBUG  > 1
 		printf("Entering serial_port_new\n");
 	#endif
 	
@@ -167,7 +158,7 @@ serial_port* serial_port_new(void) {
 }
 
 void serial_port_free(void) {
-	#if DEBUG
+	#if DEBUG  > 1
 		printf("Entering serial_port_free\n");
 	#endif
 	
@@ -175,7 +166,7 @@ void serial_port_free(void) {
 }
 
 void serial_port_flush(void) {
-	#if DEBUG
+	#if DEBUG  > 1
 		printf("Entering serial_port_flush\n");
 	#endif
 	/*
@@ -187,7 +178,7 @@ void serial_port_flush(void) {
 
 
 UART_errCode serial_port_flush_input(void) {
-	#if DEBUG
+	#if DEBUG  > 1
 		printf("Entering serial_port_flush_input\n");
 	#endif
 	/*
@@ -200,7 +191,7 @@ UART_errCode serial_port_flush_input(void) {
 }
 
 UART_errCode serial_port_flush_output(void) {
-	#if DEBUG
+	#if DEBUG  > 1
 		printf("Entering serial_port_flush_output\n");
 	#endif
 	/*
@@ -214,7 +205,7 @@ UART_errCode serial_port_flush_output(void) {
 }
 
 UART_errCode  serial_port_open_raw(const char* device, speed_t speed) {
-	#if DEBUG
+	#if DEBUG  > 1
 		printf("Entering serial_port_open_raw\n");
 	#endif
 	if ((serial_stream->fd = open(device, O_RDWR | O_NONBLOCK | O_NOCTTY)) < 0) {
@@ -248,7 +239,7 @@ UART_errCode  serial_port_open_raw(const char* device, speed_t speed) {
 }
 
 UART_errCode  serial_port_open(const char* device, void(*term_conf_callback)(struct termios*, speed_t*)) {
-	#if DEBUG
+	#if DEBUG  > 1
 		printf("Entering serial_port_open\n");
 	#endif
 
@@ -276,7 +267,7 @@ UART_errCode  serial_port_open(const char* device, void(*term_conf_callback)(str
 }
 
 UART_errCode serial_port_close(void) {
-	#if DEBUG
+	#if DEBUG  > 1
 		printf("Entering serial_port_close\n");
 	#endif
 
@@ -299,7 +290,7 @@ UART_errCode serial_port_close(void) {
 }
 
 uint8_t serial_port_get_length(void){
-	#if DEBUG
+	#if DEBUG  > 1
 		printf("Entering serial_port_get_length\n");
 	#endif
 	
@@ -327,7 +318,7 @@ uint8_t serial_port_get_length(void){
 
 UART_errCode serial_port_setup(void)
 {
-	#if DEBUG
+	#if DEBUG  > 1
 		printf("Entering serial_port_setup\n");
 	#endif
 	if(serial_port_create()==UART_ERR_SERIAL_PORT_CREATE)
@@ -344,7 +335,7 @@ UART_errCode serial_port_setup(void)
 
 int serial_port_get_baud() 
 {
-	#if DEBUG
+	#if DEBUG  > 1
 		printf("Entering serial_port_get_baud\n");
 	#endif
 	
@@ -379,7 +370,7 @@ int serial_port_get_baud()
 
 UART_errCode serial_port_create()
 {
-	#if DEBUG
+	#if DEBUG  > 1
 		printf("Entering serial_port_create\n");
 	#endif
 	
@@ -437,7 +428,7 @@ UART_errCode serial_port_create()
 
 int serial_port_read(uint32_t length) 
 {
-	#if DEBUG
+	#if DEBUG  > 1
 		printf("Entering serial_port_read\n");
 	#endif
 	
@@ -452,7 +443,7 @@ int serial_port_read(uint32_t length)
 
 UART_errCode serial_port_write(uint8_t output[]) 
 {
-	#if DEBUG
+	#if DEBUG  > 1
 		printf("Entering serial_port_write\n");
 	#endif
 
@@ -467,7 +458,7 @@ UART_errCode serial_port_write(uint8_t output[])
 
 void serial_buffer_clear(void)
 {
-	#if DEBUG
+	#if DEBUG  > 1
 		printf("Entering serial_buffer_clear\n");
 	#endif
 	serial_input_buffer_clear();
@@ -475,7 +466,7 @@ void serial_buffer_clear(void)
 
 void serial_input_buffer_clear(void)
 {
-	#if DEBUG
+	#if DEBUG  > 1
 		printf("Entering serial_input_buffer_clear\n");
 	#endif
 	int i;
@@ -488,7 +479,7 @@ void serial_input_buffer_clear(void)
 
 void benchmark_start(int timer)
 {
-	#if DEBUG
+	#if DEBUG  > 1
 		printf("Entering benchmark_start\n");
 	#endif
 	
@@ -502,7 +493,7 @@ void benchmark_start(int timer)
 
 void benchmark_stop(int timer)
 {
-	#if DEBUG
+	#if DEBUG  > 1
 		printf("Entering benchmark_stop\n");
 	#endif
 	

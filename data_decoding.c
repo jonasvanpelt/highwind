@@ -17,7 +17,7 @@ void init_decoding(){
 
 void switch_read_write()
 {
-	#if DEBUG
+	#if DEBUG  > 1
 		printf("Entering switch_read_write\n");
 	#endif
 	
@@ -29,7 +29,7 @@ void switch_read_write()
 
 int data_update(uint8_t stream[])
 {
-	#if DEBUG
+	#if DEBUG  > 1
 		printf("Entering data_update\n");
 	#endif
 	
@@ -66,7 +66,7 @@ int data_update(uint8_t stream[])
 
 int data_decode(uint32_t pos, uint8_t sender,uint8_t stream[], int length) // start = 0
 {
-	#if DEBUG
+	#if DEBUG  > 1
 		printf("Entering data_decode\n");
 	#endif
 	
@@ -153,7 +153,7 @@ int data_decode(uint32_t pos, uint8_t sender,uint8_t stream[], int length) // st
 
 int data_write(uint8_t stream[],uint8_t transfer[], int length, int pos)
 {
-	#if DEBUG
+	#if DEBUG  > 1
 		printf("Entering data_write\n");
 	#endif
 	
@@ -168,7 +168,7 @@ int data_write(uint8_t stream[],uint8_t transfer[], int length, int pos)
 
 int data_encode(char buffer[])
 {
-	#if DEBUG
+	#if DEBUG  > 1
 		printf("Entering data_encode\n");
 	#endif
 	
@@ -199,7 +199,7 @@ int data_encode(char buffer[])
 }
 
 int data_encode_commands(int32_t commands[]){
-	#if DEBUG
+	#if DEBUG  > 1
 		printf("Entering data_encode_commands\n");
 	#endif
 	

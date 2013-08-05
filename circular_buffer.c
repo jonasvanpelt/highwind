@@ -14,7 +14,7 @@
 #endif
  
 void cbInit(CircularBuffer *cb, int size) {
-	#if DEBUG
+	#if DEBUG  > 1
 		printf("Entering cbInit\n");
 	#endif
 	
@@ -25,21 +25,21 @@ void cbInit(CircularBuffer *cb, int size) {
 }
  
 void cbFree(CircularBuffer *cb) {
-	#if DEBUG
+	#if DEBUG  > 1
 		printf("Entering cbFree\n");
 	#endif
 	
     free(cb->elems); /* OK if null */ }
  
 int cbIsFull(CircularBuffer *cb) {
-	#if DEBUG
+	#if DEBUG  > 1
 		printf("Entering cbIsFull\n");
 	#endif
 	
     return (cb->end + 1) % cb->size == cb->start; }
  
 int cbIsEmpty(CircularBuffer *cb) {
-	#if DEBUG
+	#if DEBUG  > 1
 		printf("Entering cbIsEmpty\n");
 	#endif
 	
@@ -48,7 +48,7 @@ int cbIsEmpty(CircularBuffer *cb) {
 /* Write an element, overwriting oldest element if buffer is full. App can
    choose to avoid the overwrite by checking cbIsFull(). */
 void cbWrite(CircularBuffer *cb, ElemType *elem) {
-	#if DEBUG
+	#if DEBUG  > 1
 		printf("Entering cbWrite\n");
 	#endif
 	
@@ -60,7 +60,7 @@ void cbWrite(CircularBuffer *cb, ElemType *elem) {
  
 /* Read oldest element. App must ensure !cbIsEmpty() first. */
 void cbRead(CircularBuffer *cb, ElemType *elem) {
-	#if DEBUG
+	#if DEBUG  > 1
 		printf("Entering cbRead\n");
 	#endif
 	
