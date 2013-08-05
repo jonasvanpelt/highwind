@@ -1,13 +1,37 @@
-#include <stdio.h>
-
 #include "data_decoding.h"
 
 #ifndef DEBUG 
 #define DEBUG 0
 #endif
 
+#if DEBUG
+#include <stdio.h>
+#endif
+
+/********************************
+ * PROTOTYPES PRIVATE
+ * ******************************/
+int data_decode(uint32_t pos, uint8_t sender,uint8_t stream[], int length);
+int data_encode(char message[],char encoded_data[],int sender_id,int message_id);
+
+
+/********************************
+ * GLOBALS
+ * ******************************/
+//one writes to ping and another can read data from pong and upside down
+static Data ping;
+static Data pong;
+
+//pointers to ping and pong
+static Data* read_data;
+static Data* write_data;
+
+/********************************
+ * FUNCTIONS
+ * ******************************/
+
 void init_decoding(){
-	#if DEBUG
+	#if DEBUG > 1
 		printf("Entering init_decoding\n");
 	#endif
 	
@@ -21,7 +45,7 @@ void switch_read_write()
 		printf("Entering switch_read_write\n");
 	#endif
 	
-	struct Data* temp = read_data;
+	Data* temp = read_data;
 
 	read_data = write_data;
 	write_data = temp;
@@ -78,16 +102,6 @@ int data_decode(uint32_t pos, uint8_t sender,uint8_t stream[], int length) // st
 	switch(sender)
 	{
 		
-		case 1: //sender_id of groundstation
-			switch(stream[pos])
-			{
-				case 1: // servo commands - 28 bytes
-					pos = data_write(stream, write_data->groundstation.commands.raw, 28, pos);
-					write_data->groundstation.commands.message.new_data = 0;
-					break;
-				default: return -1; break;
-			}
-		break;
 		case 2: //sender_id of beaglebone
 			switch(stream[pos])
 			{
@@ -166,7 +180,7 @@ int data_write(uint8_t stream[],uint8_t transfer[], int length, int pos)
 	return pos + 1;
 }
 
-int data_encode(char buffer[])
+int data_encode(char message[],char encoded_data[],int sender_id,int message_id)
 {
 	#if DEBUG  > 1
 		printf("Entering data_encode\n");
@@ -175,29 +189,29 @@ int data_encode(char buffer[])
 	int i = 0; 
 	int checksum_1 = 0;
 	int checksum_2 = 0;
-	uint8_t length = 34; // with header and checksum
-	uint8_t sender = 1;	
+	uint8_t length = sizeof(message)+6;
+	uint8_t message_length = sizeof(message);
 	
-	buffer[0] = 0x99;
-	buffer[1] = length;
-	buffer[2] = 1; // sender id of server
-	buffer[3] = 1; // message id
+	encoded_data[0] = 0x99;
+	encoded_data[1] = length;
+	encoded_data[2] = sender_id; // sender id of server
+	encoded_data[3] = message_id; // message id
 
-	for(i=0;i<28;i++)
+	for(i=0;i<message_length;i++)
 	{
-		buffer[4+i] = output.message[i];
+		encoded_data[4+i] = message[i];
 	}
 
-	for (i=1;i<length - 2;i++)
+	for (i=1;i<length - 2;i++) //start bit 0x99 is not in checksum calculation
 	{
-		checksum_1 += buffer[i];
+		checksum_1 += message[i];
 		checksum_2 += checksum_1;
 	}
 	
-	buffer[32] = checksum_1;
-	buffer[33] = checksum_2;
+	encoded_data[length-2] = checksum_1;
+	encoded_data[length-1] = checksum_2;
 }
-
+/*
 int data_encode_commands(int32_t commands[]){
 	#if DEBUG  > 1
 		printf("Entering data_encode_commands\n");
@@ -222,4 +236,9 @@ int data_encode_commands(int32_t commands[]){
 	write_data->commands_lisa_format.commands.raw[29] = checksum_2;
 	return 0;
 
+}*/
+
+Data* get_read_pointer()
+{
+		return read_data;
 }

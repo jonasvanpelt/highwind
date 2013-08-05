@@ -134,21 +134,7 @@ int main(int argc, char *argv[]){
 		//1. retreive UDP data form PC from ethernet port.
 		
 		UDP_err_handler(receiveUDPServerData(&udp_server,(void *)&input_stream,sizeof(input_stream))); //blocking !!!
-			
-		//2.decode command
-		if(data_update(input_stream)==-1){ 
-				char str[50];
-				sprintf(str, "error decoding data package with length = %d and sender_id = %d and message_id = %d",input_stream[1],input_stream[2], input_stream[3]);
-				error_write(FILENAME,"main()",str);	
-				printf("decoding failed\n"); //NOG WEG DOEN
-
-		}else{		
-			switch_read_write();	
-			//3. encode data again in format for lisa
-			data_encode_commands(read_data->groundstation.commands.message.servo_commands);		
-			//4. send data to Lisa through UART port.
-			UART_err_handler(serial_port_write(read_data->commands_lisa_format.commands.raw)); 
-		}
+		UART_err_handler(serial_port_write(input_stream)); 
 		
 		#if LOGGING > 0
 		
@@ -354,19 +340,25 @@ static void UART_err_handler( UART_errCode err )
 		
 		}
 	
-	static UDP udp_client;
-	int message_length;
-	char buffer[MAX_STREAM_SIZE];
+	if(!UART_ERR_NONE){
+		static UDP udp_client;
+		int message_length;
+		char encoded_data[MAX_STREAM_SIZE]
+		struct Data data;
+		Error error_message;
+
+		//encode an error package
+		error_message.library=UART_L;
+		error_message.error=err;
+		data_encode(err.raw,char encoded_data[],2,2);
+		
+		//send errorcode to server
+		UDP_err_handler(openUDPClientSocket(&udp_client,connection.server_ip,connection.port_number_error_message));
+		UDP_err_handler(sendUDPClientData(&udp_client,&buffer,message_length));
+		UDP_err_handler(closeUDPClientSocket(&udp_client));
+
+	}
 	
-	//encode an error package
-		
-		
-	//send errorcode to server
-	/*UDP_err_handler(openUDPClientSocket(&udp_client,connection.server_ip,connection.port_number_error_message));
-	UDP_err_handler(sendUDPClientData(&udp_client,&buffer,message_length));
-	UDP_err_handler(closeUDPClientSocket(&udp_client));*/
-
-
 }
 
 /*static void Decode_err_handler( UART_errCode err )  

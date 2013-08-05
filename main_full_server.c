@@ -99,6 +99,7 @@ int main(int argc, char *argv[]){
 		#endif
 		
 		//2. decode data 
+		Data* data = get_read_pointer();
 		
 		if(data_update(input_stream)==-1){ 
 				char str[50];
@@ -122,11 +123,11 @@ int main(int argc, char *argv[]){
 					printf("Baro_raw content:");
 
 					for(i=0;i<input_stream[1];i++){
-						printf("%d ",read_data->lisa_plane.baro_raw.raw[i]);
+						printf("%d ",data->lisa_plane.baro_raw.raw[i]);
 					}
 					printf("\n");
-					printf("abs %d\n",read_data->lisa_plane.baro_raw.message.abs);
-					printf("diff %d\n",read_data->lisa_plane.baro_raw.message.diff);
+					printf("abs %d\n",data->lisa_plane.baro_raw.message.abs);
+					printf("diff %d\n",data->lisa_plane.baro_raw.message.diff);
 				}
 			
 				printf("\n");
@@ -135,12 +136,12 @@ int main(int argc, char *argv[]){
 					printf("Imu_gyro_raw content:");
 
 					for(i=0;i<input_stream[1];i++){
-						printf("%d ",read_data->lisa_plane.imu_gyro_raw.raw[i]);
+						printf("%d ",data->lisa_plane.imu_gyro_raw.raw[i]);
 					}
 					printf("\n");
-					printf("gp %d\n",read_data->lisa_plane.imu_gyro_raw.message.gp);
-					printf("gp %d\n",read_data->lisa_plane.imu_gyro_raw.message.gp);
-					printf("gr %d\n",read_data->lisa_plane.imu_gyro_raw.message.gr);
+					printf("gp %d\n",data->lisa_plane.imu_gyro_raw.message.gp);
+					printf("gp %d\n",data->lisa_plane.imu_gyro_raw.message.gp);
+					printf("gr %d\n",data->lisa_plane.imu_gyro_raw.message.gr);
 
 				}
 				
@@ -169,22 +170,24 @@ void *server_to_planebone(void *connection){
 	
 	openUDPClientSocket(&udp_client,conn->planebone_ip,conn->port_number_server_to_planebone);
 	int i=0;
+	
 	while(1)
 	{
 		//1. read data from i do'nt now where
 		
 		
 		uint8_t encoded_data[MAX_OUTPUT_STREAM_SIZE];
+		Output output;
 
 		//create test data
 
-		output.raw[0]=i;
-		output.raw[1]=0;
-		output.raw[2]=0;
-		output.raw[3]=0;
-		output.raw[4]=0;
-		output.raw[5]=0;
-		output.raw[6]=0;
+		output.servo_commands[0]=i;
+		output.servo_commands[1]=0;
+		output.servo_commands[2]=0;
+		output.servo_commands[3]=0;
+		output.servo_commands[4]=0;
+		output.servo_commands[5]=0;
+		output.servo_commands[6]=0;
 		
 		if(i==1000){
 				i=5;
@@ -193,7 +196,8 @@ void *server_to_planebone(void *connection){
 		}
 	
 		//2. encode the data		
-		data_encode(encoded_data); //will put output.raw encoded in encoded_data
+		
+		data_encode(output.raw,encoded_data,1,52);
 
 		//3. send data to eth port using UDP
 		sendUDPClientData(&udp_client,&encoded_data,sizeof(encoded_data));	
