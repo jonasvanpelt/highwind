@@ -65,7 +65,7 @@ Connection connection;
 int main(int argc, char *argv[]){
 	
 	//parse arguments	
-	if(argc == 4){
+	if(argc == 5){
 		//first argument is always name of program or empty string
 		connection.server_ip=argv[1];
 		connection.port_number_lisa_to_pc=atoi(argv[2]);	
