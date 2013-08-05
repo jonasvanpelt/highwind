@@ -101,7 +101,7 @@ int data_decode(uint32_t pos, uint8_t sender,uint8_t stream[], int length) // st
 		
 	switch(sender)
 	{
-		
+
 		case 2: //sender_id of beaglebone
 			switch(stream[pos])
 			{

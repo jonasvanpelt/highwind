@@ -104,12 +104,12 @@ int main(int argc, char *argv[]){
 		if(data_update(input_stream)==-1){ 
 				char str[50];
 				sprintf(str, "error decoding data package with length = %d and sender_id = %d and message_id = %d",input_stream[1],input_stream[2], input_stream[3]);
-				printf("ERROR DECODING !!!\n");
+				printf("\n\nERROR DECODING !!!\n\n");
 				error_write(FILENAME,"main()",str);	
-				exit(1); // EXIT NOG WEG DOEN 
+				//exit(1);
 			}else{
 				switch_read_write(); //only switch read write if data decoding was succesfull
-				//printf("data decoding succeeded\n");
+				printf("data decoding succeeded\n");
 				
 				/*printf("gyro_raw content\n");
 				printf("gp %d\n",read->lisa_plane.imu_gyro_raw.message.gp);
