@@ -7,6 +7,11 @@
 #include <string.h>
 #include "log.h"
 
+
+#ifndef DEBUG 
+#define DEBUG 0
+#endif
+
 FILE *lisa_log_file,*groundstation_log_file,*boneplane_log_file;
 
 static const char FILE_PATH_LISA_LOG[] = "/media/sdcard/data_lisa_log.txt";
@@ -27,6 +32,10 @@ static const char FILE_PATH_GROUND_LOG[] = "data_groundstation_log.txt";
 static const char FILE_PATH_BONEPLANE_LOG[] = "data_boneplane_log.txt";*/
 
 int init_log(){
+	#if DEBUG
+		printf("Entering init_log\n");
+	#endif
+	
 	//check if sdcard is present
 	FILE *file;
 	file = fopen("/media/sdcard/sdcard_present","r"); 
@@ -42,6 +51,10 @@ int init_log(){
 }
 
 int mount_sd_card(){
+	#if DEBUG
+		printf("Entering mount_sd_card\n");
+	#endif
+	
 	char str[256];
 	strcpy (str,"mount ");
 	strcat (str,SD_CARD_DEVICE_LOCATION);
@@ -55,6 +68,10 @@ int mount_sd_card(){
 LOG FOR DATA COMING FROM LISA
 ***********************************/
 int open_data_lisa_log(){
+	#if DEBUG
+		printf("Entering open_data_lisa_log\n");
+	#endif
+	
 	//open data log file
 	lisa_log_file = fopen(FILE_PATH_LISA_LOG,"a+"); 
 	if(lisa_log_file==NULL){
@@ -64,10 +81,18 @@ int open_data_lisa_log(){
 }
 
 int write_data_lisa_log(char *data){
+	#if DEBUG
+		printf("Entering write_data_lisa_log\n");
+	#endif
+	
 	return fprintf(lisa_log_file,"%s\n",data); 
 }
 
 int close_data_lisa_log(){
+	#if DEBUG
+		printf("Entering close_data_lisa_log\n");
+	#endif
+	
 	return fclose(lisa_log_file);
 }
 
@@ -75,6 +100,10 @@ int close_data_lisa_log(){
 LOG FOR DATA COMING FROM GROUNDSTATION
 ***********************************/
 int open_data_groundstation_log(){
+	#if DEBUG
+		printf("Entering open_data_groundstation_log\n");
+	#endif
+	
 	//open data log file
 	groundstation_log_file = fopen(FILE_PATH_GROUND_LOG,"a+"); 
 	if(groundstation_log_file==NULL){
@@ -84,32 +113,19 @@ int open_data_groundstation_log(){
 }
 
 int write_data_groundstation_log(char *data){
+	#if DEBUG
+		printf("Entering write_data_groundstation_log\n");
+	#endif
+	
 	return fprintf(groundstation_log_file,"%s\n",data); 
 }
 
 int close_data_groundstation_log(){
+	#if DEBUG
+		printf("Entering close_data_groundstation_log\n");
+	#endif
+	
 	return fclose(groundstation_log_file);
-}
-
-
-/**********************************
-LOG FOR DATA COMING FROM BONEPLANE
-***********************************/
-int open_data_boneplane_log(){
-	//open data log file
-	boneplane_log_file = fopen(FILE_PATH_BONEPLANE_LOG,"a+"); 
-	if(boneplane_log_file==NULL){
-			return -1;
-	}
-	return 0;
-}
-
-int write_data_boneplane_log(char *data){
-	return fprintf(boneplane_log_file,"%s\n",data); 
-}
-
-int close_data_boneplane_log(){
-	return fclose(boneplane_log_file);
 }
 
 
@@ -117,6 +133,10 @@ int close_data_boneplane_log(){
 LOG FOR ERRORS FROM PROGRAM 
 ***********************************/
 void error_write(char *file_name,char *function,char *message){
+	#if DEBUG
+		printf("Entering error_write\n");
+	#endif
+	
 	//write error to log		
 	FILE *file; 
 	time_t now = time(0);
@@ -127,8 +147,11 @@ void error_write(char *file_name,char *function,char *message){
 	fclose(file); 	
 }
 
-void log_write(char *file_name,char *function,char *message)
-{
+void log_write(char *file_name,char *function,char *message){
+	#if DEBUG
+		printf("Entering log_write\n");
+	#endif
+	
 	//write error to log		
 	FILE *file; 
 	time_t now = time(0);

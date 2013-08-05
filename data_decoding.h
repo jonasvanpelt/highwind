@@ -45,7 +45,6 @@ struct Data {
 			uint8_t raw[155];
 			struct Status_message {
 				uint8_t error;
-				uint8_t sd_state;
 				time_t time;
 				struct timeval tv;
 				int8_t new_data;

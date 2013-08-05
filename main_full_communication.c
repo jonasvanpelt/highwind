@@ -14,7 +14,7 @@
 #include "data_decoding.h"
 
 #ifndef LOGGING 
-#define LOGGING 1
+#define LOGGING 0
 #endif
 
 
@@ -29,6 +29,9 @@
  void *lisa_to_pc(void *connection);
  void *data_logging_lisa(void *);
  void *data_logging_groundstation(void *arg);
+ static void UDP_err_handler( UDP_errCode err ); 
+ static void UART_err_handler( UART_errCode err );   
+ static void Decode_err_handler( UART_errCode err ); 
 
 
  /***********************************
@@ -40,8 +43,12 @@ static char FILENAME[] = "main_full_communication.c";
 typedef struct{
 		int port_number_lisa_to_pc;
 		int port_number_pc_to_lisa;
+		int port_number_error_message;
 		char *server_ip;
 } Connection;
+
+Connection connection;
+
 
 #if LOGGING > 0
 //log buffer for data from lisa
@@ -56,7 +63,6 @@ typedef struct{
   * MAIN
   * *********************************/
 int main(int argc, char *argv[]){
-	Connection connection;
 	
 	//parse arguments	
 	if(argc == 4){
@@ -64,8 +70,9 @@ int main(int argc, char *argv[]){
 		connection.server_ip=argv[1];
 		connection.port_number_lisa_to_pc=atoi(argv[2]);	
 		connection.port_number_pc_to_lisa=atoi(argv[3]);
+		connection.port_number_error_message=atoi(argv[4]);
 	}else{
-			printf("wrong parameters: server ip - send port number - receive port number\n");
+			printf("wrong parameters: server ip - send port number - receive port number - error message port number\n");
 			exit(EXIT_FAILURE);		
 	}
 	
@@ -85,12 +92,8 @@ int main(int argc, char *argv[]){
 
 	//open uart port
 	serial_stream=serial_port_new();
-		
-	if (serial_port_setup()==-1)
-	{
-		error_write(FILENAME,"main()","Setup has failed, uart port couldn't be opened");
-		exit(EXIT_FAILURE);
-	}
+	
+	UART_err_handler(serial_port_setup());
 
 	pthread_t thread_lisa_to_pc,thread_data_logging_lisa,thread_data_logging_ground;
 
@@ -124,13 +127,13 @@ int main(int argc, char *argv[]){
 	//init the data decode pointers
 	init_decoding();
 
-	openUDPServerSocket(&udp_server,connection.port_number_pc_to_lisa);
+	UDP_err_handler(openUDPServerSocket(&udp_server,connection.port_number_pc_to_lisa));
 
 	while(1){
 
 		//1. retreive UDP data form PC from ethernet port.
 		
-		receiveUDPServerData(&udp_server,(void *)&input_stream,sizeof(input_stream)); //blocking !!!
+		UDP_err_handler(receiveUDPServerData(&udp_server,(void *)&input_stream,sizeof(input_stream))); //blocking !!!
 			
 		//2.decode command
 		if(data_update(input_stream)==-1){ 
@@ -144,7 +147,7 @@ int main(int argc, char *argv[]){
 			//3. encode data again in format for lisa
 			data_encode_commands(read_data->groundstation.commands.message.servo_commands);		
 			//4. send data to Lisa through UART port.
-			serial_port_write(read_data->commands_lisa_format.commands.raw); 
+			UART_err_handler(serial_port_write(read_data->commands_lisa_format.commands.raw)); 
 		}
 		
 		#if LOGGING > 0
@@ -164,7 +167,7 @@ int main(int argc, char *argv[]){
 	
 	serial_port_close();
 	serial_port_free();
-	closeUDPServerSocket(&udp_server);
+	UDP_err_handler(closeUDPServerSocket(&udp_server));
 	/*------------------------END OF FIRST THREAD------------------------*/
 	
 	
@@ -198,25 +201,24 @@ int main(int argc, char *argv[]){
 	
 	return 0;
 }
-void *lisa_to_pc(void *connection){
+void *lisa_to_pc(void *arg){
 /*-------------------------START OF SECOND THREAD: LISA TO PC------------------------*/	
 
-	Connection *conn=(Connection *)connection;
 	static UDP udp_client;
 	int message_length;
 	ElemType cb_elem = {0};
 
 	//read data from UART
 	
-	openUDPClientSocket(&udp_client,conn->server_ip,conn->port_number_lisa_to_pc);
+	UDP_err_handler(openUDPClientSocket(&udp_client,connection.server_ip,connection.port_number_lisa_to_pc));
 
 	while(1)
 	{
 		message_length = serial_input_check();
-		if(message_length !=-1){
+		if(message_length !=UART_ERR_READ){
 		
 			//send data to eth port using UDP
-			sendUDPClientData(&udp_client,&(serial_input.buffer),message_length);
+			UDP_err_handler(sendUDPClientData(&udp_client,&(serial_input.buffer),message_length));
 	
 			#if LOGGING > 0
 
@@ -234,7 +236,7 @@ void *lisa_to_pc(void *connection){
 	}
 	serial_port_close();
 	serial_port_free();
-	closeUDPClientSocket(&udp_client);
+	UDP_err_handler(closeUDPClientSocket(&udp_client));
 	
 	//the function must return something - NULL will do 
 	return NULL;
@@ -281,4 +283,94 @@ void *data_logging_groundstation(void *arg){
 
 #endif
 
+static void UDP_err_handler( UDP_errCode err )  
+{
+	//it makes no sence to send UDP errors to server when there is a UDP problem.
+	//write error to local log
+	switch( err ) {
+		case UDP_ERR_NONE:
+			break;
+		case  UDP_ERR_INET_ATON:
+			error_write(FILENAME,"main()","failed decoding ip address");
+			exit(EXIT_FAILURE);
+			break;
+		case UDP_ERR_SEND:
+			error_write(FILENAME,"main()","failed sending UDP data");
+			break;
+		case UDP_ERR_CLOSE_SOCKET:
+			error_write(FILENAME,"main()","failed closing UDP socket");
+			break;
+		case UDP_ERR_OPEN_SOCKET:
+			error_write(FILENAME,"main()","failed inserting UDP socket");
+			exit(EXIT_FAILURE);
+			break;
+		case UDP_ERR_BIND_SOCKET_PORT:
+			error_write(FILENAME,"main()","failed binding port to socket");
+			break;
+		case UDP_ERR_RECV:
+			error_write(FILENAME,"main()","failed receiving UDP data");
+			break;
+		case UDP_ERR_UNDEFINED:
+			error_write(FILENAME,"main()","undefined UDP error");
+			break;
+		default: break;// should never come here
+	
+	}
+}
 
+static void UART_err_handler( UART_errCode err )  
+{
+	//write error to local log
+	switch( err ) {
+			case UART_ERR_NONE:
+				break;
+			case  UART_ERR_READ:
+				error_write(FILENAME,"main()","failed reading data from UART");
+				break;
+			case UART_ERR_SERIAL_PORT_FLUSH_INPUT:
+				error_write(FILENAME,"main()","serial port flush input failed");
+				break;
+			case UART_ERR_SERIAL_PORT_FLUSH_OUTPUT:
+				error_write(FILENAME,"main()","serial port flush output failed");
+				break;
+			case UART_ERR_SERIAL_PORT_OPEN:
+				error_write(FILENAME,"main()","serial port open failed");
+				exit(EXIT_FAILURE);
+				break;
+			case UART_ERR_SERIAL_PORT_CLOSE:
+				error_write(FILENAME,"main()","serial port close failed");
+				break;
+			case UART_ERR_SERIAL_PORT_CREATE:
+				error_write(FILENAME,"main()","serial port create failed");
+				exit(EXIT_FAILURE);
+				break;
+			case UART_ERR_SERIAL_PORT_WRITE:
+				error_write(FILENAME,"main()","serial port write failed");
+				break;
+			case UART_ERR_UNDEFINED:
+				error_write(FILENAME,"main()","undefined UART error");
+				break;
+			default: break;// should never come here
+		
+		}
+	
+	static UDP udp_client;
+	int message_length;
+	char buffer[MAX_STREAM_SIZE];
+	
+	//encode an error package
+		
+		
+	//send errorcode to server
+	/*UDP_err_handler(openUDPClientSocket(&udp_client,connection.server_ip,connection.port_number_error_message));
+	UDP_err_handler(sendUDPClientData(&udp_client,&buffer,message_length));
+	UDP_err_handler(closeUDPClientSocket(&udp_client));*/
+
+
+}
+
+/*static void Decode_err_handler( UART_errCode err )  
+{
+	//send errorcode to server
+}
+*/

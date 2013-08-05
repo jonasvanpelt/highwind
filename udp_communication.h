@@ -8,6 +8,11 @@
 #include<sys/socket.h>
 #include<arpa/inet.h>
 
+/*-- UDP error codes --*/
+enum udp_errCode { UDP_ERR_NONE = 0, UDP_ERR_INET_ATON, UDP_ERR_SEND, UDP_ERR_CLOSE_SOCKET,UDP_ERR_OPEN_SOCKET,UDP_ERR_BIND_SOCKET_PORT,UDP_ERR_RECV, UDP_ERR_UNDEFINED };
+
+typedef enum udp_errCode UDP_errCode;
+
 typedef struct 
 { 
 	struct sockaddr_in si_me;
@@ -16,17 +21,17 @@ typedef struct
 	int fd_len;
 } UDP;
 
-extern int openUDPSocket(UDP *udp);
+extern UDP_errCode openUDPSocket(UDP *udp);
 
 //udp client prototypes
-extern int openUDPClientSocket(UDP *udp_client,char *server_ip,int port);
-extern int sendUDPClientData(UDP *udp_client,void *data,size_t data_len);
-extern int closeUDPClientSocket(UDP *udp_client);
+extern UDP_errCode openUDPClientSocket(UDP *udp_client,char *server_ip,int port);
+extern UDP_errCode sendUDPClientData(UDP *udp_client,void *data,size_t data_len);
+extern UDP_errCode closeUDPClientSocket(UDP *udp_client);
 
 //udp server prototypes
-extern int openUDPServerSocket(UDP *udp_server,int port);
-extern int receiveUDPServerData(UDP *udp_server,void *data,size_t data_len);
-extern int closeUDPServerSocket(UDP *udp_server);
+extern UDP_errCode openUDPServerSocket(UDP *udp_server,int port);
+extern UDP_errCode receiveUDPServerData(UDP *udp_server,void *data,size_t data_len);
+extern UDP_errCode closeUDPServerSocket(UDP *udp_server);
 
 #endif /*UDP_COMMUNCATION_H__*/
 

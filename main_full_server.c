@@ -11,7 +11,7 @@
 #define MAX_OUTPUT_STREAM_SIZE 34
 
 #ifndef DEBUG 
-#define DEBUG 1
+#define DEBUG 0
 #endif
 
 
@@ -209,3 +209,7 @@ void *server_to_planebone(void *connection){
 /*------------------------END OF SECOND THREAD------------------------*/
 
 }	
+
+
+
+

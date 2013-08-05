@@ -6,12 +6,17 @@
 #include<string.h> //memset
 #include<stdlib.h> //exit(0
 #include "udp_communication.h"
-#include "log.h"
 
-static char FILENAME[] = "udp_communication.c";
+#ifndef DEBUG 
+#define DEBUG 0
+#endif
 
 
-int openUDPClientSocket(UDP *udp_client,char *server_ip,int port){
+
+UDP_errCode openUDPClientSocket(UDP *udp_client,char *server_ip,int port){
+	#if DEBUG
+		printf("Entering openUDPClientSocket\n");
+	#endif
 	
 	openUDPSocket(udp_client);
 	
@@ -24,27 +29,39 @@ int openUDPClientSocket(UDP *udp_client,char *server_ip,int port){
 	// inet_aton converts the Internet host address cp from the standard numbers-and-dots notation into binary data and stores it in the structure that inp points to. inet_aton returns nonzero if the address is valid, zero if not
 	if (inet_aton(server_ip , &(udp_client->si_other.sin_addr)) == 0) 
 	{
-		error_write(FILENAME,"openUDPClientSocket()","inet_aton() failed");
-		return -1;
+		return UDP_ERR_INET_ATON;
 	}
-	return 0;
+	return UDP_ERR_NONE;
 }
 
-int sendUDPClientData(UDP *udp_client,void *data,size_t data_len){
+UDP_errCode sendUDPClientData(UDP *udp_client,void *data,size_t data_len){
+	#if DEBUG
+		printf("Entering sendUDPClientData\n");
+	#endif
+	
 	//send the message
 	if (sendto(udp_client->fd, (void *)data, data_len , 0 , (struct sockaddr *) &(udp_client->si_other), udp_client->fd_len)==-1)
 	{
-		error_write(FILENAME,"sendUDPClientData()","sendto() failed");
-		return -1;
+		return UDP_ERR_SEND;
 	}
-	return 0;
+	return UDP_ERR_NONE;
 }
 
-int closeUDPClientSocket(UDP *udp_client){
-	return close(udp_client->fd); 
+UDP_errCode closeUDPClientSocket(UDP *udp_client){
+	#if DEBUG
+		printf("Entering closeUDPClientSocket\n");
+	#endif
+	
+	if(close(udp_client->fd)==-1)
+		return UDP_ERR_CLOSE_SOCKET; 
+	else
+		return UDP_ERR_NONE;
 }
 
-int openUDPSocket(UDP *udp){
+UDP_errCode openUDPSocket(UDP *udp){
+	#if DEBUG
+		printf("Entering openUDPSocket\n");
+	#endif
 	
 	//define fd_len
     udp->fd_len = sizeof(udp->si_other);
@@ -52,16 +69,18 @@ int openUDPSocket(UDP *udp){
     //create a UDP socket
 	if ( (udp->fd=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1)
 	{
-		error_write(FILENAME,"openUDPSocket()","opening socket failed");
-		return -1;
+		return UDP_ERR_OPEN_SOCKET;
 	} 
 
-	return 0;
+	return UDP_ERR_NONE;
 }
 
 
 
-int openUDPServerSocket(UDP *udp_server,int port){
+UDP_errCode openUDPServerSocket(UDP *udp_server,int port){
+	#if DEBUG
+		printf("Entering openUDPServerSocket\n");
+	#endif
 	
 	openUDPSocket(udp_server);
 	
@@ -75,28 +94,36 @@ int openUDPServerSocket(UDP *udp_server,int port){
 	//bind socket to port
 	if( bind(udp_server->fd , (struct sockaddr*)&(udp_server->si_me), sizeof(udp_server->si_me) ) == -1)
 	{
-		error_write(FILENAME,"openUDPServerSocket()","binding socket to port failed");
-		return -1;
+		return UDP_ERR_BIND_SOCKET_PORT;
 	}
-	return 0;
+	return UDP_ERR_NONE;
 }
 
-int receiveUDPServerData(UDP *udp_server,void *data,size_t data_len){
+UDP_errCode receiveUDPServerData(UDP *udp_server,void *data,size_t data_len){
+	#if DEBUG
+		printf("Entering receiveUDPServerData\n");
+	#endif
 	int recv_len;
 	//blocking !!!
 	if ((recv_len = recvfrom(udp_server->fd, data,data_len, 0, (struct sockaddr *) &(udp_server->si_other), &(udp_server->fd_len))) == -1)
 	{
-		error_write(FILENAME,"receiveUDPServerData()","recvfrom() failed");
-		return -1;
+		return UDP_ERR_RECV;
 	}else{
 		//eventually send something back to sender using si_other
 	}
-	return 0;
+	return UDP_ERR_NONE;
 }
 
 
-int closeUDPServerSocket(UDP *udp_server){
-	return close(udp_server->fd);
+UDP_errCode closeUDPServerSocket(UDP *udp_server){
+	#if DEBUG
+		printf("Entering closeUDPServerSocket\n");
+	#endif
+	
+	if(close(udp_server->fd)==-1)
+		return UDP_ERR_CLOSE_SOCKET; 
+	else
+		return UDP_ERR_NONE;
 }
 
 
