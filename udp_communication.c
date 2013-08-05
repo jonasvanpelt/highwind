@@ -11,6 +11,11 @@
 #define DEBUG 0
 #endif
 
+/********************************
+ * PROTOTYPES PRIVATE
+ * ******************************/
+extern UDP_errCode openUDPSocket(UDP *udp);
+
 
 
 UDP_errCode openUDPClientSocket(UDP *udp_client,char *server_ip,int port){

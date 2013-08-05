@@ -152,7 +152,6 @@ int main(int argc, char *argv[]){
 	}
 	
 	serial_port_close();
-	serial_port_free();
 	UDP_err_handler(closeUDPServerSocket(&udp_server));
 	/*------------------------END OF FIRST THREAD------------------------*/
 	

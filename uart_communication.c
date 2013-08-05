@@ -18,6 +18,33 @@
 #define DEBUG 0
 #endif
 
+
+/********************************
+ * PROTOTYPES PRIVATE
+ * ******************************/
+ 
+extern UART_errCode serial_port_setup(void); //returns the number of read bytes
+extern int serial_port_read(uint32_t length);
+extern UART_errCode serial_port_create(void);
+extern int serial_port_get_baud(void);
+extern UART_errCode  serial_port_open_raw(const char* device, speed_t speed);
+extern UART_errCode  serial_port_open(const char* device, void(*term_conf_callback)(struct termios*, speed_t*));
+extern void serial_port_free(void);
+extern void serial_port_flush(void);
+extern UART_errCode serial_port_flush_input(void);
+extern UART_errCode serial_port_flush_output(void);
+extern void serial_buffer_clear(void);
+extern void serial_output_buffer_clear(void);
+extern void serial_input_buffer_clear(void);
+extern void benchmark_start(int timer);
+extern void benchmark_stop(int timer);
+extern void packets_clear(void);
+extern uint8_t serial_port_get_length(void);
+
+/********************************
+ * GLOBALS
+ * ******************************/
+ 
 static const char FILENAME[] = "uart_communication.c";
 
 //config
@@ -25,10 +52,10 @@ speed_t speed = B57600;
 const char device[]="/dev/ttyO4";
 int serial_input_buffer_size = sizeof(serial_input.buffer);
 
-/**
+/********************************
  * FUNCTIONS
- * */
-
+ * ******************************/
+ 
 int serial_input_check() //returns the number of read bytes
 {
 	#if DEBUG  > 1
@@ -285,6 +312,9 @@ UART_errCode serial_port_close(void) {
 	if (close(serial_stream->fd)) {
 		return UART_ERR_SERIAL_PORT_CLOSE; 
 	}
+	
+	serial_port_free();
+	
 	return UART_ERR_NONE;
 
 }

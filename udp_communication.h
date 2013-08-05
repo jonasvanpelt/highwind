@@ -21,8 +21,11 @@ typedef struct
 	int fd_len;
 } UDP;
 
-extern UDP_errCode openUDPSocket(UDP *udp);
 
+
+/********************************
+ * PROTOTYPES PUBLIC
+ * ******************************/
 //udp client prototypes
 extern UDP_errCode openUDPClientSocket(UDP *udp_client,char *server_ip,int port);
 extern UDP_errCode sendUDPClientData(UDP *udp_client,void *data,size_t data_len);
