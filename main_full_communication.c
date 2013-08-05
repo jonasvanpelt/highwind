@@ -343,18 +343,18 @@ static void UART_err_handler( UART_errCode err )
 	if(!UART_ERR_NONE){
 		static UDP udp_client;
 		int message_length;
-		char encoded_data[MAX_STREAM_SIZE]
-		struct Data data;
+		char encoded_data[MAX_STREAM_SIZE];
+		Data data;
 		Error error_message;
 
 		//encode an error package
-		error_message.library=UART_L;
-		error_message.error=err;
-		data_encode(err.raw,char encoded_data[],2,2);
+		error_message.message.library=UART_L;
+		error_message.message.error=err;
+		data_encode(error_message.raw,encoded_data,2,2);
 		
 		//send errorcode to server
 		UDP_err_handler(openUDPClientSocket(&udp_client,connection.server_ip,connection.port_number_error_message));
-		UDP_err_handler(sendUDPClientData(&udp_client,&buffer,message_length));
+		UDP_err_handler(sendUDPClientData(&udp_client,&encoded_data,message_length));
 		UDP_err_handler(closeUDPClientSocket(&udp_client));
 
 	}
