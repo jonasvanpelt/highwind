@@ -8,7 +8,7 @@
 #include "log.h"
 
 #define MAX_INPUT_STREAM_SIZE 255
-#define MAX_OUTPUT_STREAM_SIZE 12
+#define MAX_OUTPUT_STREAM_SIZE 36
 
 #ifndef DEBUG 
 #define DEBUG 0
@@ -189,7 +189,7 @@ void *server_to_planebone(void *connection){
 	
 		//2. encode the data	
 
-		DEC_err_handler(data_encode(output.raw,sizeof(output.raw),encoded_data,1,52));
+		DEC_err_handler(data_encode(output.raw,sizeof(output.raw),encoded_data,1,72));
 		
 		/*printf("OUTPUT RAW:");
 		int j;

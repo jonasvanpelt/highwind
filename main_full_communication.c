@@ -20,7 +20,7 @@
 
 
 #define CBSIZE 2048
-#define OUTPUT_BUFFER 34
+#define OUTPUT_BUFFER 36
 #define MAX_STREAM_SIZE 255
 
 
