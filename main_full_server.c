@@ -54,7 +54,7 @@ int main(int argc, char *argv[]){
 			printf("wrong parameters: planebone ip - send port number - receive port number\n");
 			exit(EXIT_FAILURE);		
 	}
-	
+		
 	pthread_t thread_server_to_planebone;
 
 	//create a second thread which executes server_to_planebone
@@ -258,7 +258,6 @@ static void DEC_err_handler(DEC_errCode err )
 			break;
 		case  DEC_ERR_START_BYTE:
 			error_write(SOURCEFILE,"start byte is not 0x99");
-			exit(EXIT_FAILURE);
 			break;
 		case DEC_ERR_CHECKSUM:
 			error_write(SOURCEFILE,"wrong checksum");
@@ -268,7 +267,6 @@ static void DEC_err_handler(DEC_errCode err )
 			break;
 		case DEC_ERR_UNKNOWN_LISA_PACKAGE:
 			error_write(SOURCEFILE,"received unknown package from lisa");
-			exit(EXIT_FAILURE);
 			break;
 		case DEC_ERR_UNKNOWN_SENDER:
 			error_write(SOURCEFILE,"received package from unknown sender ");

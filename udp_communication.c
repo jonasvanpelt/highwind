@@ -2,13 +2,16 @@
  * AUTHOR: Jonas Van Pelt
  */
 
-#include<stdio.h> //printf
 #include<string.h> //memset
 #include<stdlib.h> //exit(0
 #include "udp_communication.h"
 
 #ifndef DEBUG 
 #define DEBUG 0
+#endif
+
+#if DEBUG
+#include <stdio.h>
 #endif
 
 /********************************

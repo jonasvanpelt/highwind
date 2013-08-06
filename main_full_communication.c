@@ -31,8 +31,8 @@
  void *data_logging_groundstation(void *arg);
  static void UDP_err_handler( UDP_errCode err ); 
  static void UART_err_handler( UART_errCode err );   
- static void Decode_err_handler( UART_errCode err ); 
-
+ static void Decode_err_handler( UART_errCode err );
+ static void sendError(DEC_errCode err,library lib);
 
  /***********************************
   * GLOBALS
@@ -43,7 +43,6 @@ static char FILENAME[] = "main_full_communication.c";
 typedef struct{
 		int port_number_lisa_to_pc;
 		int port_number_pc_to_lisa;
-		int port_number_error_message;
 		char *server_ip;
 } Connection;
 
@@ -65,12 +64,11 @@ Connection connection;
 int main(int argc, char *argv[]){
 	
 	//parse arguments	
-	if(argc == 5){
+	if(argc == 4){
 		//first argument is always name of program or empty string
 		connection.server_ip=argv[1];
 		connection.port_number_lisa_to_pc=atoi(argv[2]);	
 		connection.port_number_pc_to_lisa=atoi(argv[3]);
-		connection.port_number_error_message=atoi(argv[4]);
 	}else{
 			printf("wrong parameters: server ip - send port number - receive port number - error message port number\n");
 			exit(EXIT_FAILURE);		
@@ -352,28 +350,58 @@ static void UART_err_handler( UART_errCode err )
 		}
 	
 	if(!UART_ERR_NONE){
+			sendError(err,UART_L);
+	}	
+}
+
+static void DEC_err_handler(DEC_errCode err )  
+{
+	static char SOURCEFILE[] = "data_decoding.c";
+	//write error to local log
+	switch( err ) {
+		case DEC_ERR_NONE:
+			break;
+		case  DEC_ERR_START_BYTE:
+			error_write(SOURCEFILE,"start byte is not 0x99");
+			break;
+		case DEC_ERR_CHECKSUM:
+			error_write(SOURCEFILE,"wrong checksum");
+			break;
+		case DEC_ERR_UNKNOWN_BONE_PACKAGE:
+			error_write(SOURCEFILE,"received unknown package from beaglebone");
+			break;
+		case DEC_ERR_UNKNOWN_LISA_PACKAGE:
+			error_write(SOURCEFILE,"received unknown package from lisa");
+			break;
+		case DEC_ERR_UNKNOWN_SENDER:
+			error_write(SOURCEFILE,"received package from unknown sender ");
+			break;
+		case DEC_ERR_UNDEFINED:
+			error_write(SOURCEFILE,"undefined decoding error");
+			break;
+		default: break;// should never come here
+	
+	}
+	if(!UART_ERR_NONE){
+		sendError(err,DECODE_L);
+	}
+}
+
+static void sendError(DEC_errCode err,library lib){
 		static UDP udp_client;
 		int message_length;
 		char encoded_data[MAX_STREAM_SIZE];
 		Data data;
 		Error error_message;
-
+		
 		//encode an error package
-		error_message.message.library=UART_L;
+		error_message.message.library=lib;
 		error_message.message.error=err;
 		data_encode(error_message.raw,sizeof(error_message.raw),encoded_data,2,2);
 		
 		//send errorcode to server
-		UDP_err_handler(openUDPClientSocket(&udp_client,connection.server_ip,connection.port_number_error_message));
+		UDP_err_handler(openUDPClientSocket(&udp_client,connection.server_ip,connection.port_number_lisa_to_pc));
 		UDP_err_handler(sendUDPClientData(&udp_client,&encoded_data,message_length));
 		UDP_err_handler(closeUDPClientSocket(&udp_client));
-
-	}
-	
 }
 
-/*static void Decode_err_handler( UART_errCode err )  
-{
-	//send errorcode to server
-}
-*/

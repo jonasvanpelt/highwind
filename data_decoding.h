@@ -21,7 +21,7 @@ typedef enum Library library;
 typedef union Output{ //message id 52
 	uint8_t raw[6]; 
 	struct Output_message {
-			uint8_t dummy;
+			uint8_t dummy; //dummy field because we hijacked a message in Lisa for sending commands
 			uint8_t mode;
 			uint8_t flap;
 			int8_t aileron;
@@ -41,12 +41,12 @@ typedef union { // id = 1
 	} Status;
 	
 typedef union { // id = 2
-		uint8_t raw[1];
+		uint8_t raw[27];
 		struct Error_message {
 			uint8_t library;
 			uint8_t error;
-			time_t time;
-			struct timeval tv;
+			time_t time; //8
+			struct timeval tv; //16
 			int8_t new_data;
 		} message;
 	} Error;

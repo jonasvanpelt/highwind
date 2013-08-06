@@ -5,12 +5,15 @@
 
 /* Circular buffer example, keeps one slot open */
  
-#include <stdio.h>
 #include <stdlib.h>
 #include "circular_buffer.h"
 
 #ifndef DEBUG 
 #define DEBUG 0
+#endif
+
+#if DEBUG
+#include <stdio.h>
 #endif
  
 void cbInit(CircularBuffer *cb, int size) {
