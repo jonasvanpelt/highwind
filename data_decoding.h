@@ -18,15 +18,16 @@ enum Library {UDP_L,UART_L,DECODE_L,LOG_L,CIRCULAR_BUFFER_L};
 typedef enum Library library; 
 
 //OUTPUT 
-typedef union Output{ //message id 52
-	uint8_t raw[6]; 
+typedef union Output{ //message id 72
+	uint8_t raw[28]; 
 	struct Output_message {
-			uint8_t dummy; //dummy field because we hijacked a message in Lisa for sending commands
-			uint8_t mode;
-			uint8_t flap;
-			int8_t aileron;
-			int8_t elevator;
-			int8_t rudder;
+			int32_t servo_1;
+			int32_t servo_2;
+			int32_t servo_3;
+			int32_t servo_4;
+			int32_t servo_5;
+			int32_t servo_6;
+			int32_t servo_7;
 		} message;
 } Output;
 	

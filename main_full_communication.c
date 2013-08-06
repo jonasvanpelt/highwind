@@ -3,6 +3,7 @@
  */
 
 #include <pthread.h>
+#include <sched.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -19,7 +20,7 @@
 
 
 #define CBSIZE 2048
-#define OUTPUT_BUFFER 12
+#define OUTPUT_BUFFER 34
 #define MAX_STREAM_SIZE 255
 
 
@@ -31,7 +32,6 @@
  void *data_logging_groundstation(void *arg);
  static void UDP_err_handler( UDP_errCode err ); 
  static void UART_err_handler( UART_errCode err );   
- static void Decode_err_handler( UART_errCode err );
  static void sendError(DEC_errCode err,library lib);
 
  /***********************************
@@ -354,38 +354,6 @@ static void UART_err_handler( UART_errCode err )
 	}	
 }
 
-static void DEC_err_handler(DEC_errCode err )  
-{
-	static char SOURCEFILE[] = "data_decoding.c";
-	//write error to local log
-	switch( err ) {
-		case DEC_ERR_NONE:
-			break;
-		case  DEC_ERR_START_BYTE:
-			error_write(SOURCEFILE,"start byte is not 0x99");
-			break;
-		case DEC_ERR_CHECKSUM:
-			error_write(SOURCEFILE,"wrong checksum");
-			break;
-		case DEC_ERR_UNKNOWN_BONE_PACKAGE:
-			error_write(SOURCEFILE,"received unknown package from beaglebone");
-			break;
-		case DEC_ERR_UNKNOWN_LISA_PACKAGE:
-			error_write(SOURCEFILE,"received unknown package from lisa");
-			break;
-		case DEC_ERR_UNKNOWN_SENDER:
-			error_write(SOURCEFILE,"received package from unknown sender ");
-			break;
-		case DEC_ERR_UNDEFINED:
-			error_write(SOURCEFILE,"undefined decoding error");
-			break;
-		default: break;// should never come here
-	
-	}
-	if(!UART_ERR_NONE){
-		sendError(err,DECODE_L);
-	}
-}
 
 static void sendError(DEC_errCode err,library lib){
 		static UDP udp_client;
