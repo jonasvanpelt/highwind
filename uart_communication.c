@@ -478,7 +478,7 @@ UART_errCode serial_port_write(uint8_t output[],long unsigned int message_length
 
 	int n = write(serial_stream->fd, output, message_length);
 	
-	printf("bytes written to UART = %d\n",n)	
+	printf("bytes written to UART = %d\n",n);	
 	
 	if (n < 0) 
 	{
