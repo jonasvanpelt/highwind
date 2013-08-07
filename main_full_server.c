@@ -175,12 +175,12 @@ void *server_to_planebone(void *connection){
 
 		//create test data
 
-		output.message.servo_1=1000;
-		output.message.servo_2=1000;
+		output.message.servo_1=0;
+		output.message.servo_2=0;
 		output.message.servo_3=i;
 		output.message.servo_4=i;
-		output.message.servo_5=1000;
-		output.message.servo_6=1000;
+		output.message.servo_5=0;
+		output.message.servo_6=0;
 		
 		if(i==500){
 			i=5;

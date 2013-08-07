@@ -33,8 +33,7 @@
  static void UDP_err_handler( UDP_errCode err ); 
  static void UART_err_handler( UART_errCode err );   
  static void sendError(DEC_errCode err,library lib);
- static void LOG_err_handler( UART_errCode err );  
-
+static void LOG_err_handler( LOG_errCode err );  
  /***********************************
   * GLOBALS
   * *********************************/
@@ -78,7 +77,7 @@ int main(int argc, char *argv[]){
 	//init log (mount sd card if necessary)
 	int err = init_log();
 	LOG_err_handler(err);
-	if(err ! = LOG_ERR_NONE){
+	if(err != LOG_ERR_NONE){
 		exit(EXIT_FAILURE);
 	}
 	
