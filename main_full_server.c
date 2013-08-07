@@ -22,6 +22,7 @@
 void *server_to_planebone(void *connection);
 static void DEC_err_handler(DEC_errCode err ); 
 static void UDP_err_handler( UDP_errCode err ); 
+static void err_receiver();
 
 
  /***********************************
@@ -275,7 +276,6 @@ static void DEC_err_handler(DEC_errCode err )
 			error_write(SOURCEFILE,"undefined decoding error");
 			break;
 		default: break;// should never come here
-	
 	}
 }
 

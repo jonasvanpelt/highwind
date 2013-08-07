@@ -33,6 +33,7 @@
  static void UDP_err_handler( UDP_errCode err ); 
  static void UART_err_handler( UART_errCode err );   
  static void sendError(DEC_errCode err,library lib);
+ static void LOG_err_handler( UART_errCode err );  
 
  /***********************************
   * GLOBALS
@@ -75,8 +76,9 @@ int main(int argc, char *argv[]){
 	}
 	
 	//init log (mount sd card if necessary)
-	if(init_log()==-1){
-		error_write(FILENAME,"Init log failed");
+	int err = init_log();
+	LOG_err_handler(err);
+	if(err ! = LOG_ERR_NONE){
 		exit(EXIT_FAILURE);
 	}
 	
@@ -133,6 +135,8 @@ int main(int argc, char *argv[]){
 		
 		UDP_err_handler(receiveUDPServerData(&udp_server,(void *)&input_stream,sizeof(input_stream))); //blocking !!!
 		
+		
+		//REMOVE ME
 		printf("INCOMING OUTPUT RAW:");
 		int j;
 			for(j=0;j<input_stream[1];j++){
@@ -157,7 +161,6 @@ int main(int argc, char *argv[]){
 		#endif
 
 	}
-	
 	serial_port_close();
 	UDP_err_handler(closeUDPServerSocket(&udp_server));
 	/*------------------------END OF FIRST THREAD------------------------*/
@@ -242,16 +245,16 @@ void *data_logging_lisa(void *arg){
 /*-------------------------START OF THIRD THREAD: LISA TO PC LOGGING------------------------*/	
 
 	ElemType cb_elem = {0};
-	open_data_lisa_log();
+	LOG_err_handler(open_data_lisa_log());
 	
 	while(1){
 		while (!cbIsEmpty(&cb_data_lisa)) {
 			cbRead(&cb_data_lisa, &cb_elem);
-			write_data_lisa_log(cb_elem.value);
+			LOG_err_handler(write_data_lisa_log(cb_elem.value));
 		}
 		usleep(10);
 	}
-	close_data_lisa_log();
+	LOG_err_handler(close_data_lisa_log());
 /*-------------------------END OF THIRD THREAD: LISA TO PC LOGGING------------------------*/	
 }
 
@@ -259,12 +262,12 @@ void *data_logging_groundstation(void *arg){
 /*-------------------------START OF FOURTH THREAD: GROUNDSTATION TO LISA LOGGING------------------------*/	
 
 	ElemType cb_elem = {0};
-	open_data_groundstation_log();
+	LOG_err_handler(open_data_groundstation_log());
 	
 	while(1){
 		while (!cbIsEmpty(&cb_data_ground)) {
 			cbRead(&cb_data_ground, &cb_elem);
-			write_data_groundstation_log(cb_elem.value);
+			LOG_err_handler(write_data_groundstation_log(cb_elem.value);
 		}
 		usleep(20);
 	}
@@ -307,8 +310,7 @@ static void UDP_err_handler( UDP_errCode err )
 		case UDP_ERR_UNDEFINED:
 			error_write(SOURCEFILE,"undefined UDP error");
 			break;
-		default: break;// should never come here
-	
+		default: break;// should never come here	
 	}
 }
 
@@ -351,6 +353,16 @@ static void UART_err_handler( UART_errCode err )
 	
 	if(!UART_ERR_NONE){
 			sendError(err,UART_L);
+	}	
+}
+
+static void LOG_err_handler( LOG_errCode err )  
+{
+	static char SOURCEFILE[] = "log.c";
+	
+	//send error to server
+	if(!LOG_ERR_NONE){
+			sendError(err,LOG_L);
 	}	
 }
 
