@@ -144,7 +144,7 @@ int main(int argc, char *argv[]){
 		printf("\n");
 
 		
-		UART_err_handler(serial_port_write(input_stream)); 
+		UART_err_handler(serial_port_write(input_stream,sizeof(input_stream))); 
 		
 		#if LOGGING > 0
 		
@@ -383,4 +383,3 @@ static void sendError(DEC_errCode err,library lib){
 		UDP_err_handler(sendUDPClientData(&udp_client,&encoded_data,message_length));
 		UDP_err_handler(closeUDPClientSocket(&udp_client));
 }
-
