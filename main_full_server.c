@@ -203,7 +203,7 @@ void *server_to_planebone(void *connection){
 		UDP_err_handler(sendUDPClientData(&udp_client,&encoded_data,sizeof(encoded_data)));	
 		
 		//sleep(1);
-		usleep(20000);
+		sleep(1);
 	}
 	UDP_err_handler(closeUDPClientSocket(&udp_client));
 
