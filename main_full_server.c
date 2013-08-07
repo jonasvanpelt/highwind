@@ -8,7 +8,7 @@
 #include "log.h"
 
 #define MAX_INPUT_STREAM_SIZE 255
-#define MAX_OUTPUT_STREAM_SIZE 36
+#define MAX_OUTPUT_STREAM_SIZE 20
 
 #ifndef DEBUG 
 #define DEBUG 0

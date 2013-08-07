@@ -19,17 +19,15 @@ typedef enum Library library;
 
 //OUTPUT 
 typedef union Output{ //message id 72
-	uint8_t raw[30]; 
+	uint8_t raw[14]; 
 	struct Output_message {
-			uint8_t dummy_1;
-			uint8_t dummy_2;
-			int32_t servo_1;
-			int32_t servo_2;
-			int32_t servo_3;
-			int32_t servo_4;
-			int32_t servo_5;
-			int32_t servo_6;
-			int32_t servo_7;
+			int16_t servo_1;
+			int16_t servo_2;
+			int16_t servo_3;
+			int16_t servo_4;
+			int16_t servo_5;
+			int16_t servo_6;
+			int16_t servo_7;
 		} message;
 } Output;
 	
