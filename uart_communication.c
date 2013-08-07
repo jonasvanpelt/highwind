@@ -478,6 +478,9 @@ UART_errCode serial_port_write(uint8_t output[])
 
 
 	int n = write(serial_stream->fd, output, sizeof(output));
+	
+	printf("n = %d \n",n);
+	
 	if (n < 0) 
 	{
 		return UART_ERR_SERIAL_PORT_WRITE;
