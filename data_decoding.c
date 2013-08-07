@@ -202,7 +202,7 @@ DEC_errCode data_encode(uint8_t message[],long unsigned int message_length,uint8
 
 	for (i=1;i<length - 2;i++) //start bit 0x99 is not in checksum calculation
 	{
-		checksum_1 += message[i];
+		checksum_1 += encoded_data[i];
 		checksum_2 += checksum_1;
 	}
 	

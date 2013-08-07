@@ -76,7 +76,7 @@ int main(int argc, char *argv[]){
 
 	while(1){
 		//printf("\nWaiting for data...\n\n");
-		fflush(stdout);
+		//fflush(stdout);
 
 		//1. retreive UDP data form planebone from ethernet port.
 		
@@ -175,17 +175,17 @@ void *server_to_planebone(void *connection){
 
 		//create test data
 
-		output.message.servo_1=0;
-		output.message.servo_2=0;
+		output.message.servo_1=i;
+		output.message.servo_2=i;
 		output.message.servo_3=i;
 		output.message.servo_4=i;
-		output.message.servo_5=0;
-		output.message.servo_6=0;
-		
-		if(i==500){
+		output.message.servo_5=i;
+		output.message.servo_6=i;
+		output.message.servo_7=i;
+		if(i==1000){
 			i=5;
 		}else{
-			i=500;
+			i=1000;
 		}
 	
 		//2. encode the data	
@@ -203,7 +203,7 @@ void *server_to_planebone(void *connection){
 		UDP_err_handler(sendUDPClientData(&udp_client,&encoded_data,sizeof(encoded_data)));	
 		
 		//sleep(1);
-		usleep(100000);
+		usleep(20000);
 	}
 	UDP_err_handler(closeUDPClientSocket(&udp_client));
 

@@ -135,13 +135,12 @@ int main(int argc, char *argv[]){
 		UDP_err_handler(receiveUDPServerData(&udp_server,(void *)&input_stream,sizeof(input_stream))); //blocking !!!
 		
 		
-		//REMOVE ME
-		printf("INCOMING OUTPUT RAW:");
+		/*printf("INCOMING OUTPUT RAW:");
 		int j;
 			for(j=0;j<input_stream[1];j++){
 				printf("%d ",input_stream[j]);
 			}
-		printf("\n");
+		printf("\n");*/
 
 		
 		UART_err_handler(serial_port_write(input_stream,sizeof(input_stream))); 

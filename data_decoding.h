@@ -18,7 +18,7 @@ enum Library {UDP_L,UART_L,DECODE_L,LOG_L,CIRCULAR_BUFFER_L};
 typedef enum Library library; 
 
 //OUTPUT 
-typedef union Output{ //message id 72
+typedef union{ //message id 72
 	uint8_t raw[14]; 
 	struct Output_message {
 			int16_t servo_1;
@@ -30,6 +30,7 @@ typedef union Output{ //message id 72
 			int16_t servo_7;
 		} message;
 } Output;
+
 	
 typedef union { // id = 1
 		uint8_t raw[155];
