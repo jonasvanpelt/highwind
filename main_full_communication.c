@@ -325,6 +325,7 @@ static void UART_err_handler( UART_errCode err )
 	//write error to local log
 	switch( err ) {
 			case UART_ERR_NONE:
+
 				break;
 			case  UART_ERR_READ:
 				error_write(SOURCEFILE,"failed reading data from UART");
@@ -355,17 +356,19 @@ static void UART_err_handler( UART_errCode err )
 			default: break;// should never come here	
 		}
 	
-	if(!UART_ERR_NONE){
-			sendError(err,UART_L);
+	if(err != UART_ERR_NONE){
+
+		sendError(err,UART_L);
 	}	
 }
 
 static void LOG_err_handler( LOG_errCode err )  
 {
 	//send error to server
-	if(!LOG_ERR_NONE){
-			sendError(err,LOG_L);
-	}	
+	if(err != LOG_ERR_NONE){
+		sendError(err,LOG_L);
+	}
+
 }
 
 
