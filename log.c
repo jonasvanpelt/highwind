@@ -56,10 +56,9 @@ LOG_errCode mount_sd_card(){
 	strcat (str,SD_CARD_DEVICE_LOCATION);
 	strcat (str," ");
 	strcat (str,SD_CARD_MOUNT_LOCATION);
-	if(system(str)==-1){
+	if(system(str)!=0){
 		return LOG_ERR_MOUNT_SD;
 	}
-
 	return LOG_ERR_NONE;
 }
 

@@ -1,5 +1,5 @@
 /*
- * AUTHOR: Maarten Arits
+ * AUTHOR: Maarten Arits and Jonas Van Pelt
  */
 
 #include <stdio.h>
@@ -10,6 +10,7 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <time.h>
+#include <poll.h>
 
 #include "uart_communication.h"
 
@@ -54,6 +55,17 @@ int serial_input_buffer_size = sizeof(serial_input.buffer);
 /********************************
  * FUNCTIONS
  * ******************************/
+
+int wait_for_data(){
+	//todo: some error handling here
+	struct pollfd fds[1];
+	int timeout = (3 * 1 * 1000); //time out of 3 seconds
+	fds[0].fd=serial_stream->fd;
+	fds[0].events=POLLIN;
+	printf("voor\n");
+	poll(fds,1,timeout); //block until there is data in the serial stream
+	printf("na\n");
+}
  
 int serial_input_check() //returns the number of read bytes
 {
@@ -72,8 +84,9 @@ int serial_input_check() //returns the number of read bytes
 
 	benchmark_start(0);
 	//Find number of bytes in buffer and read when enough
-
-	ioctl(serial_stream->fd, FIONREAD, &serial_input_buffer_chars);        //set bytes to number of bytes in buffer
+	  
+	 wait_for_data();   
+	ioctl(serial_stream->fd, FIONREAD, &serial_input_buffer_chars);        //set to number of bytes in buffer
 	if(serial_input_buffer_chars > 0) //look for char in buffer
 	{
 		
@@ -88,13 +101,13 @@ int serial_input_check() //returns the number of read bytes
 		
 		serial_input_buffer_chars=0;
 		while(serial_input_buffer_chars<message_length-2){
+			wait_for_data(); 
 			ioctl(serial_stream->fd, FIONREAD, &serial_input_buffer_chars);        
-			usleep(5);
+			
 		}
 
 		serial_input_buffer_chars = serial_port_read(message_length-2); //reads the port out and stores the number of chars red
-
-		
+	
 		if (serial_input_buffer_chars == -1) 
 		{
 			packets.serial.lost++;
@@ -157,6 +170,7 @@ int serial_input_check() //returns the number of read bytes
 		}
 
 	}else{
+		
 		return UART_ERR_READ; //-1
 	}
 	return message_length;
@@ -330,13 +344,12 @@ uint8_t serial_port_get_length(void){
 	serial_input_buffer_clear();
 	
 	while(serial_input.buffer[0] != 0x99){
+	    wait_for_data(); 
 		ioctl(serial_stream->fd, FIONREAD, &serial_input_buffer_chars);        //set bytes to number of bytes in buffer
 		if (serial_input_buffer_chars>0){
 			serial_port_read(1);
 		}	
-		usleep(20);
 	}
-	usleep(25);
 
 	serial_input_buffer_chars =serial_port_read(1);
 
@@ -460,7 +473,7 @@ int serial_port_read(uint32_t length)
 	#if DEBUG  > 1
 		printf("Entering serial_port_read\n");
 	#endif
-	
+	 
 	int n = read(serial_stream->fd, serial_input.buffer, length);
 
 	if (n < 1) 

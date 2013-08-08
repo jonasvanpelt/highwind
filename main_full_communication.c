@@ -77,6 +77,7 @@ int main(int argc, char *argv[]){
 	//init log (mount sd card if necessary)
 	int err = init_log();
 	LOG_err_handler(err);
+	
 	if(err != LOG_ERR_NONE){
 		exit(EXIT_FAILURE);
 	}
@@ -207,7 +208,7 @@ void *lisa_to_pc(void *arg){
 
 	while(1)
 	{
-		message_length = serial_input_check();
+		message_length = serial_input_check(); //blocks for 1 second, after that error UART_ERR_READ is generated
 		if(message_length !=UART_ERR_READ){
 		
 			//send data to eth port using UDP
@@ -226,6 +227,7 @@ void *lisa_to_pc(void *arg){
 			
 			#endif
 		}
+		
 	}
 	serial_port_close();
 	serial_port_free();
@@ -296,7 +298,7 @@ static void UDP_err_handler( UDP_errCode err )
 			error_write(SOURCEFILE,"failed closing UDP socket");
 			break;
 		case UDP_ERR_OPEN_SOCKET:
-			error_write(SOURCEFILE,"failed inserting UDP socket");
+			error_write(SOURCEFILE,"failed opening UDP socket");
 			exit(EXIT_FAILURE);
 			break;
 		case UDP_ERR_BIND_SOCKET_PORT:
@@ -356,9 +358,7 @@ static void UART_err_handler( UART_errCode err )
 
 static void LOG_err_handler( LOG_errCode err )  
 {
-	static char SOURCEFILE[] = "log.c";
-	
-	//send error to server
+		//send error to server
 	if(!LOG_ERR_NONE){
 			sendError(err,LOG_L);
 	}	

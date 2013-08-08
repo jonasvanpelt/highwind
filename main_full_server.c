@@ -75,9 +75,6 @@ int main(int argc, char *argv[]){
 	init_decoding();
 
 	while(1){
-		//printf("\nWaiting for data...\n\n");
-		//fflush(stdout);
-
 		//1. retreive UDP data form planebone from ethernet port.
 		
 		UDP_err_handler(receiveUDPServerData(&udp_server,(void *)&input_stream,sizeof(input_stream))); //blocking !!!
@@ -167,14 +164,11 @@ void *server_to_planebone(void *connection){
 	
 	while(1)
 	{
-		//1. read data from i do'nt now where
-		
-		
+		//1. read data from i don't now where
 		uint8_t encoded_data[MAX_OUTPUT_STREAM_SIZE];
 		Output output;
 
 		//create test data
-
 		output.message.servo_1=i;
 		output.message.servo_2=i;
 		output.message.servo_3=i;
@@ -182,14 +176,12 @@ void *server_to_planebone(void *connection){
 		output.message.servo_5=i;
 		output.message.servo_6=i;
 		output.message.servo_7=i;
-		if(i==1000){
-			i=5;
-		}else{
-			i=1000;
+		i=i+100;
+		if(i>5000){
+			i=0;	
 		}
 	
 		//2. encode the data	
-
 		DEC_err_handler(data_encode(output.raw,sizeof(output.raw),encoded_data,1,72));
 		
 		/*printf("OUTPUT RAW:");
