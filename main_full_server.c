@@ -73,6 +73,23 @@ int main(int argc, char *argv[]){
 	
 	//init the data decode pointers
 	init_decoding();
+	
+	/*
+	 * WHAT WE EXPECT:
+	 * IMU_ACCEL_RAW 204
+	 * IMU_GYRO_RAW 203
+	 * IMU_MAG_RAW 205
+	 * BARO_RAW 221
+	 * GPS_INT 155
+	 * AIRSPEED 54
+	 * */
+	 
+	int IMU_ACCEL_RAW_received=0;
+	int IMU_GYRO_RAW_received=0;	
+	int IMU_MAG_RAW_received=0;
+	int BARO_RAW_received=0;
+	int GPS_INT_received=0;
+	int AIRSPEED_received=0;
 
 	while(1){
 		//1. retreive UDP data form planebone from ethernet port.
@@ -108,17 +125,47 @@ int main(int argc, char *argv[]){
 			switch_read_write(); //only switch read write if data decoding was succesfull
 			Data* data = get_read_pointer();
 
-			if(input_stream[3]==221){
-
-			int i;
-			printf("Baro_raw content:");
-
-			for(i=0;i<input_stream[1];i++){
-				printf("%d ",data->lisa_plane.baro_raw.raw[i]);
+			if(input_stream[3]==203){
+				IMU_GYRO_RAW_received=1;
 			}
+			else if(input_stream[3]==204){
+				IMU_ACCEL_RAW_received=1;
+			}
+			else if(input_stream[3]==205){
+				IMU_MAG_RAW_received=1;
+			}
+			else if(input_stream[3]==221){
+				BARO_RAW_received=1;
+			}
+			else if(input_stream[3]==155){
+				GPS_INT_received=1;
+			}
+			else if(input_stream[3]==54){
+				AIRSPEED_received=1;
+			}else{
+					printf("UNKNOWN DATA\n");
+			}
+			
+			
+			printf("IMU_GYRO_RAW_received %d\n",IMU_GYRO_RAW_received);
+			printf("IMU_ACCEL_RAW_received %d\n",IMU_ACCEL_RAW_received);
+			printf("IMU_MAG_RAW_received %d\n",IMU_MAG_RAW_received);
+			printf("BARO_RAW_received %d\n",BARO_RAW_received);
+			printf("GPS_INT_received %d\n",GPS_INT_received);			
+			printf("AIRSPEED_received %d\n",AIRSPEED_received);			
+
 			printf("\n");
-			printf("abs %d\n",data->lisa_plane.baro_raw.message.abs);
-			printf("diff %d\n",data->lisa_plane.baro_raw.message.diff);
+
+			/*if(input_stream[3]==221){
+				int i;
+				printf("Baro_raw content:");
+
+				for(i=0;i<input_stream[1];i++){
+					printf("%d ",data->lisa_plane.baro_raw.raw[i]);
+				}
+				printf("\n");
+				printf("abs %d\n",data->lisa_plane.baro_raw.message.abs);
+				printf("diff %d\n",data->lisa_plane.baro_raw.message.diff);
 			}
 
 			printf("\n");
@@ -134,8 +181,11 @@ int main(int argc, char *argv[]){
 				printf("gp %d\n",data->lisa_plane.imu_gyro_raw.message.gp);
 				printf("gr %d\n",data->lisa_plane.imu_gyro_raw.message.gr);
 
-			}
+			}*/
 						
+		}else{
+				printf("UNKNOW PACKAGE\n");
+				exit(1);
 		}
 		
 	}
@@ -169,15 +219,15 @@ void *server_to_planebone(void *connection){
 		Output output;
 
 		//create test data
-		output.message.servo_1=i;
+		output.message.servo_1=-i;
 		output.message.servo_2=i;
 		output.message.servo_3=i;
 		output.message.servo_4=i;
 		output.message.servo_5=i;
 		output.message.servo_6=i;
 		output.message.servo_7=0;
-		i=i+500;
-		if(i>5000){
+		i=i+3200;
+		if(i>12800){
 			i=0;	
 		}
 	
