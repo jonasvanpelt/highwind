@@ -78,8 +78,8 @@ int main(int argc, char *argv[]){
 	int err = init_log();
 	LOG_err_handler(err);
 	
-	if(err != LOG_ERR_NONE){
-		exit(EXIT_FAILURE);
+	if(err != LOG_ERR_NONE){ //mounting SD card failed
+		//exit(EXIT_FAILURE);
 	}
 	
 	#if LOGGING > 0
