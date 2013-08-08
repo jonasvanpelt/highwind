@@ -62,9 +62,7 @@ int wait_for_data(){
 	int timeout = (3 * 1 * 1000); //time out of 3 seconds
 	fds[0].fd=serial_stream->fd;
 	fds[0].events=POLLIN;
-	printf("voor\n");
 	poll(fds,1,timeout); //block until there is data in the serial stream
-	printf("na\n");
 }
  
 int serial_input_check() //returns the number of read bytes

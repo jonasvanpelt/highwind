@@ -226,6 +226,10 @@ void *lisa_to_pc(void *arg){
 			}
 			
 			#endif
+		}else{
+		//send error message to server: not receiving data on uart port
+				printf("no data on uart\n");
+				UART_err_handler(message_length);
 		}
 		
 	}
