@@ -59,10 +59,16 @@ int serial_input_buffer_size = sizeof(serial_input.buffer);
 int wait_for_data(){
 	//todo: some error handling here
 	struct pollfd fds[1];
-	int timeout = (3 * 1 * 1000); //time out of 3 seconds
+	int timeout = -1; //time out forever
+	int result;
 	fds[0].fd=serial_stream->fd;
 	fds[0].events=POLLIN;
-	poll(fds,1,timeout); //block until there is data in the serial stream
+	result=poll(fds,1,timeout); //block until there is data in the serial stream
+
+	if((result & (1 << 0)) == 0){
+		return -1;	
+	}
+	return 0;
 }
  
 int serial_input_check() //returns the number of read bytes
@@ -83,8 +89,9 @@ int serial_input_check() //returns the number of read bytes
 	benchmark_start(0);
 	//Find number of bytes in buffer and read when enough
 	  
-	wait_for_data();   
+	wait_for_data();
 	ioctl(serial_stream->fd, FIONREAD, &serial_input_buffer_chars);        //set to number of bytes in buffer
+
 	if(serial_input_buffer_chars > 0) //look for char in buffer
 	{
 		
@@ -96,18 +103,25 @@ int serial_input_check() //returns the number of read bytes
 		}
 
 		gettimeofday(&start, NULL);
-		
-		serial_input_buffer_chars=0;
+		serial_input_buffer_chars=0;      
+
+		int flag_infinite=0;
+
 		while(serial_input_buffer_chars<message_length-2){
-			wait_for_data(); 
-			ioctl(serial_stream->fd, FIONREAD, &serial_input_buffer_chars);        
+			wait_for_data();	
+			ioctl(serial_stream->fd, FIONREAD, &serial_input_buffer_chars);   
+
+			if(flag_infinite==1000){
+				serial_port_flush_input();
+			}	
+			flag_infinite++;
 			
 		}
 
 		serial_input_buffer_chars = serial_port_read(message_length-2); //reads the port out and stores the number of chars red
 	
 		if (serial_input_buffer_chars == -1) 
-		{
+		{	
 			packets.serial.lost++;
 			return UART_ERR_READ;
 
@@ -146,7 +160,6 @@ int serial_input_check() //returns the number of read bytes
 					serial_input.buffer[i]=temp[i-2];	
 				}
 				
-
 				packets.serial.received++;
 
 				#if DEBUG > 0
@@ -168,7 +181,7 @@ int serial_input_check() //returns the number of read bytes
 		}
 
 	}else{
-		
+					
 		return UART_ERR_READ; //-1
 	}
 	return message_length;
@@ -338,22 +351,30 @@ uint8_t serial_port_get_length(void){
 	int i = 0;
 	int serial_input_buffer_chars =0;
 	int flag = 0;
+	int flag_infinite=0;
 	
 	serial_input_buffer_clear();
 	
 	while(serial_input.buffer[0] != 0x99){
-	    wait_for_data(); 
+	    	wait_for_data(); 
 		ioctl(serial_stream->fd, FIONREAD, &serial_input_buffer_chars);        //set bytes to number of bytes in buffer
 		if (serial_input_buffer_chars>0){
 			serial_port_read(1);
+		}
+		if(flag_infinite==1000){
+			serial_port_flush_input();
 		}	
+		flag_infinite++;
 	}
-
-	serial_input_buffer_chars =serial_port_read(1);
-
+	wait_for_data();
+	ioctl(serial_stream->fd, FIONREAD, &serial_input_buffer_chars);   
+	if (serial_input_buffer_chars>0){
+		serial_input_buffer_chars =serial_port_read(1);
+	}
 
 	return serial_input.buffer[0];
 }
+	
 	
 
 UART_errCode serial_port_setup(void)

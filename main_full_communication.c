@@ -228,8 +228,8 @@ void *lisa_to_pc(void *arg){
 			#endif
 		}else{
 		//send error message to server: not receiving data on uart port
-				printf("no data on uart\n");
-				UART_err_handler(message_length);
+			printf("no data on uart\n");
+			UART_err_handler(message_length);
 		}
 		
 	}
@@ -374,8 +374,6 @@ static void LOG_err_handler( LOG_errCode err )
 
 static void sendError(DEC_errCode err,library lib){
 		
-		printf("sending error\n");
-	
 		static UDP udp_client;
 		int message_length;
 		char encoded_data[MAX_STREAM_SIZE];
@@ -386,7 +384,7 @@ static void sendError(DEC_errCode err,library lib){
 		error_message.message.library=lib;
 		error_message.message.error=err;
 		data_encode(error_message.raw,sizeof(error_message.raw),encoded_data,2,2);
-		
+		message_length=sizeof(encoded_data);
 		//send errorcode to server
 		UDP_err_handler(openUDPClientSocket(&udp_client,connection.server_ip,connection.port_number_lisa_to_pc));
 		UDP_err_handler(sendUDPClientData(&udp_client,&encoded_data,message_length));
