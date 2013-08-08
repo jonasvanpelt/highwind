@@ -362,7 +362,7 @@ static void UART_err_handler( UART_errCode err )
 
 static void LOG_err_handler( LOG_errCode err )  
 {
-		//send error to server
+	//send error to server
 	if(!LOG_ERR_NONE){
 			sendError(err,LOG_L);
 	}	
@@ -370,6 +370,9 @@ static void LOG_err_handler( LOG_errCode err )
 
 
 static void sendError(DEC_errCode err,library lib){
+		
+		printf("sending error\n");
+	
 		static UDP udp_client;
 		int message_length;
 		char encoded_data[MAX_STREAM_SIZE];

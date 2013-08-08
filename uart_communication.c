@@ -83,7 +83,7 @@ int serial_input_check() //returns the number of read bytes
 	benchmark_start(0);
 	//Find number of bytes in buffer and read when enough
 	  
-	 wait_for_data();   
+	wait_for_data();   
 	ioctl(serial_stream->fd, FIONREAD, &serial_input_buffer_chars);        //set to number of bytes in buffer
 	if(serial_input_buffer_chars > 0) //look for char in buffer
 	{
