@@ -81,7 +81,7 @@ int main(int argc, char *argv[]){
 	 * IMU_MAG_RAW 205
 	 * BARO_RAW 221
 	 * GPS_INT 155
-	 * AIRSPEED 54
+	 * AIRSPEED_ETS 57
 	 * */
 	 
 	int IMU_ACCEL_RAW_received=0;
@@ -90,6 +90,8 @@ int main(int argc, char *argv[]){
 	int BARO_RAW_received=0;
 	int GPS_INT_received=0;
 	int AIRSPEED_received=0;
+	
+		
 
 	while(1){
 		//1. retreive UDP data form planebone from ethernet port.
@@ -119,6 +121,7 @@ int main(int argc, char *argv[]){
 		
 		int err  = data_update(input_stream);
 		DEC_err_handler(err);
+
 		
 		if(err==DEC_ERR_NONE){ 
 		
@@ -140,12 +143,11 @@ int main(int argc, char *argv[]){
 			else if(input_stream[3]==155){
 				GPS_INT_received=1;
 			}
-			else if(input_stream[3]==54){
+			else if(input_stream[3]==57){
 				AIRSPEED_received=1;
 			}else{
 					printf("UNKNOWN DATA\n");
 			}
-			
 			
 			printf("IMU_GYRO_RAW_received %d\n",IMU_GYRO_RAW_received);
 			printf("IMU_ACCEL_RAW_received %d\n",IMU_ACCEL_RAW_received);
@@ -181,10 +183,50 @@ int main(int argc, char *argv[]){
 				printf("gp %d\n",data->lisa_plane.imu_gyro_raw.message.gp);
 				printf("gr %d\n",data->lisa_plane.imu_gyro_raw.message.gr);
 
+			}
+			
+			if(input_stream[3]==57){
+				int i;
+				printf("airspeed content:");
+
+				for(i=0;i<input_stream[1];i++){
+					printf("%d ",data->lisa_plane.airspeed_ets.raw[i]);
+				}
+				printf("\n");
+				printf("adc %d\n",data->lisa_plane.airspeed_ets.message.adc);
+				printf("offset %d\n",data->lisa_plane.airspeed_ets.message.offset);
+				printf("scaled %f\n",data->lisa_plane.airspeed_ets.message.scaled);
+
+			}
+			
+			if(input_stream[3]==155){
+				int i;
+				printf("Gps_int_message content:");
+
+				for(i=0;i<input_stream[1];i++){
+					printf("%d ",data->lisa_plane.airspeed_ets.raw[i]);
+				}
+				printf("\n");
+				printf("ecef_x %d\n",data->lisa_plane.gps_int.message.ecef_x);
+				printf("ecef_y %d\n",data->lisa_plane.gps_int.message.ecef_y);
+				printf("ecef_z %d\n",data->lisa_plane.gps_int.message.ecef_z);
+				printf("lat %d\n",data->lisa_plane.gps_int.message.lat);
+				printf("lon %d\n",data->lisa_plane.gps_int.message.lon);
+				printf("alt %d\n",data->lisa_plane.gps_int.message.alt);
+				printf("hmsl %d\n",data->lisa_plane.gps_int.message.hmsl);
+				printf("ecef_xd %d\n",data->lisa_plane.gps_int.message.ecef_xd);
+				printf("ecef_yd %d\n",data->lisa_plane.gps_int.message.ecef_yd);
+				printf("ecef_zd %d\n",data->lisa_plane.gps_int.message.ecef_zd);
+				printf("pacc %d\n",data->lisa_plane.gps_int.message.pacc);
+				printf("sacc %d\n",data->lisa_plane.gps_int.message.sacc);
+				printf("tow %d\n",data->lisa_plane.gps_int.message.tow);
+				printf("pdop %d\n",data->lisa_plane.gps_int.message.pdop);
+				printf("numsv %d\n",data->lisa_plane.gps_int.message.numsv);
+				printf("fix %d\n",data->lisa_plane.gps_int.message.fix);
 			}*/
 						
 		}else{
-				printf("UNKNOW PACKAGE\n");
+				printf("UNKNOW PACKAGE with id %d\n",input_stream[3]);
 				exit(1);
 		}
 		
