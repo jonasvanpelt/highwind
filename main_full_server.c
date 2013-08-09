@@ -226,7 +226,7 @@ void *server_to_planebone(void *connection){
 		output.message.servo_5=i;
 		output.message.servo_6=i;
 		output.message.servo_7=0;
-		i=i+3200;
+		i=i+200;
 		if(i>12800){
 			i=0;	
 		}

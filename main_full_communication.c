@@ -15,7 +15,7 @@
 #include "data_decoding.h"
 
 #ifndef LOGGING 
-#define LOGGING 0
+#define LOGGING 1
 #endif
 
 
