@@ -5,6 +5,12 @@
 #ifndef UDP_COMMUNCATION_H_ 
 #define UDP_COMMUNCATION_H_
 
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 #include<sys/socket.h>
 #include<arpa/inet.h>
 
@@ -27,7 +33,7 @@ typedef struct
  * PROTOTYPES PUBLIC
  * ******************************/
 //udp client prototypes
-extern UDP_errCode openUDPClientSocket(UDP *udp_client,char *server_ip,int port);
+extern UDP_errCode openUDPClientSocket(UDP *udp_client,const char *server_ip,int port);
 extern UDP_errCode sendUDPClientData(UDP *udp_client,void *data,size_t data_len);
 extern UDP_errCode closeUDPClientSocket(UDP *udp_client);
 
@@ -35,6 +41,10 @@ extern UDP_errCode closeUDPClientSocket(UDP *udp_client);
 extern UDP_errCode openUDPServerSocket(UDP *udp_server,int port);
 extern UDP_errCode receiveUDPServerData(UDP *udp_server,void *data,size_t data_len);
 extern UDP_errCode closeUDPServerSocket(UDP *udp_server);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /*UDP_COMMUNCATION_H__*/
 

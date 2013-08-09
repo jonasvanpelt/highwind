@@ -1,6 +1,11 @@
 #ifndef DATA_DECODING_H_ 
 #define DATA_DECODING_H_
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 #include <stdint.h>
 #include <time.h>
 #include <sys/time.h>
@@ -51,11 +56,11 @@ typedef union { // id = 2
 			struct timeval tv; //16
 			int8_t new_data;
 		} message;
-	} Error;
+	} Beagle_error;
 	
 typedef struct { // sender id = 2
 		Status status;
-		Error error;
+		Beagle_error error;
 	} Bone_plane;	
 	
 typedef union { // id = 54
@@ -199,5 +204,8 @@ void switch_read_write(void);
 DEC_errCode data_encode(uint8_t message[],long unsigned int message_length,uint8_t encoded_data[],int sender_id,int message_id);
 Data* get_read_pointer();
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif /*DATA_DECODING_H_*/

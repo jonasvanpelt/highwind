@@ -378,7 +378,7 @@ static void sendError(DEC_errCode err,library lib){
 		int message_length;
 		char encoded_data[MAX_STREAM_SIZE];
 		Data data;
-		Error error_message;
+		Beagle_error error_message;
 		
 		//encode an error package
 		error_message.message.library=lib;

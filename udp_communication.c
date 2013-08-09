@@ -3,7 +3,8 @@
  */
 
 #include<string.h> //memset
-#include<stdlib.h> //exit(0
+#include<stdlib.h> //exit
+#include <unistd.h> // close
 #include "udp_communication.h"
 
 #ifndef DEBUG 
@@ -20,7 +21,7 @@
 extern UDP_errCode openUDPSocket(UDP *udp);
 
 
-UDP_errCode openUDPClientSocket(UDP *udp_client,char *server_ip,int port){
+UDP_errCode openUDPClientSocket(UDP *udp_client,const char *server_ip,int port){
 	#if DEBUG  > 1
 		printf("Entering openUDPClientSocket\n");
 	#endif
