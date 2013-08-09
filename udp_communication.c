@@ -113,7 +113,7 @@ UDP_errCode receiveUDPServerData(UDP *udp_server,void *data,size_t data_len){
 	#endif
 	int recv_len;
 	//blocking !!!
-	if ((recv_len = recvfrom(udp_server->fd, data,data_len, 0, (struct sockaddr *) &(udp_server->si_other), &(udp_server->fd_len))) == -1)
+	if ((recv_len = recvfrom(udp_server->fd, data,data_len, 0, (struct sockaddr *) &(udp_server->si_other), (socklen_t *)&(udp_server->fd_len))) == -1)
 	{
 		return UDP_ERR_RECV;
 	}else{
