@@ -271,7 +271,7 @@ void *data_logging_groundstation(void *arg){
 	while(1){
 		while (!cbIsEmpty(&cb_data_ground)) {
 			cbRead(&cb_data_ground, &cb_elem);
-			LOG_err_handler(write_data_groundstation_log(cb_elem.value);
+			LOG_err_handler(write_data_groundstation_log(cb_elem.value));
 		}
 		usleep(20);
 	}
