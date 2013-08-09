@@ -256,7 +256,7 @@ void *data_logging_lisa(void *arg){
 			cbRead(&cb_data_lisa, &cb_elem);
 			LOG_err_handler(write_data_lisa_log(cb_elem.value));
 		}
-		usleep(10);
+		usleep(20);
 	}
 	LOG_err_handler(close_data_lisa_log());
 /*-------------------------END OF THIRD THREAD: LISA TO PC LOGGING------------------------*/	
