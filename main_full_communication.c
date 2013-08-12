@@ -18,10 +18,10 @@
 #define LOGGING 1
 #endif
 
-
 #define CBSIZE 2048
 #define OUTPUT_BUFFER 20
 #define MAX_STREAM_SIZE 255
+#define UDP_SOCKET_TIMEOUT 1000
 
 
 /************************************
@@ -127,38 +127,39 @@ int main(int argc, char *argv[]){
 	//init the data decode pointers
 	init_decoding();
 
-	UDP_err_handler(openUDPServerSocket(&udp_server,connection.port_number_pc_to_lisa));
+	UDP_err_handler(openUDPServerSocket(&udp_server,connection.port_number_pc_to_lisa,UDP_SOCKET_TIMEOUT));
 
 	while(1){
 
 		//1. retreive UDP data form PC from ethernet port.
+		err=receiveUDPServerData(&udp_server,(void *)&input_stream,sizeof(input_stream)); //blocking !!!
+		UDP_err_handler(err); 
 		
-		UDP_err_handler(receiveUDPServerData(&udp_server,(void *)&input_stream,sizeof(input_stream))); //blocking !!!
-		
-		
-		/*printf("INCOMING OUTPUT RAW:");
-		int j;
+		if(err==UDP_ERR_NONE){
+			
+			/*printf("INCOMING OUTPUT RAW:");
+			int j;
 			for(j=0;j<input_stream[1];j++){
 				printf("%d ",input_stream[j]);
 			}
-		printf("\n");*/
-
-		
-		UART_err_handler(serial_port_write(input_stream,sizeof(input_stream))); 
-		
-		#if LOGGING > 0
-		
-		//write the data to circular buffer for log thread
-		memcpy (&cb_elem.value, &input_stream, sizeof(input_stream));	
-		cbWrite(&cb_data_ground, &cb_elem);
+			printf("\n");*/
 			
-		//FOR DEBUGGING: REMOVE ME!!!
-		if(cbIsFull(&cb_data_ground)){
-			printf("groundstation buffer is full\n") ;
+			UART_err_handler(serial_port_write(input_stream,sizeof(input_stream))); 
+			
+			#if LOGGING > 0
+			
+			//write the data to circular buffer for log thread
+			memcpy (&cb_elem.value, &input_stream, sizeof(input_stream));	
+			cbWrite(&cb_data_ground, &cb_elem);
+				
+			//FOR DEBUGGING: REMOVE ME!!!
+			if(cbIsFull(&cb_data_ground)){
+				printf("groundstation buffer is full\n") ;
+			}
+			
+			#endif
 		}
 		
-		#endif
-
 	}
 	serial_port_close();
 	UDP_err_handler(closeUDPServerSocket(&udp_server));
@@ -204,7 +205,7 @@ void *lisa_to_pc(void *arg){
 
 	//read data from UART
 	
-	UDP_err_handler(openUDPClientSocket(&udp_client,connection.server_ip,connection.port_number_lisa_to_pc));
+	UDP_err_handler(openUDPClientSocket(&udp_client,connection.server_ip,connection.port_number_lisa_to_pc,UDP_SOCKET_TIMEOUT));
 
 	while(1)
 	{
@@ -311,6 +312,9 @@ static void UDP_err_handler( UDP_errCode err )
 		case UDP_ERR_RECV:
 			error_write(SOURCEFILE,"failed receiving UDP data");
 			break;
+		case UDP_ERR_SET_TIMEOUT:
+			error_write(SOURCEFILE,"failed setting UDP timeout on socket");
+			break;	
 		case UDP_ERR_UNDEFINED:
 			error_write(SOURCEFILE,"undefined UDP error");
 			break;
@@ -386,7 +390,7 @@ static void sendError(DEC_errCode err,library lib){
 		data_encode(error_message.raw,sizeof(error_message.raw),encoded_data,2,2);
 		message_length=sizeof(encoded_data);
 		//send errorcode to server
-		UDP_err_handler(openUDPClientSocket(&udp_client,connection.server_ip,connection.port_number_lisa_to_pc));
+		UDP_err_handler(openUDPClientSocket(&udp_client,connection.server_ip,connection.port_number_lisa_to_pc,UDP_SOCKET_TIMEOUT));
 		UDP_err_handler(sendUDPClientData(&udp_client,&encoded_data,message_length));
 		UDP_err_handler(closeUDPClientSocket(&udp_client));
 }

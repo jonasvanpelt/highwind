@@ -9,6 +9,8 @@
 
 #define MAX_INPUT_STREAM_SIZE 255
 #define MAX_OUTPUT_STREAM_SIZE 20
+#define UDP_SOCKET_TIMEOUT 1000
+
 
 #ifndef DEBUG 
 #define DEBUG 0
@@ -69,7 +71,7 @@ int main(int argc, char *argv[]){
 	static UDP udp_server;
 	uint8_t input_stream[MAX_INPUT_STREAM_SIZE];
 
-	UDP_err_handler(openUDPServerSocket(&udp_server,connection.port_number_planebone_to_server));
+	UDP_err_handler(openUDPServerSocket(&udp_server,connection.port_number_planebone_to_server,UDP_SOCKET_TIMEOUT));
 	
 	//init the data decode pointers
 	init_decoding();
@@ -90,145 +92,169 @@ int main(int argc, char *argv[]){
 	int BARO_RAW_received=0;
 	int GPS_INT_received=0;
 	int AIRSPEED_received=0;
-	
+	int SVINFO_received=0;
+	int err;
 		
 
 	while(1){
 		//1. retreive UDP data form planebone from ethernet port.
 		
-		UDP_err_handler(receiveUDPServerData(&udp_server,(void *)&input_stream,sizeof(input_stream))); //blocking !!!
-		
-		#if DEBUG > 0
-		
-		printf("data raw: ");
-		int i;
-		for(i=0;i<input_stream[1];i++){
-				printf("%d ",input_stream[i]);
-		}
-		printf("\n");
-		
-		printf("start hex: %x\n", input_stream[0]);
-		printf("length: %d\n", input_stream[1]);
-		printf("send id: %d\n", input_stream[2]);
-		printf("message id: %d\n", input_stream[3]);
-		printf("checksum1: %d\n", input_stream[input_stream[1]-2]);
-		printf("checksum2: %d\n", input_stream[input_stream[1]-1]);
-		printf("\n");
-		
-		#endif
-		
-		//2. decode data 
-		
-		int err  = data_update(input_stream);
-		DEC_err_handler(err);
+		err = receiveUDPServerData(&udp_server,(void *)&input_stream,sizeof(input_stream)); //blocking !!!
+		UDP_err_handler(err); 
+	
+		if(err == UDP_ERR_NONE){
+			#if DEBUG > 0
+			
+			printf("data raw: ");
+			int i;
+			for(i=0;i<input_stream[1];i++){
+					printf("%d ",input_stream[i]);
+			}
+			printf("\n");
+			
+			printf("start hex: %x\n", input_stream[0]);
+			printf("length: %d\n", input_stream[1]);
+			printf("send id: %d\n", input_stream[2]);
+			printf("message id: %d\n", input_stream[3]);
+			printf("checksum1: %d\n", input_stream[input_stream[1]-2]);
+			printf("checksum2: %d\n", input_stream[input_stream[1]-1]);
+			printf("\n");
+			
+			#endif
+			
+			//2. decode data 
+			
+			int err  = data_update(input_stream);
+			DEC_err_handler(err);
 
-		
-		if(err==DEC_ERR_NONE){ 
-		
-			switch_read_write(); //only switch read write if data decoding was succesfull
-			Data* data = get_read_pointer();
+			
+			if(err==DEC_ERR_NONE){ 
+			
+				switch_read_write(); //only switch read write if data decoding was succesfull
+				Data* data = get_read_pointer();
 
-			if(input_stream[3]==203){
-				IMU_GYRO_RAW_received=1;
-			}
-			else if(input_stream[3]==204){
-				IMU_ACCEL_RAW_received=1;
-			}
-			else if(input_stream[3]==205){
-				IMU_MAG_RAW_received=1;
-			}
-			else if(input_stream[3]==221){
-				BARO_RAW_received=1;
-			}
-			else if(input_stream[3]==155){
-				GPS_INT_received=1;
-			}
-			else if(input_stream[3]==57){
-				AIRSPEED_received=1;
+				if(input_stream[3]==203){
+					IMU_GYRO_RAW_received=1;
+				}
+				else if(input_stream[3]==204){
+					IMU_ACCEL_RAW_received=1;
+				}
+				else if(input_stream[3]==205){
+					IMU_MAG_RAW_received=1;
+				}
+				else if(input_stream[3]==221){
+					BARO_RAW_received=1;
+				}
+				else if(input_stream[3]==155){
+					GPS_INT_received=1;
+				}
+				else if(input_stream[3]==57){
+					AIRSPEED_received=1;
+				}else if(input_stream[3]==25){
+					SVINFO_received=1;
+				}else{
+						printf("UNKNOWN DATA with id %d\n",input_stream[3]);
+						exit(1);
+				}
+				
+				printf("IMU_GYRO_RAW_received %d\n",IMU_GYRO_RAW_received);
+				printf("IMU_ACCEL_RAW_received %d\n",IMU_ACCEL_RAW_received);
+				printf("IMU_MAG_RAW_received %d\n",IMU_MAG_RAW_received);
+				printf("BARO_RAW_received %d\n",BARO_RAW_received);
+				printf("GPS_INT_received %d\n",GPS_INT_received);			
+				printf("AIRSPEED_received %d\n",AIRSPEED_received);			
+				printf("SVINFO_received %d\n",SVINFO_received);			
+
+				printf("\n");
+
+				/*if(input_stream[3]==221){
+					int i;
+					printf("Baro_raw content:");
+
+					for(i=0;i<input_stream[1];i++){
+						printf("%d ",data->lisa_plane.baro_raw.raw[i]);
+					}
+					printf("\n");
+					printf("abs %d\n",data->lisa_plane.baro_raw.message.abs);
+					printf("diff %d\n",data->lisa_plane.baro_raw.message.diff);
+				}
+
+				printf("\n");
+				if(input_stream[3]==203){
+					int i;
+					printf("Imu_gyro_raw content:");
+
+					for(i=0;i<input_stream[1];i++){
+						printf("%d ",data->lisa_plane.imu_gyro_raw.raw[i]);
+					}
+					printf("\n");
+					printf("gp %d\n",data->lisa_plane.imu_gyro_raw.message.gp);
+					printf("gp %d\n",data->lisa_plane.imu_gyro_raw.message.gp);
+					printf("gr %d\n",data->lisa_plane.imu_gyro_raw.message.gr);
+
+				}
+				
+				if(input_stream[3]==57){
+					int i;
+					printf("airspeed content:");
+
+					for(i=0;i<input_stream[1];i++){
+						printf("%d ",data->lisa_plane.airspeed_ets.raw[i]);
+					}
+					printf("\n");
+					printf("adc %d\n",data->lisa_plane.airspeed_ets.message.adc);
+					printf("offset %d\n",data->lisa_plane.airspeed_ets.message.offset);
+					printf("scaled %f\n",data->lisa_plane.airspeed_ets.message.scaled);
+
+				}
+				
+				if(input_stream[3]==155){
+					int i;
+					printf("Gps_int_message content:");
+
+					for(i=0;i<input_stream[1];i++){
+						printf("%d ",data->lisa_plane.airspeed_ets.raw[i]);
+					}
+					printf("\n");
+					printf("ecef_x %d\n",data->lisa_plane.gps_int.message.ecef_x);
+					printf("ecef_y %d\n",data->lisa_plane.gps_int.message.ecef_y);
+					printf("ecef_z %d\n",data->lisa_plane.gps_int.message.ecef_z);
+					printf("lat %d\n",data->lisa_plane.gps_int.message.lat);
+					printf("lon %d\n",data->lisa_plane.gps_int.message.lon);
+					printf("alt %d\n",data->lisa_plane.gps_int.message.alt);
+					printf("hmsl %d\n",data->lisa_plane.gps_int.message.hmsl);
+					printf("ecef_xd %d\n",data->lisa_plane.gps_int.message.ecef_xd);
+					printf("ecef_yd %d\n",data->lisa_plane.gps_int.message.ecef_yd);
+					printf("ecef_zd %d\n",data->lisa_plane.gps_int.message.ecef_zd);
+					printf("pacc %d\n",data->lisa_plane.gps_int.message.pacc);
+					printf("sacc %d\n",data->lisa_plane.gps_int.message.sacc);
+					printf("tow %d\n",data->lisa_plane.gps_int.message.tow);
+					printf("pdop %d\n",data->lisa_plane.gps_int.message.pdop);
+					printf("numsv %d\n",data->lisa_plane.gps_int.message.numsv);
+					printf("fix %d\n",data->lisa_plane.gps_int.message.fix);
+				}*/
+				
+				if(input_stream[3]==25){
+					int i;
+					printf("svinfo content:");
+
+					for(i=0;i<input_stream[1];i++){
+						printf("%d ",data->lisa_plane.airspeed_ets.raw[i]);
+					}
+					exit(1);
+					/*printf("\n");
+					printf("adc %d\n",data->lisa_plane.airspeed_ets.message.adc);
+					printf("offset %d\n",data->lisa_plane.airspeed_ets.message.offset);
+					printf("scaled %f\n",data->lisa_plane.airspeed_ets.message.scaled);*/
+
+				}
+							
 			}else{
-					printf("UNKNOWN DATA\n");
+					printf("UNKNOW PACKAGE with id %d\n",input_stream[3]);
+					exit(1);
 			}
-			
-			printf("IMU_GYRO_RAW_received %d\n",IMU_GYRO_RAW_received);
-			printf("IMU_ACCEL_RAW_received %d\n",IMU_ACCEL_RAW_received);
-			printf("IMU_MAG_RAW_received %d\n",IMU_MAG_RAW_received);
-			printf("BARO_RAW_received %d\n",BARO_RAW_received);
-			printf("GPS_INT_received %d\n",GPS_INT_received);			
-			printf("AIRSPEED_received %d\n",AIRSPEED_received);			
-
-			printf("\n");
-
-			/*if(input_stream[3]==221){
-				int i;
-				printf("Baro_raw content:");
-
-				for(i=0;i<input_stream[1];i++){
-					printf("%d ",data->lisa_plane.baro_raw.raw[i]);
-				}
-				printf("\n");
-				printf("abs %d\n",data->lisa_plane.baro_raw.message.abs);
-				printf("diff %d\n",data->lisa_plane.baro_raw.message.diff);
-			}
-
-			printf("\n");
-			if(input_stream[3]==203){
-				int i;
-				printf("Imu_gyro_raw content:");
-
-				for(i=0;i<input_stream[1];i++){
-					printf("%d ",data->lisa_plane.imu_gyro_raw.raw[i]);
-				}
-				printf("\n");
-				printf("gp %d\n",data->lisa_plane.imu_gyro_raw.message.gp);
-				printf("gp %d\n",data->lisa_plane.imu_gyro_raw.message.gp);
-				printf("gr %d\n",data->lisa_plane.imu_gyro_raw.message.gr);
-
-			}
-			
-			if(input_stream[3]==57){
-				int i;
-				printf("airspeed content:");
-
-				for(i=0;i<input_stream[1];i++){
-					printf("%d ",data->lisa_plane.airspeed_ets.raw[i]);
-				}
-				printf("\n");
-				printf("adc %d\n",data->lisa_plane.airspeed_ets.message.adc);
-				printf("offset %d\n",data->lisa_plane.airspeed_ets.message.offset);
-				printf("scaled %f\n",data->lisa_plane.airspeed_ets.message.scaled);
-
-			}
-			
-			if(input_stream[3]==155){
-				int i;
-				printf("Gps_int_message content:");
-
-				for(i=0;i<input_stream[1];i++){
-					printf("%d ",data->lisa_plane.airspeed_ets.raw[i]);
-				}
-				printf("\n");
-				printf("ecef_x %d\n",data->lisa_plane.gps_int.message.ecef_x);
-				printf("ecef_y %d\n",data->lisa_plane.gps_int.message.ecef_y);
-				printf("ecef_z %d\n",data->lisa_plane.gps_int.message.ecef_z);
-				printf("lat %d\n",data->lisa_plane.gps_int.message.lat);
-				printf("lon %d\n",data->lisa_plane.gps_int.message.lon);
-				printf("alt %d\n",data->lisa_plane.gps_int.message.alt);
-				printf("hmsl %d\n",data->lisa_plane.gps_int.message.hmsl);
-				printf("ecef_xd %d\n",data->lisa_plane.gps_int.message.ecef_xd);
-				printf("ecef_yd %d\n",data->lisa_plane.gps_int.message.ecef_yd);
-				printf("ecef_zd %d\n",data->lisa_plane.gps_int.message.ecef_zd);
-				printf("pacc %d\n",data->lisa_plane.gps_int.message.pacc);
-				printf("sacc %d\n",data->lisa_plane.gps_int.message.sacc);
-				printf("tow %d\n",data->lisa_plane.gps_int.message.tow);
-				printf("pdop %d\n",data->lisa_plane.gps_int.message.pdop);
-				printf("numsv %d\n",data->lisa_plane.gps_int.message.numsv);
-				printf("fix %d\n",data->lisa_plane.gps_int.message.fix);
-			}*/
-						
-		}else{
-				printf("UNKNOW PACKAGE with id %d\n",input_stream[3]);
-				exit(1);
 		}
+	
 		
 	}
 
@@ -251,7 +277,7 @@ void *server_to_planebone(void *connection){
 	Connection *conn=(Connection *)connection;
 	static UDP udp_client;
 	
-	UDP_err_handler(openUDPClientSocket(&udp_client,conn->planebone_ip,conn->port_number_server_to_planebone));
+	UDP_err_handler(openUDPClientSocket(&udp_client,conn->planebone_ip,conn->port_number_server_to_planebone,UDP_SOCKET_TIMEOUT));
 	int i=0;
 	
 	while(1)
@@ -324,8 +350,11 @@ static void UDP_err_handler( UDP_errCode err )
 			error_write(SOURCEFILE,"failed binding port to socket");
 			break;
 		case UDP_ERR_RECV:
-			error_write(SOURCEFILE,"failed receiving UDP data");
+			error_write(SOURCEFILE,"failed receiving UDP data: timeout");
 			break;
+		case UDP_ERR_SET_TIMEOUT:
+		error_write(SOURCEFILE,"failed setting UDP timeout on socket");
+		break;
 		case UDP_ERR_UNDEFINED:
 			error_write(SOURCEFILE,"undefined UDP error");
 			break;

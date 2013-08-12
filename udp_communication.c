@@ -18,15 +18,15 @@
 /********************************
  * PROTOTYPES PRIVATE
  * ******************************/
-extern UDP_errCode openUDPSocket(UDP *udp);
+extern UDP_errCode openUDPSocket(UDP *udp,unsigned int timeout);
 
 
-UDP_errCode openUDPClientSocket(UDP *udp_client,const char *server_ip,int port){
+UDP_errCode openUDPClientSocket(UDP *udp_client,const char *server_ip,int port,unsigned int timeout){
 	#if DEBUG  > 1
 		printf("Entering openUDPClientSocket\n");
 	#endif
 	
-	openUDPSocket(udp_client);
+	openUDPSocket(udp_client,timeout);
 	
     //zero out the structure
 	memset((char *) &(udp_client->si_other), 0,udp_client->fd_len);
@@ -66,10 +66,14 @@ UDP_errCode closeUDPClientSocket(UDP *udp_client){
 		return UDP_ERR_NONE;
 }
 
-UDP_errCode openUDPSocket(UDP *udp){
+UDP_errCode openUDPSocket(UDP *udp,unsigned int timeout){
 	#if DEBUG  > 1
 		printf("Entering openUDPSocket\n");
 	#endif
+	
+	 struct timeval tv;
+	tv.tv_sec = 0;
+	tv.tv_usec = timeout;
 	
 	//define fd_len
     udp->fd_len = sizeof(udp->si_other);
@@ -79,18 +83,21 @@ UDP_errCode openUDPSocket(UDP *udp){
 	{
 		return UDP_ERR_OPEN_SOCKET;
 	} 
+	if(setsockopt(udp->fd, SOL_SOCKET, SO_RCVTIMEO,(char*)&tv,sizeof(tv))){
+		return UDP_ERR_SET_TIMEOUT;
+	}
 
 	return UDP_ERR_NONE;
 }
 
 
 
-UDP_errCode openUDPServerSocket(UDP *udp_server,int port){
+UDP_errCode openUDPServerSocket(UDP *udp_server,int port,unsigned int timeout){
 	#if DEBUG  > 1
 		printf("Entering openUDPServerSocket\n");
 	#endif
 	
-	openUDPSocket(udp_server);
+	openUDPSocket(udp_server,timeout);
 	
 	// zero out the structure
 	memset((char *) &(udp_server->si_me), 0, sizeof(udp_server->si_me));
