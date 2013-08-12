@@ -241,7 +241,7 @@ int main(int argc, char *argv[]){
 					for(i=0;i<input_stream[1];i++){
 						printf("%d ",data->lisa_plane.airspeed_ets.raw[i]);
 					}
-					exit(1);
+				
 					/*printf("\n");
 					printf("adc %d\n",data->lisa_plane.airspeed_ets.message.adc);
 					printf("offset %d\n",data->lisa_plane.airspeed_ets.message.offset);

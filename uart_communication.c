@@ -48,7 +48,7 @@ extern uint8_t serial_port_get_length(void);
 static const char FILENAME[] = "uart_communication.c";
 
 //config
-speed_t speed = B57600;
+speed_t speed = B115200;
 const char device[]="/dev/ttyO4";
 int serial_input_buffer_size = sizeof(serial_input.buffer);
 
