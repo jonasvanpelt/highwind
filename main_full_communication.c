@@ -21,7 +21,7 @@
 #define CBSIZE 2048
 #define OUTPUT_BUFFER 20
 #define MAX_STREAM_SIZE 255
-#define UDP_SOCKET_TIMEOUT 1000
+#define UDP_SOCKET_TIMEOUT 1000000000
 
 
 /************************************
