@@ -34,7 +34,7 @@ static void UDP_err_handler( UDP_errCode err,int exit_on_error );
 static void UART_err_handler( UART_errCode err );   
 static void sendError(DEC_errCode err,library lib);
 static void LOG_err_handler( LOG_errCode err );  
-static int add_timestamp(char buffer[]);
+static int add_timestamp(uint8_t  buffer[]);
  /***********************************
   * GLOBALS
   * *********************************/
@@ -310,7 +310,7 @@ void *data_logging_groundstation(void *arg){
 
 #endif
 
-static int add_timestamp(char buffer[]){
+static int add_timestamp(uint8_t buffer[]){
 	int length_original=buffer[1],i,j;
 	uint8_t checksum_1,checksum_2;
 	int new_length=length_original+16; //timeval is 16 bytes
