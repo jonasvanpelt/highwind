@@ -324,7 +324,7 @@ static int add_timestamp(char buffer[]){
 	//add timestamp to buffer
 	j=0;
 	for(i=length_original-2;i<new_length-2;i++){ //overwrite previous checksums
-		buffer[i]=timestamp.raw[j];j++
+		buffer[i]=timestamp.raw[j];j++;
 	}
 	
 	//recalculate checksum
