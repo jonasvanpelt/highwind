@@ -314,9 +314,9 @@ static int add_timestamp(uint8_t buffer[]){
 	//get localtime 
 	gettimeofday(&(timestamp.tv), NULL);
 	
-	int i;
+
 	printf("now:\n");
-	printf(i=0;i<16;i++){
+	for(i=0;i<16;i++){
 		printf("%d ",timestamp.raw[i]);
 	}
 	printf("\n");
