@@ -34,7 +34,7 @@ static void UDP_err_handler( UDP_errCode err,int exit_on_error );
 static void UART_err_handler( UART_errCode err );   
 static void sendError(DEC_errCode err,library lib);
 static void LOG_err_handler( LOG_errCode err );  
-static void add_timestamp(char buffer[]);
+static int add_timestamp(char buffer[]);
  /***********************************
   * GLOBALS
   * *********************************/
@@ -48,6 +48,11 @@ typedef struct{
 } Connection;
 
 Connection connection;
+
+typedef union{
+		char raw[16];
+		struct timeval tv;
+} Timestamp;
 
 
 #if LOGGING > 0
@@ -214,9 +219,22 @@ void *lisa_to_pc(void *arg){
 	{
 		message_length = serial_input_check();		//blocking !!!
 		if(message_length !=UART_ERR_READ){
+			
+			int i;
+			printf("message before timestamp\n");
+			for(i=0;i<message_length;i++){
+					printf("%d ",serial_input.buffer[i]);
+			}
+			printf("\n");
 		
 			//add timestamp
-			add_timestamp(serial_input.buffer);
+			message_length=add_timestamp(serial_input.buffer);
+			
+			printf("message after timestamp\n");
+			for(i=0;i<message_length;i++){
+					printf("%d ",serial_input.buffer[i]);
+			}
+			printf("\n");
 			
 			//send data to eth port using UDP
 			UDP_err_handler(sendUDPClientData(&udp_client,&(serial_input.buffer),message_length),0);
@@ -292,11 +310,35 @@ void *data_logging_groundstation(void *arg){
 
 #endif
 
-static void add_timestamp(char buffer[]){
-	int length_original=buffer[1];
-	struct timeval tv;
-	gettimeofday(&tv, NULL);
-	printf("test %ld\n",tv.tv_sec);
+static int add_timestamp(char buffer[]){
+	int length_original=buffer[1],i,checksum_1,checksum_2;
+	int new_length=length_original+16; //timeval is 16 bytes
+	Timestamp timestamp;
+	
+	//get localtime 
+	gettimeofday(&(timestamp.tv), NULL);
+	
+	//reformat message length
+	
+	//change message length
+	buffer[1]=length_original+16; 
+	
+	//add timestamp to buffer
+	for(i=length_original;i<new_length;i++){
+		buffer[i]=timestamp.raw[i-length_original];
+	}
+	
+	//recalculate checksum
+	for (i=0;i<new_length - 2;i++) //start bit 0x99 is not in checksum calculation
+	{
+		checksum_1 += buffer[i];
+		checksum_2 += checksum_1;
+	}
+	
+	buffer[new_length-2]=checksum_1;
+	buffer[new_length-1]=checksum_2;
+	
+	return new_length;
 }
 
 
