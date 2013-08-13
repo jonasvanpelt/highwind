@@ -241,7 +241,7 @@ void *lisa_to_pc(void *arg){
 		
 	}*/
 	
-	lont int test = 123456789;
+	long int test = 123456789;
 	
 	UDP_err_handler(sendUDPClientData(&udp_client,&test,sizeof(test)),0);
 	
