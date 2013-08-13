@@ -18,7 +18,7 @@
 #define LOGGING 1
 #endif
 
-#define CBSIZE 2048
+#define CBSIZE 2048 * 32
 #define OUTPUT_BUFFER 20
 #define MAX_STREAM_SIZE 255
 #define UDP_SOCKET_TIMEOUT 1000000000
@@ -276,11 +276,11 @@ void *data_logging_lisa(void *arg){
 	LOG_err_handler(open_data_lisa_log());
 	
 	while(1){
-		while (!cbIsEmpty(&cb_data_lisa)) {
+		if (!cbIsEmpty(&cb_data_lisa)) {
 			cbRead(&cb_data_lisa, &cb_elem);
 			LOG_err_handler(write_data_lisa_log(cb_elem.value));
 		}
-		usleep(20);
+		usleep(1000);
 	}
 	LOG_err_handler(close_data_lisa_log());
 	
@@ -295,11 +295,11 @@ void *data_logging_groundstation(void *arg){
 	LOG_err_handler(open_data_groundstation_log());
 	
 	while(1){
-		while (!cbIsEmpty(&cb_data_ground)) {
+		if (!cbIsEmpty(&cb_data_ground)) {
 			cbRead(&cb_data_ground, &cb_elem);
 			LOG_err_handler(write_data_groundstation_log(cb_elem.value));
 		}
-		usleep(20);
+		usleep(1000);
 	}
 	close_data_groundstation_log();
 	
@@ -318,13 +318,11 @@ static int add_timestamp(char buffer[]){
 	//get localtime 
 	gettimeofday(&(timestamp.tv), NULL);
 	
-	//reformat message length
-	
 	//change message length
-	buffer[1]=length_original+16; 
+	buffer[1]=new_length; 
 	
 	//add timestamp to buffer
-	for(i=length_original;i<new_length;i++){
+	for(i=length_original-2;i<new_length;i++){ //overwrite previous checksums
 		buffer[i]=timestamp.raw[i-length_original];
 	}
 	

@@ -77,9 +77,15 @@ DEC_errCode data_update(uint8_t stream[])
 	}
 	
 	//checksum1 is voorlaatste byte, checksum2 is last byte
-	if(checksum_1 != stream[length-2] || checksum_2 != stream[length-1] || sender == 0)
+	if(checksum_1 != stream[length-2] || checksum_2 != stream[length-1])
 	{	
-
+		printf("id = %d\n",stream[3]);
+		printf("checksum_1 calc %d\n",checksum_1);
+		printf("checksum_1 %d\n",stream[length-2]);
+		
+		printf("checksum_2 calc %d\n",checksum_2);
+		printf("checksum_2 %d\n",stream[length-1]);
+		
 		return DEC_ERR_CHECKSUM;
 	}
 	
@@ -118,7 +124,7 @@ DEC_errCode data_decode(uint32_t pos, uint8_t sender,uint8_t stream[], int lengt
 			switch(stream[pos]) // the message id of the folowing message
 			{
 				case 25: // Svinfo 
-					pos = data_write(stream, write_data->lisa_plane.svinfo.raw, 24, pos);
+					pos = data_write(stream, write_data->lisa_plane.svinfo.raw, 8, pos);
 					write_data->lisa_plane.svinfo.message.new_data = 0;
 					break;
 				/*case 54: // airspeed - 48 bytes
@@ -126,27 +132,27 @@ DEC_errCode data_decode(uint32_t pos, uint8_t sender,uint8_t stream[], int lengt
 					write_data->lisa_plane.airspeed.message.new_data = 0;
 					break;*/
 				case 57: // airspeed_ets - 40 bytes
-					pos = data_write(stream, write_data->lisa_plane.airspeed_ets.raw, 24, pos);
+					pos = data_write(stream, write_data->lisa_plane.airspeed_ets.raw, 8, pos);
 					write_data->lisa_plane.airspeed_ets.message.new_data = 0;
 					break;
 				case 155: // gps_int - 81 bytes
-					pos = data_write(stream, write_data->lisa_plane.gps_int.raw, 72, pos);
+					pos = data_write(stream, write_data->lisa_plane.gps_int.raw, 56, pos);
 					write_data->lisa_plane.gps_int.message.new_data = 0;
 					break;
 				case 203: // imu_gyro_raw - 48 bytes
-					pos = data_write(stream, write_data->lisa_plane.imu_gyro_raw.raw, 28, pos);
+					pos = data_write(stream, write_data->lisa_plane.imu_gyro_raw.raw, 12, pos);
 					write_data->lisa_plane.imu_gyro_raw.message.new_data = 0;
 					break;
 				case 204: // imu_accel_raw - 48 bytes
-					pos = data_write(stream, write_data->lisa_plane.imu_accel_raw.raw, 28, pos);
+					pos = data_write(stream, write_data->lisa_plane.imu_accel_raw.raw, 12, pos);
 					write_data->lisa_plane.imu_accel_raw.message.new_data = 0;
 					break;
 				case 205: // imu_mag_raw - 48 bytes
-					pos = data_write(stream, write_data->lisa_plane.imu_mag_raw.raw, 28, pos);
+					pos = data_write(stream, write_data->lisa_plane.imu_mag_raw.raw, 12, pos);
 					write_data->lisa_plane.imu_mag_raw.message.new_data = 0;
 					break;
 				case 221: // baro_raw - 40 bytes
-					pos = data_write(stream, write_data->lisa_plane.baro_raw.raw, 16, pos);
+					pos = data_write(stream, write_data->lisa_plane.baro_raw.raw, 8, pos);
 					write_data->lisa_plane.baro_raw.message.new_data = 0;
 					break;
 				default: return DEC_ERR_UNKNOWN_LISA_PACKAGE;break;
@@ -156,10 +162,9 @@ DEC_errCode data_decode(uint32_t pos, uint8_t sender,uint8_t stream[], int lengt
 	}
 	if (pos == length-2)
 	{
-
 		return DEC_ERR_NONE; //data encoding succeeded
 	} else {
-				printf("here %d\n",pos);
+		
 		return data_decode(pos, sender, stream, length);
 	}
 }
