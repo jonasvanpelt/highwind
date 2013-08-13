@@ -312,7 +312,8 @@ void *data_logging_groundstation(void *arg){
 
 static int add_timestamp(uint8_t buffer[]){
 	int length_original=buffer[1],i,j;
-	uint8_t checksum_1,checksum_2;
+	uint8_t checksum_1=0;
+	uint8_t checksum_2=0;
 	int new_length=length_original+16; //timeval is 16 bytes
 	Timestamp timestamp;
 	
