@@ -311,7 +311,8 @@ void *data_logging_groundstation(void *arg){
 #endif
 
 static int add_timestamp(char buffer[]){
-	int length_original=buffer[1],i,checksum_1,checksum_2,j;
+	int length_original=buffer[1],i,j;
+	uint8_t checksum_1,checksum_2;
 	int new_length=length_original+16; //timeval is 16 bytes
 	Timestamp timestamp;
 	
@@ -323,11 +324,11 @@ static int add_timestamp(char buffer[]){
 	
 	//add timestamp to buffer
 	j=0;
-	printf("start index time %d\n",length_original-2);
+
 	for(i=length_original-2;i<new_length-2;i++){ //overwrite previous checksums
 		buffer[i]=timestamp.raw[j];j++;
 	}
-	printf("end index time %d\n",i);
+
 	//recalculate checksum
 	for (i=1;i<new_length-2;i++) //start bit 0x99 is not in checksum calculation
 	{
