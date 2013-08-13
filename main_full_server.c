@@ -157,17 +157,17 @@ int main(int argc, char *argv[]){
 						exit(1);
 				}
 				
-				printf("IMU_GYRO_RAW_received %d\n",IMU_GYRO_RAW_received);
+				/*printf("IMU_GYRO_RAW_received %d\n",IMU_GYRO_RAW_received);
 				printf("IMU_ACCEL_RAW_received %d\n",IMU_ACCEL_RAW_received);
 				printf("IMU_MAG_RAW_received %d\n",IMU_MAG_RAW_received);
 				printf("BARO_RAW_received %d\n",BARO_RAW_received);
 				printf("GPS_INT_received %d\n",GPS_INT_received);			
 				printf("AIRSPEED_received %d\n",AIRSPEED_received);			
-				printf("SVINFO_received %d\n",SVINFO_received);			
+				printf("SVINFO_received %d\n",SVINFO_received);		
 
-				printf("\n");
+				printf("\n");*/
 
-				/*if(input_stream[3]==221){
+				if(input_stream[3]==221){
 					int i;
 					printf("Baro_raw content:");
 
@@ -180,7 +180,7 @@ int main(int argc, char *argv[]){
 				}
 
 				printf("\n");
-				if(input_stream[3]==203){
+				/*if(input_stream[3]==203){
 					int i;
 					printf("Imu_gyro_raw content:");
 
