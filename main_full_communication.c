@@ -215,7 +215,7 @@ void *lisa_to_pc(void *arg){
 		message_length = serial_input_check();		//blocking !!!
 		if(message_length !=UART_ERR_READ){
 			
-			/*int i;
+			int i;
 			printf("message before timestamp\n");
 			for(i=0;i<message_length;i++){
 					printf("%d ",serial_input.buffer[i]);
@@ -229,7 +229,7 @@ void *lisa_to_pc(void *arg){
 			for(i=0;i<message_length;i++){
 					printf("%d ",serial_input.buffer[i]);
 			}
-			printf("\n\n");*/
+			printf("\n\n");
 			
 			//send data to eth port using UDP
 			UDP_err_handler(sendUDPClientData(&udp_client,&(serial_input.buffer),message_length),0);
