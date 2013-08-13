@@ -76,7 +76,7 @@ DEC_errCode data_update(uint8_t stream[])
 		checksum_2 += checksum_1;
 	}
 	
-	//checksum1 is voorlaatste byte, checksu2 is last byte
+	//checksum1 is voorlaatste byte, checksum2 is last byte
 	if(checksum_1 != stream[length-2] || checksum_2 != stream[length-1] || sender == 0)
 	{	
 
@@ -100,7 +100,6 @@ DEC_errCode data_decode(uint32_t pos, uint8_t sender,uint8_t stream[], int lengt
 		
 	switch(sender)
 	{
-
 		case 2: //sender_id of beaglebone
 			switch(stream[pos])
 			{

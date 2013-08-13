@@ -27,13 +27,14 @@
 /************************************
  * PROTOTYPES
  * **********************************/
- void *lisa_to_pc(void *connection);
- void *data_logging_lisa(void *);
- void *data_logging_groundstation(void *arg);
- static void UDP_err_handler( UDP_errCode err,int exit_on_error ); 
- static void UART_err_handler( UART_errCode err );   
- static void sendError(DEC_errCode err,library lib);
+void *lisa_to_pc(void *connection);
+void *data_logging_lisa(void *);
+void *data_logging_groundstation(void *arg);
+static void UDP_err_handler( UDP_errCode err,int exit_on_error ); 
+static void UART_err_handler( UART_errCode err );   
+static void sendError(DEC_errCode err,library lib);
 static void LOG_err_handler( LOG_errCode err );  
+static void add_timestamp(char buffer[]);
  /***********************************
   * GLOBALS
   * *********************************/
@@ -194,6 +195,10 @@ int main(int argc, char *argv[]){
 	
 	return 0;
 }
+
+/************************************
+ * FUNCTIONS
+ * **********************************/
 void *lisa_to_pc(void *arg){
 /*-------------------------START OF SECOND THREAD: LISA TO PC------------------------*/	
 
@@ -210,6 +215,9 @@ void *lisa_to_pc(void *arg){
 		message_length = serial_input_check();		//blocking !!!
 		if(message_length !=UART_ERR_READ){
 		
+			//add timestamp
+			add_timestamp(serial_input.buffer);
+			
 			//send data to eth port using UDP
 			UDP_err_handler(sendUDPClientData(&udp_client,&(serial_input.buffer),message_length),0);
 	
@@ -283,6 +291,14 @@ void *data_logging_groundstation(void *arg){
 }
 
 #endif
+
+static void add_timestamp(char buffer[]){
+	int length_original=buffer[1];
+	struct timeval tv;
+	gettimeofday(&tv, NULL);
+	printf("test %ld\n",tv.tv_sec);
+}
+
 
 static void UDP_err_handler( UDP_errCode err,int exit_on_error)  
 {

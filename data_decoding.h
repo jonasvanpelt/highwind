@@ -38,21 +38,19 @@ typedef union{ //message id 72
 
 	
 typedef union { // id = 1
-		uint8_t raw[26];
+		uint8_t raw[18];
 		struct Status_message {
 			uint8_t error;
-			time_t time;
 			struct timeval tv;
 			int8_t new_data;
 		} message;
 	} Status;
 	
 typedef union { // id = 2
-		uint8_t raw[27];
+		uint8_t raw[19];
 		struct Error_message {
 			uint8_t library;
 			uint8_t error;
-			time_t time; //8
 			struct timeval tv; //16
 			int8_t new_data;
 		} message;
@@ -64,20 +62,19 @@ typedef struct { // sender id = 2
 	} Bone_plane;	
 	
 typedef union { // id = 54
-		uint8_t raw[41];
+		uint8_t raw[33];
 		struct Airspeed_message {
 			float airspeed;
 			float airspeed_sp;
 			float airspeed_cnt;
 			float groundspeed_sp;
-			time_t time; 
 			struct timeval tv; 
 			int8_t new_data;
 		} message;
 	} Airspeed;
 	
 typedef union { // id = 25
-		uint8_t raw[33];
+		uint8_t raw[25];
 		struct Svinfo_message {
 			uint8_t chn;
 			uint8_t svid;
@@ -86,26 +83,24 @@ typedef union { // id = 25
 			uint8_t cno;
 			int8_t elev;
 			uint16_t azim;
-			time_t time; 
 			struct timeval tv; 
 			int8_t new_data;
 		} message;
 	} Svinfo;
 	
 typedef union Airspeed_ets { // id = 57
-		uint8_t raw[33];
+		uint8_t raw[25];
 		struct Airspeed_ets_message {
 			uint16_t adc;
 			uint16_t offset;
 			float scaled; //4
-			time_t time; //8
 			struct timeval tv; //16
 			int8_t new_data;
 		} message;
 	} Airspeed_ets;
 	
 typedef union { // id = 155
-		uint8_t raw[81];
+		uint8_t raw[73];
 		struct Gps_int_message {
 			int32_t ecef_x;
 			int32_t ecef_y;
@@ -123,54 +118,49 @@ typedef union { // id = 155
 			uint16_t pdop;
 			uint8_t numsv;
 			uint8_t fix;
-			time_t time;
 			struct timeval tv; //16
 			int8_t new_data;
 		} message;
 	} Gps_int;
 	
 typedef union { // id = 221
-		uint8_t raw[33];
+		uint8_t raw[25];
 		struct Baro_raw_message {
 			int32_t abs;
 			int32_t diff;
-			time_t time;
 			struct timeval tv;
 			int8_t new_data;
 		} message;
 	} Baro_raw;
 	
 typedef union { // id = 203
-		uint8_t raw[37];
+		uint8_t raw[29];
 		struct Imu_gyro_message {
 			int32_t gp;
 			int32_t gq;
 			int32_t gr;
-			time_t time;
 			struct timeval tv;
 			int8_t new_data;
 		} message;
 	} Imu_gyro_raw;
 	
 typedef union { // id = 204
-		uint8_t raw[37];
+		uint8_t raw[29];
 		struct Imu_accel_message {
 			int32_t ax;
 			int32_t ay;
 			int32_t az;
-			time_t time;
 			struct timeval tv;
 			int8_t new_data;
 		} message;
 	} Imu_accel_raw;
 	
 typedef union { // id = 205
-		uint8_t raw[37];
+		uint8_t raw[29];
 		struct Imu_mag_message {
 			int32_t mx;
 			int32_t my;
 			int32_t mz;
-			time_t time;
 			struct timeval tv;
 			int8_t new_data;
 		} message;

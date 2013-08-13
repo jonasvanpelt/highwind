@@ -40,7 +40,7 @@ struct Packets {
 } packets;
 
 union Serial_input {
-	char buffer[INPUT_BUFFER]; //must be set bigger
+	char buffer[INPUT_BUFFER]; 
 } serial_input;
 
 //timers

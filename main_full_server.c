@@ -232,7 +232,7 @@ int main(int argc, char *argv[]){
 					printf("pdop %d\n",data->lisa_plane.gps_int.message.pdop);
 					printf("numsv %d\n",data->lisa_plane.gps_int.message.numsv);
 					printf("fix %d\n",data->lisa_plane.gps_int.message.fix);
-				}*/
+				}
 				
 				if(input_stream[3]==25){
 					int i;
@@ -242,12 +242,12 @@ int main(int argc, char *argv[]){
 						printf("%d ",data->lisa_plane.airspeed_ets.raw[i]);
 					}
 				
-					/*printf("\n");
+					printf("\n");
 					printf("adc %d\n",data->lisa_plane.airspeed_ets.message.adc);
 					printf("offset %d\n",data->lisa_plane.airspeed_ets.message.offset);
-					printf("scaled %f\n",data->lisa_plane.airspeed_ets.message.scaled);*/
+					printf("scaled %f\n",data->lisa_plane.airspeed_ets.message.scaled);
 
-				}
+				}*/
 							
 			}else{
 					printf("UNKNOW PACKAGE with id %d\n",input_stream[3]);
