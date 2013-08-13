@@ -275,7 +275,7 @@ void *data_logging_groundstation(void *arg){
 		}
 		usleep(20);
 	}
-	close_data_groundstation_log();µ
+	close_data_groundstation_log();
 	
 	return NULL;
 /*-------------------------END OF FOURTH THREAD: GROUNDSTATION TO LISA LOGGING------------------------*/	
