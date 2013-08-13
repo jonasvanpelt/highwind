@@ -21,6 +21,9 @@
 extern UDP_errCode openUDPSocket(UDP *udp,unsigned int timeout);
 
 
+/********************************
+ * FUNCTIONS
+ * ******************************/
 UDP_errCode openUDPClientSocket(UDP *udp_client,const char *server_ip,int port,unsigned int timeout){
 	#if DEBUG  > 1
 		printf("Entering openUDPClientSocket\n");

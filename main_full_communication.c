@@ -30,7 +30,7 @@
  void *lisa_to_pc(void *connection);
  void *data_logging_lisa(void *);
  void *data_logging_groundstation(void *arg);
- static void UDP_err_handler( UDP_errCode err ); 
+ static void UDP_err_handler( UDP_errCode err,int exit_on_error ); 
  static void UART_err_handler( UART_errCode err );   
  static void sendError(DEC_errCode err,library lib);
 static void LOG_err_handler( LOG_errCode err );  
@@ -70,7 +70,7 @@ int main(int argc, char *argv[]){
 		connection.port_number_lisa_to_pc=atoi(argv[2]);	
 		connection.port_number_pc_to_lisa=atoi(argv[3]);
 	}else{
-			printf("wrong parameters: server ip - send port number - receive port number - error message port number\n");
+			printf("wrong parameters: server ip - send port number - receive port number\n");
 			exit(EXIT_FAILURE);		
 	}
 	
@@ -78,8 +78,8 @@ int main(int argc, char *argv[]){
 	int err = init_log();
 	LOG_err_handler(err);
 	
-	if(err != LOG_ERR_NONE){ //mounting SD card failed
-		//exit(EXIT_FAILURE);
+	if(err != LOG_ERR_NONE){ 
+		exit(EXIT_FAILURE);		//mounting SD card failed
 	}
 	
 	#if LOGGING > 0
@@ -94,7 +94,8 @@ int main(int argc, char *argv[]){
 	serial_stream=serial_port_new();
 	
 	UART_err_handler(serial_port_setup());
-
+	
+	//thread variables
 	pthread_t thread_lisa_to_pc,thread_data_logging_lisa,thread_data_logging_ground;
 
 	//create a second thread which executes lisa_to_pc
@@ -127,13 +128,13 @@ int main(int argc, char *argv[]){
 	//init the data decode pointers
 	init_decoding();
 
-	UDP_err_handler(openUDPServerSocket(&udp_server,connection.port_number_pc_to_lisa,UDP_SOCKET_TIMEOUT));
+	UDP_err_handler(openUDPServerSocket(&udp_server,connection.port_number_pc_to_lisa,UDP_SOCKET_TIMEOUT),1);
 
 	while(1){
 
 		//1. retreive UDP data form PC from ethernet port.
 		err=receiveUDPServerData(&udp_server,(void *)&input_stream,sizeof(input_stream)); //blocking !!!
-		UDP_err_handler(err); 
+		UDP_err_handler(err,0); 
 		
 		if(err==UDP_ERR_NONE){
 			
@@ -162,14 +163,13 @@ int main(int argc, char *argv[]){
 		
 	}
 	serial_port_close();
-	UDP_err_handler(closeUDPServerSocket(&udp_server));
+	UDP_err_handler(closeUDPServerSocket(&udp_server),0);
 	/*------------------------END OF FIRST THREAD------------------------*/
 	
 	
 	//wait for the second thread to finish
 	if(pthread_join(thread_lisa_to_pc, NULL)) {
 		error_write(FILENAME,"error joining thread_lisa_to_pc");
-		exit(EXIT_FAILURE);
 	}
 	
 	#if LOGGING > 0 
@@ -177,14 +177,12 @@ int main(int argc, char *argv[]){
 	//wait for the third thread to finish
 	if(pthread_join(thread_data_logging_lisa, NULL)) {
 		error_write(FILENAME,"error joining thread_data_logging_lisa");
-		exit(EXIT_FAILURE);
 	}
 	
 	
 	//wait for the fourth thread to finish
 	if(pthread_join(thread_data_logging_ground, NULL)) {
 		error_write(FILENAME,"error joining thread_data_logging_ground");
-		exit(EXIT_FAILURE);
 	}
 	
 	
@@ -205,15 +203,15 @@ void *lisa_to_pc(void *arg){
 
 	//read data from UART
 	
-	UDP_err_handler(openUDPClientSocket(&udp_client,connection.server_ip,connection.port_number_lisa_to_pc,UDP_SOCKET_TIMEOUT));
+	UDP_err_handler(openUDPClientSocket(&udp_client,connection.server_ip,connection.port_number_lisa_to_pc,UDP_SOCKET_TIMEOUT),1);
 
 	while(1)
 	{
-		message_length = serial_input_check(); //blocks for 1 second, after that error UART_ERR_READ is generated
+		message_length = serial_input_check();		//blocking !!!
 		if(message_length !=UART_ERR_READ){
 		
 			//send data to eth port using UDP
-			UDP_err_handler(sendUDPClientData(&udp_client,&(serial_input.buffer),message_length));
+			UDP_err_handler(sendUDPClientData(&udp_client,&(serial_input.buffer),message_length),0);
 	
 			#if LOGGING > 0
 
@@ -236,9 +234,8 @@ void *lisa_to_pc(void *arg){
 	}
 	serial_port_close();
 	serial_port_free();
-	UDP_err_handler(closeUDPClientSocket(&udp_client));
+	UDP_err_handler(closeUDPClientSocket(&udp_client),0);
 	
-	//the function must return something - NULL will do 
 	return NULL;
 /*------------------------END OF SECOND THREAD------------------------*/
 
@@ -260,6 +257,8 @@ void *data_logging_lisa(void *arg){
 		usleep(20);
 	}
 	LOG_err_handler(close_data_lisa_log());
+	
+	return NULL;
 /*-------------------------END OF THIRD THREAD: LISA TO PC LOGGING------------------------*/	
 }
 
@@ -276,14 +275,16 @@ void *data_logging_groundstation(void *arg){
 		}
 		usleep(20);
 	}
-	close_data_groundstation_log();
+	close_data_groundstation_log();µ
+	
+	return NULL;
 /*-------------------------END OF FOURTH THREAD: GROUNDSTATION TO LISA LOGGING------------------------*/	
 
 }
 
 #endif
 
-static void UDP_err_handler( UDP_errCode err )  
+static void UDP_err_handler( UDP_errCode err,int exit_on_error)  
 {
 	static char SOURCEFILE[] = "udp_communication.c";
 
@@ -293,8 +294,7 @@ static void UDP_err_handler( UDP_errCode err )
 		case UDP_ERR_NONE:
 			break;
 		case  UDP_ERR_INET_ATON:
-			error_write(SOURCEFILE,"failed decoding ip address");
-			exit(EXIT_FAILURE);
+			error_write(SOURCEFILE,"failed decoding ip address");	
 			break;
 		case UDP_ERR_SEND:
 			error_write(SOURCEFILE,"failed sending UDP data");
@@ -304,7 +304,6 @@ static void UDP_err_handler( UDP_errCode err )
 			break;
 		case UDP_ERR_OPEN_SOCKET:
 			error_write(SOURCEFILE,"failed opening UDP socket");
-			exit(EXIT_FAILURE);
 			break;
 		case UDP_ERR_BIND_SOCKET_PORT:
 			error_write(SOURCEFILE,"failed binding port to socket");
@@ -318,8 +317,10 @@ static void UDP_err_handler( UDP_errCode err )
 		case UDP_ERR_UNDEFINED:
 			error_write(SOURCEFILE,"undefined UDP error");
 			break;
-		default: break;// should never come here	
+		default: break;
 	}
+	if(exit_on_error && err != UDP_ERR_NONE)
+		exit(EXIT_FAILURE);
 }
 
 static void UART_err_handler( UART_errCode err )  
@@ -357,11 +358,10 @@ static void UART_err_handler( UART_errCode err )
 			case UART_ERR_UNDEFINED:
 				error_write(SOURCEFILE,"undefined UART error");
 				break;
-			default: break;// should never come here	
+			default: break;	
 		}
 	
 	if(err != UART_ERR_NONE){
-
 		sendError(err,UART_L);
 	}	
 }
@@ -389,8 +389,9 @@ static void sendError(DEC_errCode err,library lib){
 		error_message.message.error=err;
 		data_encode(error_message.raw,sizeof(error_message.raw),encoded_data,2,2);
 		message_length=sizeof(encoded_data);
+		
 		//send errorcode to server
-		UDP_err_handler(openUDPClientSocket(&udp_client,connection.server_ip,connection.port_number_lisa_to_pc,UDP_SOCKET_TIMEOUT));
-		UDP_err_handler(sendUDPClientData(&udp_client,&encoded_data,message_length));
-		UDP_err_handler(closeUDPClientSocket(&udp_client));
+		UDP_err_handler(openUDPClientSocket(&udp_client,connection.server_ip,connection.port_number_lisa_to_pc,UDP_SOCKET_TIMEOUT),0);
+		UDP_err_handler(sendUDPClientData(&udp_client,&encoded_data,message_length),0);
+		UDP_err_handler(closeUDPClientSocket(&udp_client),0);
 }
