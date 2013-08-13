@@ -4,9 +4,9 @@
 #define DEBUG 0
 #endif
 
-//#if DEBUG
+#if DEBUG
 #include <stdio.h>
-//#endif
+#endif
 
 /********************************
  * PROTOTYPES PRIVATE
@@ -69,23 +69,11 @@ DEC_errCode data_update(uint8_t stream[])
 		return DEC_ERR_START_BYTE;
 	}
 	
-	//check checksums
-	for (i=1;i<length-2;i++)
-	{
-		checksum_1 += stream[i];
-		checksum_2 += checksum_1;
-	}
+	calculateChecksum(stream,&checksum_1,&checksum_2);
 	
 	//checksum1 is voorlaatste byte, checksum2 is last byte
 	if(checksum_1 != stream[length-2] || checksum_2 != stream[length-1])
 	{	
-		printf("id = %d\n",stream[3]);
-		printf("checksum_1 calc %d\n",checksum_1);
-		printf("checksum_1 %d\n",stream[length-2]);
-		
-		printf("checksum_2 calc %d\n",checksum_2);
-		printf("checksum_2 %d\n",stream[length-1]);
-		
 		return DEC_ERR_CHECKSUM;
 	}
 	
@@ -221,4 +209,19 @@ DEC_errCode data_encode(uint8_t message[],long unsigned int message_length,uint8
 Data* get_read_pointer()
 {
 		return read_data;
+}
+
+void calculateChecksum(uint8_t buffer[],uint8_t *checksum_1,uint8_t *checksum_2){
+	int i;
+	int length = buffer[1];
+	*checksum_1=0;
+	*checksum_2=0;
+	
+	//first byte is not in checksum
+	for (i=1;i<length-2;i++)
+	{
+		*checksum_1 += buffer[i];
+		*checksum_2 += *checksum_1;
+	}
+	
 }

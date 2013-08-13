@@ -11,8 +11,6 @@
 #define MAX_OUTPUT_STREAM_SIZE 20
 #define UDP_SOCKET_TIMEOUT 1000000000
 
-#define DEBUG 1
-
 #ifndef DEBUG 
 #define DEBUG 0
 #endif
