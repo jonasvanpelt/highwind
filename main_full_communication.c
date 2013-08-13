@@ -49,11 +49,6 @@ typedef struct{
 
 Connection connection;
 
-typedef union{
-		char raw[16];
-		struct timeval tv;
-} Timestamp;
-
 
 #if LOGGING > 0
 //log buffer for data from lisa
@@ -220,7 +215,7 @@ void *lisa_to_pc(void *arg){
 		message_length = serial_input_check();		//blocking !!!
 		if(message_length !=UART_ERR_READ){
 			
-			int i;
+			/*int i;
 			printf("message before timestamp\n");
 			for(i=0;i<message_length;i++){
 					printf("%d ",serial_input.buffer[i]);
@@ -234,7 +229,7 @@ void *lisa_to_pc(void *arg){
 			for(i=0;i<message_length;i++){
 					printf("%d ",serial_input.buffer[i]);
 			}
-			printf("\n\n");
+			printf("\n\n");*/
 			
 			//send data to eth port using UDP
 			UDP_err_handler(sendUDPClientData(&udp_client,&(serial_input.buffer),message_length),0);
@@ -319,17 +314,27 @@ static int add_timestamp(uint8_t buffer[]){
 	//get localtime 
 	gettimeofday(&(timestamp.tv), NULL);
 	
+	int i;
+	printf("now:\n");
+	printf(i=0;i<16;i++){
+		printf("%d ",timestamp.raw[i]);
+	}
+	printf("\n");
+	
 	//change message length
 	buffer[1]=new_length; 
 	
 	//add timestamp to buffer
+	printf("reload:\n");
 	j=0;
 	for(i=length_original-2;i<new_length-2;i++){ //overwrite previous checksums
-		buffer[i]=timestamp.raw[j];j++;
+		buffer[i]=timestamp.raw[j];j++;	
+		printf("%d ",buffer[i]);
 	}
-
+	printf("\n");
+	
 	//recalculate checksum
-	calculateChecksum(buffer,&checksum_1,&checksum_2);
+	calculate_checksum(buffer,&checksum_1,&checksum_2);
 	buffer[new_length-2]=checksum_1;
 	buffer[new_length-1]=checksum_2;
 	

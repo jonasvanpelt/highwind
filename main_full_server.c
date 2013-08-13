@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include "udp_communication.h"
 #include "data_decoding.h"
@@ -10,6 +11,7 @@
 #define MAX_INPUT_STREAM_SIZE 255
 #define MAX_OUTPUT_STREAM_SIZE 20
 #define UDP_SOCKET_TIMEOUT 1000000000
+
 
 #ifndef DEBUG 
 #define DEBUG 0
@@ -104,7 +106,7 @@ int main(int argc, char *argv[]){
 		if(err == UDP_ERR_NONE){
 			#if DEBUG > 0
 			
-			printf("data raw: ");
+			printf("message raw: ");
 			int i;
 			for(i=0;i<input_stream[1];i++){
 					printf("%d ",input_stream[i]);
@@ -170,15 +172,59 @@ int main(int argc, char *argv[]){
 					int i;
 					printf("Baro_raw content:");
 
-					for(i=0;i<input_stream[1];i++){
+					for(i=0;i<input_stream[1]-6;i++){
 						printf("%d ",data->lisa_plane.baro_raw.raw[i]);
 					}
 					printf("\n");
 					printf("abs %d\n",data->lisa_plane.baro_raw.message.abs);
-					printf("diff %d\n",data->lisa_plane.baro_raw.message.diff);
-				}
+					printf("diff %d\n",data->lisa_plane.baro_raw.message.diff);	
+					printf("\n");
+					
+					
+					char strTime[64]={0};
+					char strTime2[64]={0};
+					char strTime3[64]={0};
+					
+					struct timeval tvSend=data->lisa_plane.baro_raw.message.tv;
+					struct timeval tvNow;
+					struct timeval tvDiff;
+					
+					//gettimeofday(&tvSend, NULL);
+					
+					timestamp_to_timeString(tvSend,strTime);
+					printf("send time \t%s\n",strTime);
+					
+					printf("send sec %ld\n",tvSend.tv_sec);
+					printf("send usec %ld\n",tvSend.tv_usec);	
+					
+					printf("now sec %ld\n",tvNow.tv_sec);
+					printf("now usec %ld\n",tvNow.tv_usec);	
+	
 
-				printf("\n");
+					gettimeofday(&tvNow, NULL);		
+					
+					timestamp_to_timeString(tvNow,strTime2);	
+					printf("receive time \t%s\n",strTime2);
+					
+					
+					if(timeval_subtract(&tvDiff, &tvNow, &tvSend)<0){
+						printf("negative latency\n");
+						exit(1);
+					}
+					
+					printf("latency %ld.%06ld\n", tvDiff.tv_sec, tvDiff.tv_usec);
+					
+					
+					
+					/*timestamp_to_timeString(tvDiff,strTime3);			
+					printf("latency \t%s\n",strTime3);*/
+					
+	
+					 
+					printf("\n\n\n");
+				}
+				
+				//printf("\n");
 				/*if(input_stream[3]==203){
 					int i;
 					printf("Imu_gyro_raw content:");

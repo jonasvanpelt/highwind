@@ -7,8 +7,8 @@ extern "C"
 #endif
 
 #include <stdint.h>
-#include <time.h>
 #include <sys/time.h>
+#include <time.h>
 
 /********************************
  * GLOBALS
@@ -21,6 +21,12 @@ typedef enum dec_errCode DEC_errCode;
  
 enum Library {UDP_L,UART_L,DECODE_L,LOG_L,CIRCULAR_BUFFER_L};
 typedef enum Library library; 
+
+typedef union{
+		uint8_t raw[16];
+		struct timeval tv;
+} Timestamp;
+
 
 //OUTPUT 
 typedef union{ //message id 72
@@ -193,7 +199,9 @@ extern int32_t data_write(uint8_t stream[], uint8_t data[], int length, int pos)
 extern void switch_read_write(void);
 extern DEC_errCode data_encode(uint8_t message[],long unsigned int message_length,uint8_t encoded_data[],int sender_id,int message_id);
 extern Data* get_read_pointer();
-extern void calculateChecksum(uint8_t buffer[],uint8_t *checksum_1,uint8_t *checksum2);
+extern void calculate_checksum(uint8_t buffer[],uint8_t *checksum_1,uint8_t *checksum2);
+extern void timestamp_to_timeString(struct timeval tv,char time_string[]);
+extern int timeval_subtract(struct timeval *result, struct timeval *t2, struct timeval *t1);
 
 #ifdef __cplusplus
 }

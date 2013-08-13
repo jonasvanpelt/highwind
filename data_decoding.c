@@ -1,12 +1,14 @@
+#include <stdlib.h>
 #include "data_decoding.h"
+
 
 #ifndef DEBUG 
 #define DEBUG 0
 #endif
 
-#if DEBUG
+//#if DEBUG
 #include <stdio.h>
-#endif
+//#endif
 
 /********************************
  * PROTOTYPES PRIVATE
@@ -69,7 +71,7 @@ DEC_errCode data_update(uint8_t stream[])
 		return DEC_ERR_START_BYTE;
 	}
 	
-	calculateChecksum(stream,&checksum_1,&checksum_2);
+	calculate_checksum(stream,&checksum_1,&checksum_2);
 	
 	//checksum1 is voorlaatste byte, checksum2 is last byte
 	if(checksum_1 != stream[length-2] || checksum_2 != stream[length-1])
@@ -112,35 +114,35 @@ DEC_errCode data_decode(uint32_t pos, uint8_t sender,uint8_t stream[], int lengt
 			switch(stream[pos]) // the message id of the folowing message
 			{
 				case 25: // Svinfo 
-					pos = data_write(stream, write_data->lisa_plane.svinfo.raw, 8, pos);
+					pos = data_write(stream, write_data->lisa_plane.svinfo.raw, 24, pos);
 					write_data->lisa_plane.svinfo.message.new_data = 0;
 					break;
 				/*case 54: // airspeed - 48 bytes
-					pos = data_write(stream, write_data->lisa_plane.airspeed.raw, 8, pos);
+					pos = data_write(stream, write_data->lisa_plane.airspeed.raw, 24, pos);
 					write_data->lisa_plane.airspeed.message.new_data = 0;
 					break;*/
 				case 57: // airspeed_ets - 40 bytes
-					pos = data_write(stream, write_data->lisa_plane.airspeed_ets.raw, 8, pos);
+					pos = data_write(stream, write_data->lisa_plane.airspeed_ets.raw, 24, pos);
 					write_data->lisa_plane.airspeed_ets.message.new_data = 0;
 					break;
 				case 155: // gps_int - 81 bytes
-					pos = data_write(stream, write_data->lisa_plane.gps_int.raw, 56, pos);
+					pos = data_write(stream, write_data->lisa_plane.gps_int.raw, 72, pos);
 					write_data->lisa_plane.gps_int.message.new_data = 0;
 					break;
 				case 203: // imu_gyro_raw - 48 bytes
-					pos = data_write(stream, write_data->lisa_plane.imu_gyro_raw.raw, 12, pos);
+					pos = data_write(stream, write_data->lisa_plane.imu_gyro_raw.raw, 28, pos);
 					write_data->lisa_plane.imu_gyro_raw.message.new_data = 0;
 					break;
 				case 204: // imu_accel_raw - 48 bytes
-					pos = data_write(stream, write_data->lisa_plane.imu_accel_raw.raw, 12, pos);
+					pos = data_write(stream, write_data->lisa_plane.imu_accel_raw.raw, 28, pos);
 					write_data->lisa_plane.imu_accel_raw.message.new_data = 0;
 					break;
 				case 205: // imu_mag_raw - 48 bytes
-					pos = data_write(stream, write_data->lisa_plane.imu_mag_raw.raw, 12, pos);
+					pos = data_write(stream, write_data->lisa_plane.imu_mag_raw.raw, 28, pos);
 					write_data->lisa_plane.imu_mag_raw.message.new_data = 0;
 					break;
 				case 221: // baro_raw - 40 bytes
-					pos = data_write(stream, write_data->lisa_plane.baro_raw.raw, 8, pos);
+					pos = data_write(stream, write_data->lisa_plane.baro_raw.raw, 24, pos);
 					write_data->lisa_plane.baro_raw.message.new_data = 0;
 					break;
 				default: return DEC_ERR_UNKNOWN_LISA_PACKAGE;break;
@@ -152,7 +154,7 @@ DEC_errCode data_decode(uint32_t pos, uint8_t sender,uint8_t stream[], int lengt
 	{
 		return DEC_ERR_NONE; //data encoding succeeded
 	} else {
-		
+		printf("here\n");
 		return data_decode(pos, sender, stream, length);
 	}
 }
@@ -211,7 +213,7 @@ Data* get_read_pointer()
 		return read_data;
 }
 
-void calculateChecksum(uint8_t buffer[],uint8_t *checksum_1,uint8_t *checksum_2){
+void calculate_checksum(uint8_t buffer[],uint8_t *checksum_1,uint8_t *checksum_2){
 	int i;
 	int length = buffer[1];
 	*checksum_1=0;
@@ -225,3 +227,25 @@ void calculateChecksum(uint8_t buffer[],uint8_t *checksum_1,uint8_t *checksum_2)
 	}
 	
 }
+
+
+//Return 1 if the difference is negative, otherwise 0. 
+
+int timeval_subtract(struct timeval *result, struct timeval *t2, struct timeval *t1)
+{
+    long int diff = (t2->tv_usec + 1000000 * t2->tv_sec) - (t1->tv_usec + 1000000 * t1->tv_sec);
+    result->tv_sec = diff / 1000000;
+    result->tv_usec = diff % 1000000;
+    return (diff<0);
+}
+
+void timestamp_to_timeString(struct timeval tv,char time_string[]){	
+	time_t nowtime;
+	struct tm *nowtm;
+	char tmbuf[64];
+	nowtime = tv.tv_sec;
+	nowtm = localtime(&nowtime);
+	strftime(tmbuf, sizeof tmbuf, "%Y-%m-%d %H:%M:%S", nowtm);
+	snprintf(time_string, 64, "%s.%06d", tmbuf, (int)tv.tv_usec);
+}
+
