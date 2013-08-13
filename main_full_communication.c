@@ -210,26 +210,13 @@ void *lisa_to_pc(void *arg){
 	
 	UDP_err_handler(openUDPClientSocket(&udp_client,connection.server_ip,connection.port_number_lisa_to_pc,UDP_SOCKET_TIMEOUT),1);
 
-	while(1)
+	/*while(1)
 	{
 		message_length = serial_input_check();		//blocking !!!
 		if(message_length !=UART_ERR_READ){
 			
-			int i;
-			printf("message before timestamp\n");
-			for(i=0;i<message_length;i++){
-					printf("%d ",serial_input.buffer[i]);
-			}
-			printf("\n");
-		
 			//add timestamp
 			message_length=add_timestamp(serial_input.buffer);
-			
-			printf("message after timestamp\n");
-			for(i=0;i<message_length;i++){
-					printf("%d ",serial_input.buffer[i]);
-			}
-			printf("\n\n");
 			
 			//send data to eth port using UDP
 			UDP_err_handler(sendUDPClientData(&udp_client,&(serial_input.buffer),message_length),0);
@@ -252,7 +239,12 @@ void *lisa_to_pc(void *arg){
 			UART_err_handler(message_length);
 		}
 		
-	}
+	}*/
+	
+	lont int test = 123456789;
+	
+	UDP_err_handler(sendUDPClientData(&udp_client,&test,sizeof(test)),0);
+	
 	serial_port_close();
 	serial_port_free();
 	UDP_err_handler(closeUDPClientSocket(&udp_client),0);

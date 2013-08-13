@@ -95,7 +95,11 @@ int main(int argc, char *argv[]){
 	int AIRSPEED_received=0;
 	int SVINFO_received=0;
 	int err;
-		
+	
+	long int test;
+	receiveUDPServerData(&udp_server,(void *)&test,sizeof(test));
+	
+	printf("test: %ld",test);
 
 	while(1){
 		//1. retreive UDP data form planebone from ethernet port.
