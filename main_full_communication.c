@@ -241,9 +241,10 @@ void *lisa_to_pc(void *arg){
 		
 	}*/
 	
-	long int test = 123456789;
+	uint32_t test = 123456789;
+	test=htonl(test);
 	
-	UDP_err_handler(sendUDPClientData(&udp_client,&test,sizeof(test)),0);
+	sendUDPClientData(&udp_client,&test,sizeof(test));
 	
 	serial_port_close();
 	serial_port_free();
