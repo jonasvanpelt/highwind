@@ -242,7 +242,37 @@ void calculate_checksum(uint8_t buffer[],uint8_t *checksum_1,uint8_t *checksum_2
 		*checksum_1 += buffer[i];
 		*checksum_2 += *checksum_1;
 	}
+}
+
+int add_timestamp(uint8_t buffer[]){
+	int length_original=buffer[1],i,j;
+	uint8_t checksum_1,checksum_2;
+	int new_length=length_original+16; //timeval is 16 bytes
+	struct timeval tv_8;
+	TimestampBeagle timestampBeagle;
+
+	//get localtime 
+	gettimeofday(&tv_8, NULL);
+
+	//convert beaglebone 8 byte timeval to 16 byte timeval for server
+	timestampBeagle.tv.tv_sec=(uint64_t)tv_8.tv_sec;
+	timestampBeagle.tv.tv_usec=(uint64_t)tv_8.tv_usec;
+
+	//update message length
+	buffer[1]=new_length; 
 	
+	//add timestamp to buffer
+	j=0;
+	for(i=length_original-2;i<new_length-2;i++){ //overwrite previous checksums
+		buffer[i]=timestampBeagle.raw[j];j++;	
+	}
+	
+	//recalculate checksum
+	calculate_checksum(buffer,&checksum_1,&checksum_2);
+	buffer[new_length-2]=checksum_1;
+	buffer[new_length-1]=checksum_2;
+	
+	return new_length;
 }
 
 int timeval_subtract(struct timeval *result, struct timeval *t2, struct timeval *t1)
