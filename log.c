@@ -77,12 +77,12 @@ LOG_errCode open_data_lisa_log(){
 	return LOG_ERR_NONE;
 }
 
-LOG_errCode write_data_lisa_log(char *data){
+LOG_errCode write_data_lisa_log(char *data,int length){
 	#if DEBUG  > 1
 		printf("Entering write_data_lisa_log\n");
 	#endif
 	
-	fwrite(data,INPUT_BUFFER, 1, lisa_log_file);
+	fwrite(data,length, 1, lisa_log_file);
 
 	/*if(fprintf(lisa_log_file,"%s\n",data)<0){
 		return LOG_ERR_WRITE; 

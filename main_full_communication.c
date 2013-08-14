@@ -236,7 +236,7 @@ void *lisa_to_pc(void *arg){
 			}*/
 			
 			
-			LOG_err_handler(write_data_lisa_log(serial_input.buffer)); //REMOVE ME !!!
+			LOG_err_handler(write_data_lisa_log(serial_input.buffer,message_length)); //REMOVE ME !!!
 		
 			
 			#endif
@@ -269,7 +269,7 @@ void *data_logging_lisa(void *arg){
 	while(1){
 		if (!cbIsEmpty(&cb_data_lisa)) {
 			cbRead(&cb_data_lisa, &cb_elem);
-			LOG_err_handler(write_data_lisa_log(cb_elem.value));
+			//LOG_err_handler(write_data_lisa_log(cb_elem.value));
 		}
 		usleep(1000);
 	}
