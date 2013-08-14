@@ -183,45 +183,26 @@ int main(int argc, char *argv[]){
 					printf("\n");
 						
 					char strTime[64]={0};
-					char strTime2[64]={0};
-					char strTime3[64]={0};
 					
 					struct timeval tvSend;
 					struct timeval tvNow;
-					struct timeval tvDiff;
-					
+					struct timeval tvDiff;				
 					
 					tvSend.tv_sec=data->lisa_plane.baro_raw.message.tv.tv_sec;
-					tvSend.tv_usec=data->lisa_plane.baro_raw.message.tv.tv_usec;
+					tvSend.tv_usec=data->lisa_plane.baro_raw.message.tv.tv_usec;				
 					
-					//printf("grootte %ld\n",sizeof(data->lisa_plane.baro_raw.message.tv.tv_sec));
-
-					
-					//gettimeofday(&tvSend, NULL);
 					gettimeofday(&tvNow, NULL);
 					
 					timestamp_to_timeString(tvSend,strTime);
 					printf("send time \t%s\n",strTime);
-					
-					printf("send sec %ld\n",tvSend.tv_sec);
-					printf("send usec %ld\n",tvSend.tv_usec);	
-					
-					printf("now sec %ld\n",tvNow.tv_sec);
-					printf("now usec %ld\n",tvNow.tv_usec);	
-	
-
+					memset(strTime,0,sizeof(strTime));
 								
-					timestamp_to_timeString(tvNow,strTime2);	
-					printf("receive time \t%s\n",strTime2);
+					timestamp_to_timeString(tvNow,strTime);	
+					printf("receive time \t%s\n",strTime);
+								
+					timeval_subtract(&tvDiff, &tvNow, &tvSend);
 					
-					
-					if(timeval_subtract(&tvDiff, &tvNow, &tvSend)==0){
-						printf("negative latency\n");
-						exit(1);
-					}
-					
-					printf("latency %ld.%06ld\n", tvDiff.tv_sec, tvDiff.tv_usec);
-
+					printf("latency %ld.%06ld sec\n", tvDiff.tv_sec, tvDiff.tv_usec);
 									 
 					printf("\n\n\n");
 				}

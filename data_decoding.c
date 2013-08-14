@@ -180,29 +180,46 @@ DEC_errCode data_encode(uint8_t message[],long unsigned int message_length,uint8
 		printf("Entering data_encode\n");
 	#endif
 	
-	int i = 0; 
-	int checksum_1 = 0;
-	int checksum_2 = 0;
-	uint8_t length = message_length+6;
+	int i = 0,j; 
+	uint8_t checksum_1 = 0;
+	uint8_t checksum_2 = 0;
+	uint8_t length = message_length+6+16; //message length + 6 info bytes + 16 timestamp bytes
+	Timestamp timestamp;
 		
 	encoded_data[0] = 0x99;
 	encoded_data[1] = length;
 	encoded_data[2] = sender_id; // sender id of server
 	encoded_data[3] = message_id; // message id
 
+	/*printf("message:");
+	for(i=0;i<message_length;i++){
+		printf("%d ",message[i]);
+	}
+	printf("\n");*/
+
+	//add message
 	for(i=0;i<message_length;i++)
 	{
 		encoded_data[4+i] = message[i];
 	}
-
-	for (i=1;i<length - 2;i++) //start bit 0x99 is not in checksum calculation
-	{
-		checksum_1 += encoded_data[i];
-		checksum_2 += checksum_1;
+	
+	//add timestamp
+	//add timestamp to buffer
+	j=0;
+	for(i=message_length+4;i<length-2;i++){ //overwrite previous checksums
+		encoded_data[i]=timestamp.raw[j];j++;	
 	}
+	
+	calculate_checksum(encoded_data,&checksum_1,&checksum_2);
 	
 	encoded_data[length-2] = checksum_1;
 	encoded_data[length-1] = checksum_2;
+	
+	/*printf("raw:");
+	for(i=0;i<length;i++){
+		printf("%d ",encoded_data[i]);
+	}
+	printf("\n");*/
 	
 	return DEC_ERR_NONE;
 }
@@ -228,7 +245,6 @@ void calculate_checksum(uint8_t buffer[],uint8_t *checksum_1,uint8_t *checksum_2
 	
 }
 
-
 int timeval_subtract(struct timeval *result, struct timeval *t2, struct timeval *t1)
 {
     long int diff = (t2->tv_usec + 1000000 * t2->tv_sec) - (t1->tv_usec + 1000000 * t1->tv_sec);
@@ -236,8 +252,6 @@ int timeval_subtract(struct timeval *result, struct timeval *t2, struct timeval 
     result->tv_usec = diff % 1000000;
     return (diff<0);	//Return 1 if the difference is negative, otherwise 0. 
 }
-
-
 
 void timestamp_to_timeString(struct timeval tv,char time_string[]){	
 	time_t nowtime;

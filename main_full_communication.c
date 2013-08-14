@@ -305,24 +305,18 @@ static int add_timestamp(uint8_t buffer[]){
 	//get localtime 
 	gettimeofday(&tv_8, NULL);
 
-	timestampBeagle.tv.tv_sec=(uint8_t)tv_8.tv_sec;
-	timestampBeagle.tv.tv_usec=(uint8_t)tv_8.tv_usec;
+	//convert beaglebone 8 byte timeval to 16 byte timeval for server
+	timestampBeagle.tv.tv_sec=(uint64_t)tv_8.tv_sec;
+	timestampBeagle.tv.tv_usec=(uint64_t)tv_8.tv_usec;
 
-	timestampBeagle.tv.tv_sec=htobe64(timestampBeagle.tv.tv_sec);
-	timestampBeagle.tv.tv_usec=htobe64(timestampBeagle.tv.tv_usec);
-	
-
-	//change message length
+	//update message length
 	buffer[1]=new_length; 
 	
 	//add timestamp to buffer
-	
 	j=0;
 	for(i=length_original-2;i<new_length-2;i++){ //overwrite previous checksums
 		buffer[i]=timestampBeagle.raw[j];j++;	
-		printf("%d ",buffer[i]);
 	}
-	printf("\n");
 	
 	//recalculate checksum
 	calculate_checksum(buffer,&checksum_1,&checksum_2);
