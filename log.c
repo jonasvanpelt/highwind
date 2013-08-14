@@ -119,7 +119,7 @@ LOG_errCode write_data_groundstation_log(char *data,int length){
 		printf("Entering write_data_groundstation_log\n");
 	#endif
 	
-	if(fwrite(data,length, 1, lisa_log_file)<0){
+	if(fwrite(data,length, 1, groundstation_log_file)<0){
 		return LOG_ERR_WRITE; 
 	}
 	
