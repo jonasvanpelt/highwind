@@ -304,17 +304,13 @@ static int add_timestamp(uint8_t buffer[]){
 
 	//get localtime 
 	gettimeofday(&tv_8, NULL);
+
 	timestampBeagle.tv.tv_sec=(uint8_t)tv_8.tv_sec;
 	timestampBeagle.tv.tv_usec=(uint8_t)tv_8.tv_usec;
+
+	timestampBeagle.tv.tv_sec=htobe64(timestampBeagle.tv.tv_sec);
+	timestampBeagle.tv.tv_usec=htobe64(timestampBeagle.tv.tv_usec);
 	
-	//reformat timestamp to big endian, server = big endian, beaglebone = little endian
-	char strTime[64]={0};
-	
-	//timestamp.tv.tv_sec=htonl(timestamp.tv.tv_sec);
-	//timestamp.tv.tv_usec=htonl(timestamp.tv.tv_usec);
-	
-	timestamp_to_timeString(tv_8,strTime);
-	printf("send time \t%s\n",strTime);
 
 	//change message length
 	buffer[1]=new_length; 
