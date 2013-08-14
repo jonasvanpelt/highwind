@@ -190,11 +190,12 @@ int main(int argc, char *argv[]){
 					struct timeval tvNow;
 					struct timeval tvDiff;
 					
-					printf("grootte %ld\n",sizeof(tvSend.tv_sec));
 					
-					tvSend.tv_sec=htobe64(data->lisa_plane.baro_raw.message.tv.tv_sec);
-					tvSend.tv_usec=htobe64(data->lisa_plane.baro_raw.message.tv.tv_usec);
+					tvSend.tv_sec=data->lisa_plane.baro_raw.message.tv.tv_sec;
+					tvSend.tv_usec=data->lisa_plane.baro_raw.message.tv.tv_usec;
 					
+					//printf("grootte %ld\n",sizeof(data->lisa_plane.baro_raw.message.tv.tv_sec));
+
 					
 					//gettimeofday(&tvSend, NULL);
 					gettimeofday(&tvNow, NULL);
