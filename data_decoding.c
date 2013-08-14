@@ -219,7 +219,7 @@ void calculate_checksum(uint8_t buffer[],uint8_t *checksum_1,uint8_t *checksum_2
 	*checksum_1=0;
 	*checksum_2=0;
 	
-	//first byte is not in checksum
+	//start byte '0x99' is not in checksum
 	for (i=1;i<length-2;i++)
 	{
 		*checksum_1 += buffer[i];
@@ -229,15 +229,15 @@ void calculate_checksum(uint8_t buffer[],uint8_t *checksum_1,uint8_t *checksum_2
 }
 
 
-//Return 1 if the difference is negative, otherwise 0. 
-
 int timeval_subtract(struct timeval *result, struct timeval *t2, struct timeval *t1)
 {
     long int diff = (t2->tv_usec + 1000000 * t2->tv_sec) - (t1->tv_usec + 1000000 * t1->tv_sec);
     result->tv_sec = diff / 1000000;
     result->tv_usec = diff % 1000000;
-    return (diff<0);
+    return (diff<0);	//Return 1 if the difference is negative, otherwise 0. 
 }
+
+
 
 void timestamp_to_timeString(struct timeval tv,char time_string[]){	
 	time_t nowtime;

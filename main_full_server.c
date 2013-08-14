@@ -96,12 +96,6 @@ int main(int argc, char *argv[]){
 	int SVINFO_received=0;
 	int err;
 	
-	uint32_t test;
-	printf("before test\n");
-	receiveUDPServerData(&udp_server,(void *)&test,sizeof(test));
-	test=htonl(test);
-	printf("test: %d\n",test);
-	printf("after test\n");
 
 	while(1){
 		//1. retreive UDP data form planebone from ethernet port.
@@ -185,8 +179,7 @@ int main(int argc, char *argv[]){
 					printf("abs %d\n",data->lisa_plane.baro_raw.message.abs);
 					printf("diff %d\n",data->lisa_plane.baro_raw.message.diff);	
 					printf("\n");
-					
-					
+						
 					char strTime[64]={0};
 					char strTime2[64]={0};
 					char strTime3[64]={0};
@@ -207,26 +200,21 @@ int main(int argc, char *argv[]){
 					printf("now usec %ld\n",tvNow.tv_usec);	
 	
 
-					gettimeofday(&tvNow, NULL);		
-					
+					gettimeofday(&tvNow, NULL);				
 					timestamp_to_timeString(tvNow,strTime2);	
 					printf("receive time \t%s\n",strTime2);
 					
 					
-					if(timeval_subtract(&tvDiff, &tvNow, &tvSend)<0){
+					if(timeval_subtract(&tvDiff, &tvNow, &tvSend)==0){
 						printf("negative latency\n");
 						exit(1);
 					}
 					
 					printf("latency %ld.%06ld\n", tvDiff.tv_sec, tvDiff.tv_usec);
-					
-					
-					
+							
 					/*timestamp_to_timeString(tvDiff,strTime3);			
 					printf("latency \t%s\n",strTime3);*/
-					
-	
-					 
+									 
 					printf("\n\n\n");
 				}
 				

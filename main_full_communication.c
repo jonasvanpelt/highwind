@@ -7,6 +7,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <endian.h>
+
 
 #include "udp_communication.h"
 #include "uart_communication.h"
@@ -210,7 +212,7 @@ void *lisa_to_pc(void *arg){
 	
 	UDP_err_handler(openUDPClientSocket(&udp_client,connection.server_ip,connection.port_number_lisa_to_pc,UDP_SOCKET_TIMEOUT),1);
 
-	/*while(1)
+	while(1)
 	{
 		message_length = serial_input_check();		//blocking !!!
 		if(message_length !=UART_ERR_READ){
@@ -239,12 +241,7 @@ void *lisa_to_pc(void *arg){
 			UART_err_handler(message_length);
 		}
 		
-	}*/
-	
-	uint32_t test = 123456789;
-	test=htonl(test);
-	
-	sendUDPClientData(&udp_client,&test,sizeof(test));
+	}
 	
 	serial_port_close();
 	serial_port_free();
@@ -307,24 +304,25 @@ static int add_timestamp(uint8_t buffer[]){
 	//get localtime 
 	gettimeofday(&(timestamp.tv), NULL);
 	
+	//reformat timestamp to big endian, server = big endian, beaglebone = little endian
+	
+	//TODO: hier nog checken of tv_sec inderdaad 32 bit is op beaglebone!!!!!!!!
+	
+	printf("size tv_sec %ld\n",sizeof(timestamp.tv.tv_sec));
+	printf("size tv_usec %ld\n",sizeof(timestamp.tv.tv_usec));
 
-	printf("now:\n");
-	for(i=0;i<16;i++){
-		printf("%d ",timestamp.raw[i]);
-	}
-	printf("\n");
+	timestamp.tv.tv_sec=htobe32(timestamp.tv.tv_sec);
+	timestamp.tv.tv_usec=htobe32(timestamp.tv.tv_usec);
 	
 	//change message length
 	buffer[1]=new_length; 
 	
 	//add timestamp to buffer
-	printf("reload:\n");
+	
 	j=0;
 	for(i=length_original-2;i<new_length-2;i++){ //overwrite previous checksums
 		buffer[i]=timestamp.raw[j];j++;	
-		printf("%d ",buffer[i]);
 	}
-	printf("\n");
 	
 	//recalculate checksum
 	calculate_checksum(buffer,&checksum_1,&checksum_2);
