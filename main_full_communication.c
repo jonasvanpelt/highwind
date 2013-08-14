@@ -211,7 +211,6 @@ void *lisa_to_pc(void *arg){
 	
 	UDP_err_handler(openUDPClientSocket(&udp_client,connection.server_ip,connection.port_number_lisa_to_pc,UDP_SOCKET_TIMEOUT),1);
 
-	LOG_err_handler(open_data_lisa_log()); //REMOVE ME !!!
 	
 	while(1)
 	{
@@ -226,17 +225,16 @@ void *lisa_to_pc(void *arg){
 	
 			#if LOGGING > 0
 
-			/*//write the data to circual buffer for log thread
+			//write the data to circual buffer for log thread
 			 memcpy (&cb_elem.value, &(serial_input.buffer), message_length);	
 			 cbWrite(&cb_data_lisa, &cb_elem);
 			 
 			 //FOR DEBUGGING: REMOVE ME!!!
 			 if(cbIsFull(&cb_data_lisa)){
 				printf("lisa buffer is full\n") ;
-			}*/
+			}
 			
 			
-			LOG_err_handler(write_data_lisa_log(serial_input.buffer,message_length)); //REMOVE ME !!!
 		
 			
 			#endif
@@ -247,7 +245,6 @@ void *lisa_to_pc(void *arg){
 		}
 		
 	}
-	LOG_err_handler(close_data_lisa_log()); //REMOVE ME !!!
 	
 	serial_port_close();
 	serial_port_free();
@@ -269,7 +266,7 @@ void *data_logging_lisa(void *arg){
 	while(1){
 		if (!cbIsEmpty(&cb_data_lisa)) {
 			cbRead(&cb_data_lisa, &cb_elem);
-			//LOG_err_handler(write_data_lisa_log(cb_elem.value));
+			LOG_err_handler(write_data_lisa_log(cb_elem.value,cb_elem.value[1]));
 		}
 		usleep(1000);
 	}
@@ -288,7 +285,7 @@ void *data_logging_groundstation(void *arg){
 	while(1){
 		if (!cbIsEmpty(&cb_data_ground)) {
 			cbRead(&cb_data_ground, &cb_elem);
-			LOG_err_handler(write_data_groundstation_log(cb_elem.value));
+			LOG_err_handler(write_data_groundstation_log(cb_elem.value,cb_elem.value[1]));
 		}
 		usleep(1000);
 	}

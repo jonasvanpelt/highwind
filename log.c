@@ -82,11 +82,9 @@ LOG_errCode write_data_lisa_log(char *data,int length){
 		printf("Entering write_data_lisa_log\n");
 	#endif
 	
-	fwrite(data,length, 1, lisa_log_file);
-
-	/*if(fprintf(lisa_log_file,"%s\n",data)<0){
+	if(fwrite(data,length, 1, lisa_log_file)<1){
 		return LOG_ERR_WRITE; 
-	}*/
+	}
 	return LOG_ERR_NONE;
 }
 
@@ -116,14 +114,15 @@ LOG_errCode open_data_groundstation_log(){
 	return LOG_ERR_NONE;
 }
 
-LOG_errCode write_data_groundstation_log(char *data){
+LOG_errCode write_data_groundstation_log(char *data,int length){
 	#if DEBUG  > 1
 		printf("Entering write_data_groundstation_log\n");
 	#endif
 	
-	if(fprintf(groundstation_log_file,"%s\n",data)<0){
+	if(fwrite(data,length, 1, lisa_log_file)<0){
 		return LOG_ERR_WRITE; 
 	}
+	
 	return LOG_ERR_NONE;
 }
 

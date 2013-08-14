@@ -14,7 +14,7 @@ int main(int argc, char **argv)
 	while ( ( ch = fgetc(f) ) != EOF ) {
 		
 		if(ch == 0x99)
-			printf("\n");
+			printf("\n\n");
 		printf("%d ",ch);
 	}
     fclose(f);

@@ -18,7 +18,7 @@ extern LOG_errCode close_data_lisa_log();
 
 //for loging data coming from groundstation
 extern LOG_errCode open_data_groundstation_log();
-extern LOG_errCode write_data_groundstation_log(char *data);
+extern LOG_errCode write_data_groundstation_log(char *data,int length);
 extern LOG_errCode close_data_groundstation_log();
 
 //for logging program
