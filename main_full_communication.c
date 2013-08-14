@@ -8,8 +8,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-
-
 #include "udp_communication.h"
 #include "uart_communication.h"
 #include "log.h"

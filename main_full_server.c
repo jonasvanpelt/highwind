@@ -166,7 +166,7 @@ int main(int argc, char *argv[]){
 				printf("BARO_RAW_received %d\n",BARO_RAW_received);
 				printf("GPS_INT_received %d\n",GPS_INT_received);			
 				printf("AIRSPEED_received %d\n",AIRSPEED_received);			
-				printf("SVINFO_received %d\n",SVINFO_received);	*/	
+				printf("SVINFO_received %d\n",SVINFO_received);	*/
 
 				printf("\n");
 
