@@ -3,10 +3,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <endian.h>
 
 #include "udp_communication.h"
 #include "data_decoding.h"
 #include "log.h"
+
 
 #define MAX_INPUT_STREAM_SIZE 255
 #define MAX_OUTPUT_STREAM_SIZE 20
@@ -184,11 +186,18 @@ int main(int argc, char *argv[]){
 					char strTime2[64]={0};
 					char strTime3[64]={0};
 					
-					struct timeval tvSend=data->lisa_plane.baro_raw.message.tv;
+					struct timeval tvSend;
 					struct timeval tvNow;
 					struct timeval tvDiff;
 					
+					printf("grootte %ld\n",sizeof(tvSend.tv_sec));
+					
+					tvSend.tv_sec=htobe64(data->lisa_plane.baro_raw.message.tv.tv_sec);
+					tvSend.tv_usec=htobe64(data->lisa_plane.baro_raw.message.tv.tv_usec);
+					
+					
 					//gettimeofday(&tvSend, NULL);
+					gettimeofday(&tvNow, NULL);
 					
 					timestamp_to_timeString(tvSend,strTime);
 					printf("send time \t%s\n",strTime);
@@ -200,7 +209,7 @@ int main(int argc, char *argv[]){
 					printf("now usec %ld\n",tvNow.tv_usec);	
 	
 
-					gettimeofday(&tvNow, NULL);				
+								
 					timestamp_to_timeString(tvNow,strTime2);	
 					printf("receive time \t%s\n",strTime2);
 					
@@ -211,9 +220,7 @@ int main(int argc, char *argv[]){
 					}
 					
 					printf("latency %ld.%06ld\n", tvDiff.tv_sec, tvDiff.tv_usec);
-							
-					/*timestamp_to_timeString(tvDiff,strTime3);			
-					printf("latency \t%s\n",strTime3);*/
+
 									 
 					printf("\n\n\n");
 				}

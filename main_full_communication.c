@@ -299,21 +299,23 @@ static int add_timestamp(uint8_t buffer[]){
 	int length_original=buffer[1],i,j;
 	uint8_t checksum_1,checksum_2;
 	int new_length=length_original+16; //timeval is 16 bytes
-	Timestamp timestamp;
-	
+	struct timeval tv_8;
+	TimestampBeagle timestampBeagle;
+
 	//get localtime 
-	gettimeofday(&(timestamp.tv), NULL);
+	gettimeofday(&tv_8, NULL);
+	timestampBeagle.tv.tv_sec=(uint8_t)tv_8.tv_sec;
+	timestampBeagle.tv.tv_usec=(uint8_t)tv_8.tv_usec;
 	
 	//reformat timestamp to big endian, server = big endian, beaglebone = little endian
+	char strTime[64]={0};
 	
-	//TODO: hier nog checken of tv_sec inderdaad 32 bit is op beaglebone!!!!!!!!
+	//timestamp.tv.tv_sec=htonl(timestamp.tv.tv_sec);
+	//timestamp.tv.tv_usec=htonl(timestamp.tv.tv_usec);
 	
-	printf("size tv_sec %ld\n",sizeof(timestamp.tv.tv_sec));
-	printf("size tv_usec %ld\n",sizeof(timestamp.tv.tv_usec));
+	timestamp_to_timeString(tv_8,strTime);
+	printf("send time \t%s\n",strTime);
 
-	timestamp.tv.tv_sec=htobe32(timestamp.tv.tv_sec);
-	timestamp.tv.tv_usec=htobe32(timestamp.tv.tv_usec);
-	
 	//change message length
 	buffer[1]=new_length; 
 	
@@ -321,8 +323,10 @@ static int add_timestamp(uint8_t buffer[]){
 	
 	j=0;
 	for(i=length_original-2;i<new_length-2;i++){ //overwrite previous checksums
-		buffer[i]=timestamp.raw[j];j++;	
+		buffer[i]=timestampBeagle.raw[j];j++;	
+		printf("%d ",buffer[i]);
 	}
+	printf("\n");
 	
 	//recalculate checksum
 	calculate_checksum(buffer,&checksum_1,&checksum_2);

@@ -27,6 +27,15 @@ typedef union{
 		struct timeval tv;
 } Timestamp;
 
+typedef struct {
+		uint8_t tv_sec;
+		uint8_t tv_usec;
+} Timeval16; //redefine a new 16byte timeval for beaglebone because beaglebone has 8 byte timeval
+
+typedef union{
+		uint8_t raw[16];
+		Timeval16 tv;
+} TimestampBeagle;
 
 //OUTPUT 
 typedef union{ //message id 72
