@@ -82,9 +82,11 @@ LOG_errCode write_data_lisa_log(char *data){
 		printf("Entering write_data_lisa_log\n");
 	#endif
 	
-	if(fprintf(lisa_log_file,"%s\n",data)<0){
+	fwrite(data,INPUT_BUFFER, 1, lisa_log_file);
+
+	/*if(fprintf(lisa_log_file,"%s\n",data)<0){
 		return LOG_ERR_WRITE; 
-	}
+	}*/
 	return LOG_ERR_NONE;
 }
 
