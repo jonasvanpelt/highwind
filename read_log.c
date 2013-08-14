@@ -10,7 +10,8 @@
 int main(int argc, char **argv)
 {
     char buff[BUFF_SIZE];
-    FILE *f = fopen("/media/sdcard/data_lisa_log.txt", "r");
+    //FILE *f = fopen("/media/sdcard/data_lisa_log.txt", "r");
+    FILE *f = fopen("/media/sdcard/data_groundstation_log.txt", "r");
     int ch;
     int length;
     int i;
@@ -39,7 +40,7 @@ while(ch!=EOF){
 		}
 		printf("\n\n");
 
-		sendUDPClientData(&udp_client,&buff,length);
+		//sendUDPClientData(&udp_client,&buff,length);
 
 	}
 	usleep(1000);

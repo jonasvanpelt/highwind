@@ -191,19 +191,15 @@ DEC_errCode data_encode(uint8_t message[],long unsigned int message_length,uint8
 	encoded_data[2] = sender_id; // sender id of server
 	encoded_data[3] = message_id; // message id
 
-	/*printf("message:");
-	for(i=0;i<message_length;i++){
-		printf("%d ",message[i]);
-	}
-	printf("\n");*/
-
 	//add message
 	for(i=0;i<message_length;i++)
 	{
 		encoded_data[4+i] = message[i];
 	}
 	
-	//add timestamp
+	//get localtime 
+	gettimeofday(&timestamp.tv, NULL);
+	
 	//add timestamp to buffer
 	j=0;
 	for(i=message_length+4;i<length-2;i++){ //overwrite previous checksums
@@ -214,12 +210,6 @@ DEC_errCode data_encode(uint8_t message[],long unsigned int message_length,uint8
 	
 	encoded_data[length-2] = checksum_1;
 	encoded_data[length-1] = checksum_2;
-	
-	/*printf("raw:");
-	for(i=0;i<length;i++){
-		printf("%d ",encoded_data[i]);
-	}
-	printf("\n");*/
 	
 	return DEC_ERR_NONE;
 }

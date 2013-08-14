@@ -11,7 +11,7 @@
 
 
 #define MAX_INPUT_STREAM_SIZE 255
-#define MAX_OUTPUT_STREAM_SIZE 20
+#define MAX_OUTPUT_STREAM_SIZE 36
 #define UDP_SOCKET_TIMEOUT 1000000000
 
 
@@ -322,14 +322,14 @@ void *server_to_planebone(void *connection){
 		output.message.servo_5=i;
 		output.message.servo_6=i;
 		output.message.servo_7=0;
-		i=i+200;
+		i=i+300;
 		if(i>12800){
 			i=0;	
 		}
 	
 		//2. encode the data	
 		DEC_err_handler(data_encode(output.raw,sizeof(output.raw),encoded_data,1,72));
-		
+	
 		/*printf("OUTPUT RAW:");
 		int j;
 			for(j=0;j<encoded_data[1];j++){

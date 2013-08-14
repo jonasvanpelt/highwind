@@ -19,7 +19,7 @@
 #endif
 
 #define CBSIZE 2048 * 32
-#define OUTPUT_BUFFER 20
+#define OUTPUT_BUFFER 36
 #define MAX_STREAM_SIZE 255
 #define UDP_SOCKET_TIMEOUT 1000000000
 
@@ -185,7 +185,6 @@ int main(int argc, char *argv[]){
 		error_write(FILENAME,"error joining thread_data_logging_ground");
 	}
 	
-	
 	//free circular buffers
 	cbFree(&cb_data_lisa);
 	cbFree(&cb_data_ground);
@@ -231,10 +230,7 @@ void *lisa_to_pc(void *arg){
 			 if(cbIsFull(&cb_data_lisa)){
 				printf("lisa buffer is full\n") ;
 			}
-			
-			
-		
-			
+				
 			#endif
 		}else{
 		//send error message to server: not receiving data on uart port
