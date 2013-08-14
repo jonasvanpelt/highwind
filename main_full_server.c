@@ -160,16 +160,17 @@ int main(int argc, char *argv[]){
 						exit(1);
 				}
 				
-				printf("IMU_GYRO_RAW_received %d\n",IMU_GYRO_RAW_received);
+				/*printf("IMU_GYRO_RAW_received %d\n",IMU_GYRO_RAW_received);
 				printf("IMU_ACCEL_RAW_received %d\n",IMU_ACCEL_RAW_received);
 				printf("IMU_MAG_RAW_received %d\n",IMU_MAG_RAW_received);
 				printf("BARO_RAW_received %d\n",BARO_RAW_received);
 				printf("GPS_INT_received %d\n",GPS_INT_received);			
 				printf("AIRSPEED_received %d\n",AIRSPEED_received);			
-				printf("SVINFO_received %d\n",SVINFO_received);		
+				printf("SVINFO_received %d\n",SVINFO_received);	*/	
+
 				printf("\n");
 
-				/*if(input_stream[3]==221){
+				if(input_stream[3]==221){
 					int i;
 					printf("Baro_raw content:");
 
@@ -204,7 +205,7 @@ int main(int argc, char *argv[]){
 					printf("latency %ld.%06ld sec\n", tvDiff.tv_sec, tvDiff.tv_usec);
 									 
 					printf("\n\n\n");
-				}*/
+				}
 				
 				//printf("\n");
 				/*if(input_stream[3]==203){
@@ -219,9 +220,9 @@ int main(int argc, char *argv[]){
 					printf("gp %d\n",data->lisa_plane.imu_gyro_raw.message.gp);
 					printf("gr %d\n",data->lisa_plane.imu_gyro_raw.message.gr);
 
-				}
+				}*/
 				
-				if(input_stream[3]==57){
+				/*if(input_stream[3]==57){
 					int i;
 					printf("airspeed content:");
 
@@ -233,9 +234,9 @@ int main(int argc, char *argv[]){
 					printf("offset %d\n",data->lisa_plane.airspeed_ets.message.offset);
 					printf("scaled %f\n",data->lisa_plane.airspeed_ets.message.scaled);
 
-				}
+				}*/
 				
-				if(input_stream[3]==155){
+				/*if(input_stream[3]==155){
 					int i;
 					printf("Gps_int_message content:");
 
@@ -259,9 +260,9 @@ int main(int argc, char *argv[]){
 					printf("pdop %d\n",data->lisa_plane.gps_int.message.pdop);
 					printf("numsv %d\n",data->lisa_plane.gps_int.message.numsv);
 					printf("fix %d\n",data->lisa_plane.gps_int.message.fix);
-				}
+				}*/
 				
-				if(input_stream[3]==25){
+				/*if(input_stream[3]==25){
 					int i;
 					printf("svinfo content:");
 
