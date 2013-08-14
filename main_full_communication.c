@@ -146,11 +146,8 @@ int main(int argc, char *argv[]){
 				printf("%d ",input_stream[j]);
 			}
 			printf("\n");*/
-			
-			UART_err_handler(serial_port_write(input_stream,sizeof(input_stream))); 
-			
+				
 			#if LOGGING > 0
-			
 			//write the data to circular buffer for log thread
 			memcpy (&cb_elem.value, &input_stream, sizeof(input_stream));	
 			cbWrite(&cb_data_ground, &cb_elem);
@@ -159,8 +156,11 @@ int main(int argc, char *argv[]){
 			if(cbIsFull(&cb_data_ground)){
 				printf("groundstation buffer is full\n") ;
 			}
-			
 			#endif
+			
+			int new_length = strip_timestamp(input_stream); //lisa expects a package without a timestamp
+			
+			UART_err_handler(serial_port_write(input_stream,new_length)); 
 		}
 		
 	}

@@ -275,6 +275,23 @@ int add_timestamp(uint8_t buffer[]){
 	return new_length;
 }
 
+int strip_timestamp(uint8_t buffer[]){
+	int length=buffer[1],i,j;
+	uint8_t checksum_1,checksum_2;
+	int new_length=length-16; //timeval is 16 bytes
+	TimestampBeagle timestampBeagle;
+
+	//update message length
+	buffer[1]=new_length; 
+	
+	//recalculate checksum
+	calculate_checksum(buffer,&checksum_1,&checksum_2);
+	buffer[new_length-2]=checksum_1;
+	buffer[new_length-1]=checksum_2;
+	
+	return new_length;	
+}
+
 int timeval_subtract(struct timeval *result, struct timeval *t2, struct timeval *t1)
 {
     long int diff = (t2->tv_usec + 1000000 * t2->tv_sec) - (t1->tv_usec + 1000000 * t1->tv_sec);

@@ -210,6 +210,7 @@ extern DEC_errCode data_encode(uint8_t message[],long unsigned int message_lengt
 extern Data* get_read_pointer();
 extern void calculate_checksum(uint8_t buffer[],uint8_t *checksum_1,uint8_t *checksum2);
 extern int add_timestamp(uint8_t buffer[]);
+extern int strip_timestamp(uint8_t buffer[]);
 extern void timestamp_to_timeString(struct timeval tv,char time_string[]);
 extern int timeval_subtract(struct timeval *result, struct timeval *t2, struct timeval *t1);
 
