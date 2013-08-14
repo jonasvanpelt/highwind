@@ -8,8 +8,8 @@ int main(int argc, char **argv)
     char buff[BUZZ_SIZE];
     FILE *f = fopen("/media/sdcard/data_lisa_log.txt", "r");
     int ch;
-
-
+    
+    
 
 	while ( ( ch = fgetc(f) ) != EOF ) {
 		
