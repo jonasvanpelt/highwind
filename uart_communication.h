@@ -51,10 +51,10 @@ struct timeval timers[10];
  * PROTOTYPES PUBLIC
  * ******************************/
  
- extern UART_errCode serial_port_create();
- extern int serial_input_check(void);
+extern UART_errCode serial_port_create();
+extern int serial_input_check(void);
 extern UART_errCode serial_port_write(uint8_t output[],long unsigned int message_length) ;
- extern UART_errCode serial_port_close(void);
+extern UART_errCode serial_port_close(void);
 extern serial_port* serial_port_new(void);
 
 
