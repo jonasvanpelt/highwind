@@ -45,6 +45,7 @@ extern uint8_t serial_port_get_length(void);
  * GLOBALS
  * ******************************/
  
+ 
 static const char FILENAME[] = "uart_communication.c";
 
 //config
