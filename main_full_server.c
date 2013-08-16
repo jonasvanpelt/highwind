@@ -101,7 +101,6 @@ int main(int argc, char *argv[]){
 
 	while(1){
 		//1. retreive UDP data form planebone from ethernet port.
-		
 		err = receiveUDPServerData(&udp_server,(void *)&input_stream,sizeof(input_stream)); //blocking !!!
 		UDP_err_handler(err); 
 	
@@ -166,9 +165,9 @@ int main(int argc, char *argv[]){
 				printf("BARO_RAW_received %d\n",BARO_RAW_received);
 				printf("GPS_INT_received %d\n",GPS_INT_received);			
 				printf("AIRSPEED_received %d\n",AIRSPEED_received);			
-				printf("SVINFO_received %d\n",SVINFO_received);	*/
+				printf("SVINFO_received %d\n",SVINFO_received);	
 
-				printf("\n");
+				printf("\n");*/
 
 				if(input_stream[3]==221){
 					int i;
@@ -340,8 +339,8 @@ void *server_to_planebone(void *connection){
 		//3. send data to eth port using UDP
 		UDP_err_handler(sendUDPClientData(&udp_client,&encoded_data,sizeof(encoded_data)));	
 		
-		//usleep(10000);
-		sleep(1);
+		usleep(10000);
+		//sleep(1);
 	}
 	UDP_err_handler(closeUDPClientSocket(&udp_client));
 
