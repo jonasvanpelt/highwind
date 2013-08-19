@@ -183,7 +183,7 @@ int main(int argc, char *argv[]){
 				printf("ACTUATORS_received %d\n",ACTUATORS_received);	
 				printf("\n");*/
 
-			/*	if(input_stream[3]==221){
+				if(input_stream[3]==221){
 					int i;
 					printf("Baro_raw content:");
 
@@ -219,9 +219,9 @@ int main(int argc, char *argv[]){
 									 
 					printf("\n\n\n");
 				}
-				*/
-				//printf("\n");
-				/*if(input_stream[3]==203){
+				
+				printf("\n");
+				if(input_stream[3]==203){
 					int i;
 					printf("Imu_gyro_raw content:");
 
@@ -230,11 +230,106 @@ int main(int argc, char *argv[]){
 					}
 					printf("\n");
 					printf("gp %d\n",data->lisa_plane.imu_gyro_raw.message.gp);
-					printf("gp %d\n",data->lisa_plane.imu_gyro_raw.message.gp);
+					printf("gq %d\n",data->lisa_plane.imu_gyro_raw.message.gq);
 					printf("gr %d\n",data->lisa_plane.imu_gyro_raw.message.gr);
+					
+					char strTime[64]={0};
+
+					struct timeval tvSend;
+					struct timeval tvNow;
+					struct timeval tvDiff;		
+					
+	
+					tvSend.tv_sec=data->lisa_plane.imu_gyro_raw.message.tv.tv_sec;
+					tvSend.tv_usec=data->lisa_plane.imu_gyro_raw.message.tv.tv_usec;		
+					
+					printf("size %ld\n",sizeof(data->lisa_plane.imu_gyro_raw.message));
+					printf("sec %ld\n",tvSend.tv_sec);
+					printf("usec %ld\n",tvSend.tv_usec);							
+					
+					gettimeofday(&tvNow, NULL);
+									
+					timestamp_to_timeString(tvSend,strTime);
+					printf("send time \t%s\n",strTime);
+					memset(strTime,0,sizeof(strTime));
+								
+					timestamp_to_timeString(tvNow,strTime);	
+					printf("receive time \t%s\n",strTime);
+								
+					timeval_subtract(&tvDiff, &tvNow, &tvSend);
+					
+					printf("latency %ld.%06ld sec\n", tvDiff.tv_sec, tvDiff.tv_usec);
+									 
+					printf("\n\n\n");
+
+				}
+				
+				/*f(input_stream[3]==204){
+					int i;
+					printf("Imu_accel_raw content:");
+
+					for(i=0;i<input_stream[1];i++){
+						printf("%d ",data->lisa_plane.imu_accel_raw.raw[i]);
+					}
+					printf("\n");
+					printf("ax %d\n",data->lisa_plane.imu_accel_raw.message.ax);
+					printf("ay %d\n",data->lisa_plane.imu_accel_raw.message.ay);
+					printf("az %d\n",data->lisa_plane.imu_accel_raw.message.az);
+					printf("\n");
+					
+					char strTime[64]={0};
+					
+					struct timeval tvSend;
+					struct timeval tvNow;
+					struct timeval tvDiff;				
+					
+					tvSend.tv_sec=data->lisa_plane.imu_accel_raw.message.tv.tv_sec;
+					tvSend.tv_usec=data->lisa_plane.imu_accel_raw.message.tv.tv_usec;				
+					
+					gettimeofday(&tvNow, NULL);
+									
+					timestamp_to_timeString(tvSend,strTime);
+					printf("send time \t%s\n",strTime);
+					memset(strTime,0,sizeof(strTime));
+								
+					timestamp_to_timeString(tvNow,strTime);	
+					printf("receive time \t%s\n",strTime);
+								
+					timeval_subtract(&tvDiff, &tvNow, &tvSend);
+					
+					printf("latency %ld.%06ld sec\n", tvDiff.tv_sec, tvDiff.tv_usec);
+									 
+					printf("\n\n\n");
 
 				}*/
 				
+				/*if(input_stream[3]==57){
+					int i;
+					printf("airspeed content:");
+
+					for(i=0;i<input_stream[1];i++){
+						printf("%d ",data->lisa_plane.airspeed_ets.raw[i]);
+					}
+					printf("\n");
+					printf("adc %d\n",data->lisa_plane.airspeed_ets.message.adc);
+					printf("offset %d\n",data->lisa_plane.airspeed_ets.message.offset);
+					printf("scaled %f\n",data->lisa_plane.airspeed_ets.message.scaled);
+
+				}*/
+				
+				/*if(input_stream[3]==57){
+					int i;
+					printf("airspeed content:");
+
+					for(i=0;i<input_stream[1];i++){
+						printf("%d ",data->lisa_plane.airspeed_ets.raw[i]);
+					}
+					printf("\n");
+					printf("adc %d\n",data->lisa_plane.airspeed_ets.message.adc);
+					printf("offset %d\n",data->lisa_plane.airspeed_ets.message.offset);
+					printf("scaled %f\n",data->lisa_plane.airspeed_ets.message.scaled);
+
+				}*/
 				/*if(input_stream[3]==57){
 					int i;
 					printf("airspeed content:");
@@ -306,7 +401,7 @@ int main(int argc, char *argv[]){
 					printf("cpu_load %d\n",data->lisa_plane.sys_mon.message.cpu_load);
 
 				}*/
-				if(input_stream[3]==208){
+			/*if(input_stream[3]==208){
 					int i;
 					printf("uart error content:");
 
@@ -320,7 +415,7 @@ int main(int argc, char *argv[]){
 					printf("framing_err_cnt %d\n",data->lisa_plane.uart_errors.message.framing_err_cnt);
 					printf("bus_number %d\n",data->lisa_plane.uart_errors.message.bus_number);
 
-				}
+				}*/
 				/*if(input_stream[3]==105){
 					int i;
 					printf("actuators content:");
@@ -334,8 +429,9 @@ int main(int argc, char *argv[]){
 					for(i=0;i<data->lisa_plane.actuators.message.arr_length;i++){
 						printf("servo_%d %d\n",i,data->lisa_plane.actuators.message.values[i]);
 					}
+				}
 				}*/
-							
+						
 			}else{
 					printf("UNKNOW PACKAGE with id %d\n",input_stream[3]);
 					exit(1);

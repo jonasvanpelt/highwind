@@ -311,3 +311,7 @@ void timestamp_to_timeString(struct timeval tv,char time_string[]){
 	snprintf(time_string, 64, "%s.%06d", tmbuf, (int)tv.tv_usec);
 }
 
+void log_time_diff_to_csv(uint8_t buffer[]){
+	
+}
+
