@@ -111,7 +111,7 @@ int main(int argc, char *argv[]){
 		UDP_err_handler(err); 
 	
 		if(err == UDP_ERR_NONE){
-			#if DEBUG > 0
+			//#if DEBUG > 0
 			
 			printf("message raw: ");
 			int i;
@@ -128,7 +128,7 @@ int main(int argc, char *argv[]){
 			printf("checksum2: %d\n", input_stream[input_stream[1]-1]);
 			printf("\n");
 			
-			#endif
+			//#endif
 			
 			//2. decode data 
 			
@@ -202,14 +202,16 @@ int main(int argc, char *argv[]){
 					struct timeval tvDiff;				
 					
 					tvSend.tv_sec=data->lisa_plane.baro_raw.message.tv.tv_sec;
-					tvSend.tv_usec=data->lisa_plane.baro_raw.message.tv.tv_usec;				
+					tvSend.tv_usec=data->lisa_plane.baro_raw.message.tv.tv_usec;
 					
-					gettimeofday(&tvNow, NULL);
+					printf("sec %ld\n",tvSend.tv_sec);
+					printf("usec %ld\n",tvSend.tv_usec);										
 					
 					timestamp_to_timeString(tvSend,strTime);
 					printf("send time \t%s\n",strTime);
 					memset(strTime,0,sizeof(strTime));
-								
+					
+					gettimeofday(&tvNow, NULL);
 					timestamp_to_timeString(tvNow,strTime);	
 					printf("receive time \t%s\n",strTime);
 								
@@ -225,7 +227,7 @@ int main(int argc, char *argv[]){
 					int i;
 					printf("Imu_gyro_raw content:");
 
-					for(i=0;i<input_stream[1];i++){
+					for(i=0;i<input_stream[1]-6;i++){
 						printf("%d ",data->lisa_plane.imu_gyro_raw.raw[i]);
 					}
 					printf("\n");
@@ -240,10 +242,9 @@ int main(int argc, char *argv[]){
 					struct timeval tvDiff;		
 					
 	
-					tvSend.tv_sec=data->lisa_plane.imu_gyro_raw.message.tv.tv_sec;
-					tvSend.tv_usec=data->lisa_plane.imu_gyro_raw.message.tv.tv_usec;		
+					tvSend.tv_sec=data->lisa_plane.imu_gyro_raw.message.tv.tv_usec;
+					tvSend.tv_usec=data->lisa_plane.imu_gyro_raw.message.tv.tv_sec;
 					
-					printf("size %ld\n",sizeof(data->lisa_plane.imu_gyro_raw.message));
 					printf("sec %ld\n",tvSend.tv_sec);
 					printf("usec %ld\n",tvSend.tv_usec);							
 					
