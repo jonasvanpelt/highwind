@@ -88,6 +88,42 @@ typedef union { // id = 54
 		} message;
 	} Airspeed;
 	
+typedef union { // id = 33
+		uint8_t raw[28];
+		struct Sys_mon_message {
+			uint16_t periodic_time;
+			uint16_t periodic_cycle;
+			uint16_t periodic_cycle_min;
+			uint16_t periodic_cycle_max;
+			uint16_t event_number;
+			uint8_t cpu_load; //in %
+			struct timeval tv; 
+			int8_t new_data;
+		} message;
+	} Sys_mon;
+	
+typedef union { // id = 208
+		uint8_t raw[24];
+		struct UART_errors_message {
+			uint16_t overrun_cnt;
+			uint16_t noise_err_cnt;
+			uint16_t framing_err_cnt;
+			uint8_t bus_number; 
+			struct timeval tv; 
+			int8_t new_data;
+		} message;
+	} UART_errors;
+	
+typedef union { // id = 105
+		uint8_t raw[32];
+		struct Actuators_message {
+			uint8_t arr_length;
+			int16_t values[7]; //the ACTUATORS message contains the final commands to the servos (or any actuator) regardless of which mode you are in (e.g. if it's comming from RC or NAV)
+			struct timeval tv; 
+			int8_t new_data;
+		} message;
+	} Actuators;
+	
 typedef union { // id = 25
 		uint8_t raw[25];
 		struct Svinfo_message {
@@ -181,7 +217,7 @@ typedef union { // id = 205
 		} message;
 	} Imu_mag_raw;
 	
-	typedef struct { // sender id = 165
+typedef struct { // sender id = 165
 		Airspeed airspeed;
 		Svinfo svinfo;
 		Airspeed_ets airspeed_ets;
@@ -190,6 +226,9 @@ typedef union { // id = 205
 		Imu_gyro_raw imu_gyro_raw;
 		Imu_accel_raw imu_accel_raw;
 		Imu_mag_raw imu_mag_raw;
+		Sys_mon sys_mon;
+		UART_errors uart_errors;
+		Actuators actuators;
 	} Lisa_plane;	
 	
 //INPUT

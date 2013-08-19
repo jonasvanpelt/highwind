@@ -87,6 +87,9 @@ int main(int argc, char *argv[]){
 	 * BARO_RAW 221
 	 * GPS_INT 155
 	 * AIRSPEED_ETS 57
+	 * SYSMON 33
+	 * UART_ERROR 208
+	 * ACTUATORS_received 105
 	 * */
 	 
 	int IMU_ACCEL_RAW_received=0;
@@ -96,6 +99,9 @@ int main(int argc, char *argv[]){
 	int GPS_INT_received=0;
 	int AIRSPEED_received=0;
 	int SVINFO_received=0;
+	int SYSMON_received=0;
+	int UART_ERROR_received=0;
+	int ACTUATORS_received=0;
 	int err;
 	
 
@@ -154,6 +160,12 @@ int main(int argc, char *argv[]){
 					AIRSPEED_received=1;
 				}else if(input_stream[3]==25){
 					SVINFO_received=1;
+				}else if(input_stream[3]==33){
+					SYSMON_received=1;
+				}else if(input_stream[3]==208){
+					UART_ERROR_received=1;
+				}else if(input_stream[3]==105){
+					ACTUATORS_received=1;
 				}else{
 						printf("UNKNOWN DATA with id %d\n",input_stream[3]);
 						exit(1);
@@ -166,10 +178,12 @@ int main(int argc, char *argv[]){
 				printf("GPS_INT_received %d\n",GPS_INT_received);			
 				printf("AIRSPEED_received %d\n",AIRSPEED_received);			
 				printf("SVINFO_received %d\n",SVINFO_received);	
-
+				printf("SYSMON_received %d\n",SYSMON_received);	
+				printf("UART_ERROR_received %d\n",UART_ERROR_received);	
+				printf("ACTUATORS_received %d\n",ACTUATORS_received);	
 				printf("\n");*/
 
-				if(input_stream[3]==221){
+			/*	if(input_stream[3]==221){
 					int i;
 					printf("Baro_raw content:");
 
@@ -205,7 +219,7 @@ int main(int argc, char *argv[]){
 									 
 					printf("\n\n\n");
 				}
-				
+				*/
 				//printf("\n");
 				/*if(input_stream[3]==203){
 					int i;
@@ -275,6 +289,52 @@ int main(int argc, char *argv[]){
 					printf("scaled %f\n",data->lisa_plane.airspeed_ets.message.scaled);
 
 				}*/
+				/*if(input_stream[3]==33){
+					int i;
+					printf("sysmon content:");
+
+					for(i=0;i<input_stream[1];i++){
+						printf("%d ",data->lisa_plane.sys_mon.raw[i]);
+					}
+				
+					printf("\n");
+					printf("periodic_time %d\n",data->lisa_plane.sys_mon.message.periodic_time);
+					printf("periodic_cycle %d\n",data->lisa_plane.sys_mon.message.periodic_cycle);
+					printf("periodic_cycle_min %d\n",data->lisa_plane.sys_mon.message.periodic_cycle_min);
+					printf("periodic_cycle_max %d\n",data->lisa_plane.sys_mon.message.periodic_cycle_max);
+					printf("event_number %d\n",data->lisa_plane.sys_mon.message.event_number);
+					printf("cpu_load %d\n",data->lisa_plane.sys_mon.message.cpu_load);
+
+				}*/
+				if(input_stream[3]==208){
+					int i;
+					printf("uart error content:");
+
+					for(i=0;i<input_stream[1];i++){
+						printf("%d ",data->lisa_plane.uart_errors.raw[i]);
+					}
+				
+					printf("\n");
+					printf("overrun_cnt %d\n",data->lisa_plane.uart_errors.message.overrun_cnt);
+					printf("noise_err_cnt %d\n",data->lisa_plane.uart_errors.message.noise_err_cnt);
+					printf("framing_err_cnt %d\n",data->lisa_plane.uart_errors.message.framing_err_cnt);
+					printf("bus_number %d\n",data->lisa_plane.uart_errors.message.bus_number);
+
+				}
+				/*if(input_stream[3]==105){
+					int i;
+					printf("actuators content:");
+
+					for(i=0;i<input_stream[1];i++){
+						printf("%d ",data->lisa_plane.uart_errors.raw[i]);
+					}
+				
+					printf("\n");
+					printf("arr_length %d\n",data->lisa_plane.actuators.message.arr_length);
+					for(i=0;i<data->lisa_plane.actuators.message.arr_length;i++){
+						printf("servo_%d %d\n",i,data->lisa_plane.actuators.message.values[i]);
+					}
+				}*/
 							
 			}else{
 					printf("UNKNOW PACKAGE with id %d\n",input_stream[3]);
@@ -339,8 +399,8 @@ void *server_to_planebone(void *connection){
 		//3. send data to eth port using UDP
 		UDP_err_handler(sendUDPClientData(&udp_client,&encoded_data,sizeof(encoded_data)));	
 		
-		usleep(10000);
-		//sleep(1);
+		//usleep(100000);
+		sleep(1);
 	}
 	UDP_err_handler(closeUDPClientSocket(&udp_client));
 

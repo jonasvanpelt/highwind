@@ -121,9 +121,17 @@ DEC_errCode data_decode(uint32_t pos, uint8_t sender,uint8_t stream[], int lengt
 					pos = data_write(stream, write_data->lisa_plane.airspeed.raw, 24, pos);
 					write_data->lisa_plane.airspeed.message.new_data = 0;
 					break;*/
+				case 33: // sys_mon 
+					pos = data_write(stream, write_data->lisa_plane.sys_mon.raw, 27, pos);
+					write_data->lisa_plane.sys_mon.message.new_data = 0;
+					break;
 				case 57: // airspeed_ets - 40 bytes
 					pos = data_write(stream, write_data->lisa_plane.airspeed_ets.raw, 24, pos);
 					write_data->lisa_plane.airspeed_ets.message.new_data = 0;
+					break;
+				case 105: // actuators 
+					pos = data_write(stream, write_data->lisa_plane.actuators.raw, 31, pos);
+					write_data->lisa_plane.actuators.message.new_data = 0;
 					break;
 				case 155: // gps_int - 81 bytes
 					pos = data_write(stream, write_data->lisa_plane.gps_int.raw, 72, pos);
@@ -141,6 +149,10 @@ DEC_errCode data_decode(uint32_t pos, uint8_t sender,uint8_t stream[], int lengt
 					pos = data_write(stream, write_data->lisa_plane.imu_mag_raw.raw, 28, pos);
 					write_data->lisa_plane.imu_mag_raw.message.new_data = 0;
 					break;
+				case 208: // UART_errors_message
+					pos = data_write(stream, write_data->lisa_plane.uart_errors.raw, 23, pos);
+					write_data->lisa_plane.uart_errors.message.new_data = 0;
+					break;
 				case 221: // baro_raw - 40 bytes
 					pos = data_write(stream, write_data->lisa_plane.baro_raw.raw, 24, pos);
 					write_data->lisa_plane.baro_raw.message.new_data = 0;
@@ -154,7 +166,6 @@ DEC_errCode data_decode(uint32_t pos, uint8_t sender,uint8_t stream[], int lengt
 	{
 		return DEC_ERR_NONE; //data encoding succeeded
 	} else {
-		printf("here\n");
 		return data_decode(pos, sender, stream, length);
 	}
 }
