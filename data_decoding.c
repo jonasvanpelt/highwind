@@ -1,5 +1,7 @@
 #include <stdlib.h>
 #include "data_decoding.h"
+#include <string.h>
+
 
 
 #ifndef DEBUG 
@@ -13,12 +15,14 @@
 /********************************
  * PROTOTYPES PRIVATE
  * ******************************/
-DEC_errCode data_decode(uint32_t pos, uint8_t sender,uint8_t stream[], int length);
+DEC_errCode data_decode(uint8_t sender,uint8_t stream[], int length);
 
 
 /********************************
  * GLOBALS
  * ******************************/
+enum stream_index{STARTBYTE_INDEX=0,LENGTH_INDEX,SENDER_ID_INDEX,MESSAGE_ID_INDEX,MESSAGE_START_INDEX};
+ 
 //one writes to ping and another can read data from pong and upside down
 static Data ping;
 static Data pong;
@@ -61,11 +65,11 @@ DEC_errCode data_update(uint8_t stream[])
 	int i = 0; 
 	uint8_t checksum_1 = 0;
 	uint8_t checksum_2 = 0;
-	uint8_t length = stream[1];
-	uint8_t sender = stream[2];	
+	uint8_t length = stream[LENGTH_INDEX];
+	uint8_t sender = stream[SENDER_ID_INDEX];	
 
 	//check first bit is 0x99
-	if(stream[0] != 0x99)
+	if(stream[STARTBYTE_INDEX] != 0x99)
 	{
 		//unknown package !!!
 		return DEC_ERR_START_BYTE;
@@ -80,110 +84,75 @@ DEC_errCode data_update(uint8_t stream[])
 	}
 	
 	
-	return data_decode(0, sender, stream, length);
+	return data_decode(sender, stream, length);
 }
 
-DEC_errCode data_decode(uint32_t pos, uint8_t sender,uint8_t stream[], int length) // start = 0
+DEC_errCode data_decode(uint8_t sender,uint8_t stream[], int length) // start = 0
 {
 	#if DEBUG  > 1
 		printf("Entering data_decode\n");
 	#endif
 	
-	if(pos == 0)
-	{
-		pos = 3;
-	} 
-		
 	switch(sender)
 	{
-		case 2: //sender_id of beaglebone
-			switch(stream[pos])
+		case BEAGLEBONE: //sender_id of beaglebone
+			switch(stream[MESSAGE_ID_INDEX])
 			{
-				case 1: // status - x bytes
-					pos = data_write(stream, write_data->bone_plane.status.raw, 8, pos);
-					write_data->bone_plane.status.message.new_data = 0;
-					break;
-				case 2: // error - 1 byte
-					pos = data_write(stream, write_data->bone_plane.error.raw, 1, pos);
+				case BEAGLE_ERROR: 
+					data_write(stream, (void *)&write_data->bone_plane.error, sizeof(Beagle_error));
 					write_data->bone_plane.error.message.new_data = 0;
 					break;
 				default: return DEC_ERR_UNKNOWN_BONE_PACKAGE; break;
 			}
 		break;
-		case 165: //sender_id of lisa
-			switch(stream[pos]) // the message id of the folowing message
+		case LISA: //sender_id of lisa
+			switch(stream[MESSAGE_ID_INDEX]) // the message id of the folowing message
 			{
-				case 25: // Svinfo 
-					pos = data_write(stream, write_data->lisa_plane.svinfo.raw, 24, pos);
-					write_data->lisa_plane.svinfo.message.new_data = 0;
+				case SVINFO:
+					data_write(stream, (void *)&write_data->lisa_plane.svinfo, sizeof(Svinfo)-1);
 					break;
-				/*case 54: // airspeed - 48 bytes
-					pos = data_write(stream, write_data->lisa_plane.airspeed.raw, 24, pos);
-					write_data->lisa_plane.airspeed.message.new_data = 0;
-					break;*/
-				case 33: // sys_mon 
-					pos = data_write(stream, write_data->lisa_plane.sys_mon.raw, 27, pos);
-					write_data->lisa_plane.sys_mon.message.new_data = 0;
+				case SYSMON: 
+					data_write(stream, (void *)&write_data->lisa_plane.sys_mon, sizeof(Sys_mon)-1);
 					break;
-				case 57: // airspeed_ets - 40 bytes
-					pos = data_write(stream, write_data->lisa_plane.airspeed_ets.raw, 24, pos);
-					write_data->lisa_plane.airspeed_ets.message.new_data = 0;
+				case AIRSPEED_ETS: 
+					data_write(stream, (void *)&write_data->lisa_plane.airspeed_ets, sizeof(Airspeed_ets)-1);
 					break;
-				case 105: // actuators 
-					pos = data_write(stream, write_data->lisa_plane.actuators.raw, 31, pos);
-					write_data->lisa_plane.actuators.message.new_data = 0;
+				case ACTUATORS:
+					data_write(stream, (void *)&write_data->lisa_plane.actuators, sizeof(Actuators)-1);
 					break;
-				case 155: // gps_int - 81 bytes
-					pos = data_write(stream, write_data->lisa_plane.gps_int.raw, 72, pos);
-					write_data->lisa_plane.gps_int.message.new_data = 0;
+				case GPS_INT: 
+					data_write(stream, (void *)&write_data->lisa_plane.gps_int, sizeof(Gps_int)-1);
 					break;
-				case 203: // imu_gyro_raw - 48 bytes
-					pos = data_write(stream, write_data->lisa_plane.imu_gyro_raw.raw, 28, pos);
-					write_data->lisa_plane.imu_gyro_raw.message.new_data = 0;
+				case IMU_GYRO_RAW:
+					data_write(stream, (void *)&write_data->lisa_plane.imu_gyro_raw, sizeof(Imu_gyro_raw)-1);
 					break;
-				case 204: // imu_accel_raw - 48 bytes
-					pos = data_write(stream, write_data->lisa_plane.imu_accel_raw.raw, 28, pos);
-					write_data->lisa_plane.imu_accel_raw.message.new_data = 0;
+				case IMU_ACCEL_RAW: 
+					data_write(stream, (void *)&write_data->lisa_plane.imu_accel_raw, sizeof(Imu_accel_raw)-1);
 					break;
-				case 205: // imu_mag_raw - 48 bytes
-					pos = data_write(stream, write_data->lisa_plane.imu_mag_raw.raw, 28, pos);
-					write_data->lisa_plane.imu_mag_raw.message.new_data = 0;
+				case IMU_MAG_RAW: 
+					data_write(stream, (void *)&write_data->lisa_plane.imu_mag_raw, sizeof(Imu_mag_raw)-1);
 					break;
-				case 208: // UART_errors_message
-					pos = data_write(stream, write_data->lisa_plane.uart_errors.raw, 23, pos);
-					write_data->lisa_plane.uart_errors.message.new_data = 0;
+				case UART_ERRORS:
+					data_write(stream, (void *)&write_data->lisa_plane.uart_errors, sizeof(UART_errors)-1);
 					break;
-				case 221: // baro_raw - 40 bytes
-					pos = data_write(stream, write_data->lisa_plane.baro_raw.raw, 24, pos);
-					write_data->lisa_plane.baro_raw.message.new_data = 0;
+				case BARO_RAW:
+					data_write(stream, (void *)&write_data->lisa_plane.baro_raw, sizeof(Baro_raw)-1);
 					break;
 				default: return DEC_ERR_UNKNOWN_LISA_PACKAGE;break;
 			}
 		 break;
 				default: return DEC_ERR_UNKNOWN_SENDER; break;
-	}
-	if (pos == length-2)
-	{
-		return DEC_ERR_NONE; //data encoding succeeded
-	} else {
-		return data_decode(pos, sender, stream, length);
-	}
+	}	
+	return DEC_ERR_NONE;	
 }
 
-int data_write(uint8_t stream[],uint8_t transfer[], int length, int pos)
+data_write(uint8_t stream[],void *destination, int length)
 {
 	#if DEBUG  > 1
 		printf("Entering data_write\n");
 	#endif
-	
-	int i;
-	for(i=0;i<length;i++)
-	{
-	    transfer[i] = stream[++pos]; //pos is first time message id so first ++ for first data byte
-	    
-	}
-	
-	return pos + 1;
+
+	memcpy(destination,&(stream[MESSAGE_START_INDEX]),length);	
 }
 
 DEC_errCode data_encode(uint8_t message[],long unsigned int message_length,uint8_t encoded_data[],int sender_id,int message_id)
@@ -196,8 +165,8 @@ DEC_errCode data_encode(uint8_t message[],long unsigned int message_length,uint8
 	uint8_t checksum_1 = 0;
 	uint8_t checksum_2 = 0;
 	uint8_t length = message_length+6+16; //message length + 6 info bytes + 16 timestamp bytes
-	Timestamp timestamp;
-		
+	timeval timestamp; 
+	 
 	encoded_data[0] = 0x99;
 	encoded_data[1] = length;
 	encoded_data[2] = sender_id; // sender id of server
@@ -210,13 +179,15 @@ DEC_errCode data_encode(uint8_t message[],long unsigned int message_length,uint8
 	}
 	
 	//get localtime 
-	gettimeofday(&timestamp.tv, NULL);
+	gettimeofday(&timestamp, NULL);
 	
 	//add timestamp to buffer
-	j=0;
+	memcpy(&(encoded_data[message_length+4]),(void *)&timestamp,sizeof(timestamp));
+	
+	/*j=0;
 	for(i=message_length+4;i<length-2;i++){ //overwrite previous checksums
 		encoded_data[i]=timestamp.raw[j];j++;	
-	}
+	}*/
 	
 	calculate_checksum(encoded_data,&checksum_1,&checksum_2);
 	
@@ -264,10 +235,7 @@ int add_timestamp(uint8_t buffer[]){
 	buffer[1]=new_length; 
 	
 	//add timestamp to buffer
-	j=0;
-	for(i=length_original-2;i<new_length-2;i++){ //overwrite previous checksums
-		buffer[i]=timestampBeagle.raw[j];j++;	
-	}
+	memcpy(&(buffer[length_original-2]),(void *)&timestampBeagle.tv,sizeof(timestampBeagle.tv)); //overwrite previous checksums (-2)
 	
 	//recalculate checksum
 	calculate_checksum(buffer,&checksum_1,&checksum_2);
@@ -281,7 +249,6 @@ int strip_timestamp(uint8_t buffer[]){
 	int length=buffer[1],i,j;
 	uint8_t checksum_1,checksum_2;
 	int new_length=length-16; //timeval is 16 bytes
-	TimestampBeagle timestampBeagle;
 
 	//update message length
 	buffer[1]=new_length; 
@@ -294,7 +261,7 @@ int strip_timestamp(uint8_t buffer[]){
 	return new_length;	
 }
 
-int timeval_subtract(Timeval16 *result, Timeval16 *t2, Timeval16 *t1)
+int timeval_subtract(timeval *result,timeval *t2,timeval *t1)
 {
     long int diff = (t2->tv_usec + 1000000 * t2->tv_sec) - (t1->tv_usec + 1000000 * t1->tv_sec);
     result->tv_sec = diff / 1000000;
@@ -302,7 +269,7 @@ int timeval_subtract(Timeval16 *result, Timeval16 *t2, Timeval16 *t1)
     return (diff<0);	//Return 1 if the difference is negative, otherwise 0. 
 }
 
-void timestamp_to_timeString(Timeval16 tv,char time_string[]){	
+void timestamp_to_timeString(timeval tv,char time_string[]){	
 	time_t nowtime;
 	struct tm *nowtm;
 	char tmbuf[64];
