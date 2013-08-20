@@ -83,7 +83,6 @@ DEC_errCode data_update(uint8_t stream[])
 		return DEC_ERR_CHECKSUM;
 	}
 	
-	
 	return data_decode(sender, stream, length);
 }
 
@@ -167,27 +166,19 @@ DEC_errCode data_encode(uint8_t message[],long unsigned int message_length,uint8
 	uint8_t length = message_length+6+16; //message length + 6 info bytes + 16 timestamp bytes
 	timeval timestamp; 
 	 
-	encoded_data[0] = 0x99;
-	encoded_data[1] = length;
-	encoded_data[2] = sender_id; // sender id of server
-	encoded_data[3] = message_id; // message id
+	encoded_data[STARTBYTE_INDEX] = 0x99;
+	encoded_data[LENGTH_INDEX] = length;
+	encoded_data[SENDER_ID_INDEX] = sender_id; // sender id of server
+	encoded_data[MESSAGE_ID_INDEX] = message_id; // message id
 
 	//add message
-	for(i=0;i<message_length;i++)
-	{
-		encoded_data[4+i] = message[i];
-	}
-	
+	memcpy(&(encoded_data[MESSAGE_START_INDEX]),(void *)message,message_length);
+
 	//get localtime 
 	gettimeofday(&timestamp, NULL);
 	
 	//add timestamp to buffer
 	memcpy(&(encoded_data[message_length+4]),(void *)&timestamp,sizeof(timestamp));
-	
-	/*j=0;
-	for(i=message_length+4;i<length-2;i++){ //overwrite previous checksums
-		encoded_data[i]=timestamp.raw[j];j++;	
-	}*/
 	
 	calculate_checksum(encoded_data,&checksum_1,&checksum_2);
 	

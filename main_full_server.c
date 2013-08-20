@@ -173,7 +173,7 @@ int main(int argc, char *argv[]){
 						exit(1);
 				}
 				
-				printf("IMU_GYRO_RAW_received %d\n",IMU_GYRO_RAW_received);
+				/*printf("IMU_GYRO_RAW_received %d\n",IMU_GYRO_RAW_received);
 				printf("IMU_ACCEL_RAW_received %d\n",IMU_ACCEL_RAW_received);
 				printf("IMU_MAG_RAW_received %d\n",IMU_MAG_RAW_received);
 				printf("BARO_RAW_received %d\n",BARO_RAW_received);
@@ -183,9 +183,9 @@ int main(int argc, char *argv[]){
 				printf("SYSMON_received %d\n",SYSMON_received);	
 				printf("UART_ERROR_received %d\n",UART_ERROR_received);	
 				printf("ACTUATORS_received %d\n",ACTUATORS_received);	
-				printf("\n");
+				printf("\n");*/
 
-				/*if(input_stream[3]==221){
+				if(input_stream[3]==221){
 					int i;
 					printf("Baro_raw content:");	
 					print_mem((void *)&data->lisa_plane.baro_raw,sizeof(Baro_raw));
@@ -197,7 +197,7 @@ int main(int argc, char *argv[]){
 					print_latency(data->lisa_plane.baro_raw.tv);
 									 
 					printf("\n\n\n");
-				}*/
+				}
 				
 				printf("\n");
 				/*if(input_stream[3]==203){
