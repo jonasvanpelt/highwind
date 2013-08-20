@@ -180,6 +180,7 @@ int data_write(uint8_t stream[],uint8_t transfer[], int length, int pos)
 	for(i=0;i<length;i++)
 	{
 	    transfer[i] = stream[++pos]; //pos is first time message id so first ++ for first data byte
+	    
 	}
 	
 	return pos + 1;
@@ -293,7 +294,7 @@ int strip_timestamp(uint8_t buffer[]){
 	return new_length;	
 }
 
-int timeval_subtract(struct timeval *result, struct timeval *t2, struct timeval *t1)
+int timeval_subtract(Timeval16 *result, Timeval16 *t2, Timeval16 *t1)
 {
     long int diff = (t2->tv_usec + 1000000 * t2->tv_sec) - (t1->tv_usec + 1000000 * t1->tv_sec);
     result->tv_sec = diff / 1000000;
@@ -301,7 +302,7 @@ int timeval_subtract(struct timeval *result, struct timeval *t2, struct timeval 
     return (diff<0);	//Return 1 if the difference is negative, otherwise 0. 
 }
 
-void timestamp_to_timeString(struct timeval tv,char time_string[]){	
+void timestamp_to_timeString(Timeval16 tv,char time_string[]){	
 	time_t nowtime;
 	struct tm *nowtm;
 	char tmbuf[64];
@@ -312,6 +313,13 @@ void timestamp_to_timeString(struct timeval tv,char time_string[]){
 }
 
 void log_time_diff_to_csv(uint8_t buffer[]){
+	/*FILE *file; 
+    file = fopen(FILE_PATH_PROGRAM_LOG,"w"); 
+    
+	fprintf(file,"");
+	fprintf(file,",");
+	
+	fclose(file)==EOF);*/
 	
 }
 

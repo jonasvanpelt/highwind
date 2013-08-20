@@ -22,9 +22,11 @@ typedef enum dec_errCode DEC_errCode;
 enum Library {UDP_L,UART_L,DECODE_L,LOG_L,CIRCULAR_BUFFER_L};
 typedef enum Library library; 
 
+typedef struct timeval timeval;
+
 typedef union{
 		uint8_t raw[16];
-		struct timeval tv;
+		timeval tv;
 } Timestamp;
 
 typedef struct {
@@ -56,7 +58,7 @@ typedef union { // id = 1
 		uint8_t raw[18];
 		struct Status_message {
 			uint8_t error;
-			struct timeval tv;
+			timeval tv;
 			int8_t new_data;
 		} message;
 	} Status;
@@ -66,7 +68,7 @@ typedef union { // id = 2
 		struct Error_message {
 			uint8_t library;
 			uint8_t error;
-			struct timeval tv; //16
+			timeval tv; //16
 			int8_t new_data;
 		} message;
 	} Beagle_error;
@@ -76,6 +78,8 @@ typedef struct { // sender id = 2
 		Beagle_error error;
 	} Bone_plane;	
 	
+//these structure are translated from messages.xml in the paparazzi code
+	
 typedef union { // id = 54
 		uint8_t raw[33];
 		struct Airspeed_message {
@@ -83,7 +87,7 @@ typedef union { // id = 54
 			float airspeed_sp;
 			float airspeed_cnt;
 			float groundspeed_sp;
-			struct timeval tv; 
+			timeval tv; 
 			int8_t new_data;
 		} message;
 	} Airspeed;
@@ -97,7 +101,7 @@ typedef union { // id = 33
 			uint16_t periodic_cycle_max;
 			uint16_t event_number;
 			uint8_t cpu_load; //in %
-			struct timeval tv; 
+			timeval tv; 
 			int8_t new_data;
 		} message;
 	} Sys_mon;
@@ -109,7 +113,7 @@ typedef union { // id = 208
 			uint16_t noise_err_cnt;
 			uint16_t framing_err_cnt;
 			uint8_t bus_number; 
-			struct timeval tv; 
+			timeval tv; 
 			int8_t new_data;
 		} message;
 	} UART_errors;
@@ -119,7 +123,7 @@ typedef union { // id = 105
 		struct Actuators_message {
 			uint8_t arr_length;
 			int16_t values[7]; //the ACTUATORS message contains the final commands to the servos (or any actuator) regardless of which mode you are in (e.g. if it's comming from RC or NAV)
-			struct timeval tv; 
+			timeval tv; 
 			int8_t new_data;
 		} message;
 	} Actuators;
@@ -134,7 +138,7 @@ typedef union { // id = 25
 			uint8_t cno;
 			int8_t elev;
 			uint16_t azim;
-			struct timeval tv; 
+			timeval tv; 
 			int8_t new_data;
 		} message;
 	} Svinfo;
@@ -145,7 +149,7 @@ typedef union Airspeed_ets { // id = 57
 			uint16_t adc;
 			uint16_t offset;
 			float scaled; //4
-			struct timeval tv; //16
+			timeval tv; //16
 			int8_t new_data;
 		} message;
 	} Airspeed_ets;
@@ -169,7 +173,7 @@ typedef union { // id = 155
 			uint16_t pdop;
 			uint8_t numsv;
 			uint8_t fix;
-			struct timeval tv; //16
+			timeval tv; //16
 			int8_t new_data;
 		} message;
 	} Gps_int;
@@ -179,7 +183,7 @@ typedef union { // id = 221
 		struct Baro_raw_message {
 			int32_t abs;
 			int32_t diff;
-			struct timeval tv;
+			timeval tv;
 			int8_t new_data;
 		} message;
 	} Baro_raw;
@@ -190,18 +194,18 @@ typedef union { // id = 203
 			int32_t gp;
 			int32_t gq;
 			int32_t gr;
-			struct timeval tv;
+			timeval tv;
 			int8_t new_data;
 		} message;
 	} Imu_gyro_raw;
 	
 typedef union { // id = 204
 		uint8_t raw[29];
-		struct Imu_accel_message {
+		struct Imu_accel_message  {
 			int32_t ax;
 			int32_t ay;
 			int32_t az;
-			struct timeval tv;
+			Timeval16 tv;
 			int8_t new_data;
 		} message;
 	} Imu_accel_raw;
@@ -212,7 +216,7 @@ typedef union { // id = 205
 			int32_t mx;
 			int32_t my;
 			int32_t mz;
-			struct timeval tv;
+			timeval tv;
 			int8_t new_data;
 		} message;
 	} Imu_mag_raw;
@@ -250,8 +254,8 @@ extern Data* get_read_pointer();
 extern void calculate_checksum(uint8_t buffer[],uint8_t *checksum_1,uint8_t *checksum2);
 extern int add_timestamp(uint8_t buffer[]);
 extern int strip_timestamp(uint8_t buffer[]);
-extern void timestamp_to_timeString(struct timeval tv,char time_string[]);
-extern int timeval_subtract(struct timeval *result, struct timeval *t2, struct timeval *t1);
+extern void timestamp_to_timeString(Timeval16 tv,char time_string[]);
+extern int timeval_subtract(Timeval16 *result,Timeval16 *t2, Timeval16 *t1);
 
 #ifdef __cplusplus
 }

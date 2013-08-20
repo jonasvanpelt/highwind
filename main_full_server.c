@@ -183,7 +183,7 @@ int main(int argc, char *argv[]){
 				printf("ACTUATORS_received %d\n",ACTUATORS_received);	
 				printf("\n");*/
 
-				if(input_stream[3]==221){
+				/*if(input_stream[3]==221){
 					int i;
 					printf("Baro_raw content:");
 
@@ -197,12 +197,19 @@ int main(int argc, char *argv[]){
 						
 					char strTime[64]={0};
 					
-					struct timeval tvSend;
-					struct timeval tvNow;
-					struct timeval tvDiff;				
+					timeval tvSend;
+					timeval tvNow;
+					timeval tvDiff;				
 					
 					tvSend.tv_sec=data->lisa_plane.baro_raw.message.tv.tv_sec;
 					tvSend.tv_usec=data->lisa_plane.baro_raw.message.tv.tv_usec;
+					
+					printf("content timestamp: ");
+					Timestamp timestamp;
+					timestamp.tv=data->lisa_plane.baro_raw.message.tv;
+					for(i=0;i<16;i++){
+							printf("%d ",timestamp.raw[i]);
+					}printf("\n");
 					
 					printf("sec %ld\n",tvSend.tv_sec);
 					printf("usec %ld\n",tvSend.tv_usec);										
@@ -222,12 +229,12 @@ int main(int argc, char *argv[]){
 					printf("\n\n\n");
 				}
 				
-				printf("\n");
-				if(input_stream[3]==203){
+				printf("\n");*/
+				/*if(input_stream[3]==203){
 					int i;
 					printf("Imu_gyro_raw content:");
 
-					for(i=0;i<input_stream[1]-6;i++){
+					for(i=0;i<29;i++){
 						printf("%d ",data->lisa_plane.imu_gyro_raw.raw[i]);
 					}
 					printf("\n");
@@ -237,14 +244,20 @@ int main(int argc, char *argv[]){
 					
 					char strTime[64]={0};
 
-					struct timeval tvSend;
-					struct timeval tvNow;
-					struct timeval tvDiff;		
+					timeval tvSend;
+					timeval tvNow;
+					timeval tvDiff;		
+										
+					tvSend.tv_sec=data->lisa_plane.imu_gyro_raw.message.tv.tv_sec;
+					tvSend.tv_usec=data->lisa_plane.imu_gyro_raw.message.tv.tv_usec;
 					
-	
-					tvSend.tv_sec=data->lisa_plane.imu_gyro_raw.message.tv.tv_usec;
-					tvSend.tv_usec=data->lisa_plane.imu_gyro_raw.message.tv.tv_sec;
-					
+					printf("content timestamp: ");
+					Timestamp timestamp;
+					timestamp.tv=data->lisa_plane.imu_gyro_raw.message.tv;
+					for(i=0;i<16;i++){
+							printf("%d ",timestamp.raw[i]);
+					}printf("\n");
+
 					printf("sec %ld\n",tvSend.tv_sec);
 					printf("usec %ld\n",tvSend.tv_usec);							
 					
@@ -263,46 +276,59 @@ int main(int argc, char *argv[]){
 									 
 					printf("\n\n\n");
 
-				}
+				}*/
 				
-				/*f(input_stream[3]==204){
+				if(input_stream[3]==204){
 					int i;
 					printf("Imu_accel_raw content:");
 
-					for(i=0;i<input_stream[1];i++){
+					for(i=0;i<29;i++){
 						printf("%d ",data->lisa_plane.imu_accel_raw.raw[i]);
 					}
 					printf("\n");
-					printf("ax %d\n",data->lisa_plane.imu_accel_raw.message.ax);
-					printf("ay %d\n",data->lisa_plane.imu_accel_raw.message.ay);
-					printf("az %d\n",data->lisa_plane.imu_accel_raw.message.az);
+					printf("ax %x\n",data->lisa_plane.imu_accel_raw.message.ax);
+					printf("ay %x\n",data->lisa_plane.imu_accel_raw.message.ay);
+					printf("az %x\n",data->lisa_plane.imu_accel_raw.message.az);
 					printf("\n");
 					
 					char strTime[64]={0};
 					
-					struct timeval tvSend;
-					struct timeval tvNow;
-					struct timeval tvDiff;				
+					Timeval16 tvSend;
+					Timeval16 tvNow;
+					Timeval16 tvDiff;	
+							
+					//tvSend=data->lisa_plane.imu_accel_raw.message.tv;
 					
-					tvSend.tv_sec=data->lisa_plane.imu_accel_raw.message.tv.tv_sec;
-					tvSend.tv_usec=data->lisa_plane.imu_accel_raw.message.tv.tv_usec;				
-					
-					gettimeofday(&tvNow, NULL);
+					//printf("address tv message\t %x\n",&data->lisa_plane.imu_accel_raw.message.tv);
+					//printf("address tv raw\t\t %x\n",&data->lisa_plane.imu_accel_raw.raw[12]);
+
+					gettimeofday((struct timeval *)&tvNow, NULL);
 									
-					timestamp_to_timeString(tvSend,strTime);
+					timestamp_to_timeString(data->lisa_plane.imu_accel_raw.message.tv,strTime);
 					printf("send time \t%s\n",strTime);
 					memset(strTime,0,sizeof(strTime));
 								
 					timestamp_to_timeString(tvNow,strTime);	
 					printf("receive time \t%s\n",strTime);
 								
-					timeval_subtract(&tvDiff, &tvNow, &tvSend);
-					
+					timeval_subtract(&tvDiff, &tvNow, &data->lisa_plane.imu_accel_raw.message.tv);	
 					printf("latency %ld.%06ld sec\n", tvDiff.tv_sec, tvDiff.tv_usec);
-									 
+					
+					printf("self fill: ");
+					Imu_accel_raw m;
+					m.message.ax=5;
+					m.message.ay=5;
+					m.message.az=5;
+					//m.message.test=5;
+					gettimeofday((struct timeval *)&m.message.tv,NULL);
+					
+					for(i=0;i<29;i++){
+						printf("%d ",m.raw[i]);
+					}printf("\n");		
+											 
 					printf("\n\n\n");
 
-				}*/
+				}
 				
 				/*if(input_stream[3]==57){
 					int i;
@@ -478,7 +504,7 @@ void *server_to_planebone(void *connection){
 		output.message.servo_5=i;
 		output.message.servo_6=i;
 		output.message.servo_7=0;
-		i=i+300;
+		i=i+600;
 		if(i>12800){
 			i=0;	
 		}

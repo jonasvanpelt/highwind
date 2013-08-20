@@ -35,11 +35,11 @@ int main(int argc, char *argv[])
 			exit(1);		
 	}
 	
-    char buff[BUFF_SIZE];
+    uint8_t buff[BUFF_SIZE];
     FILE *f;
      
     if(settings.file==0)
-		f = fopen("/media/sdcard/data_lisa_log.txt", "r");
+		f = fopen("data_lisa_log.txt", "r");
 	else
 		f = fopen("/media/sdcard/data_groundstation_log.txt", "r");
 		
