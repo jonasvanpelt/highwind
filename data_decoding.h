@@ -218,6 +218,7 @@ extern int add_timestamp(uint8_t buffer[]);
 extern int strip_timestamp(uint8_t buffer[]);
 extern void timestamp_to_timeString(timeval tv,char time_string[]);
 extern int timeval_subtract(timeval *result,timeval *t2, timeval *t1);
+void write_latency_to_netCDF(timeval tvSent);
 
 #ifdef __cplusplus
 }

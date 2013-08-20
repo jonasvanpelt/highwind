@@ -185,7 +185,9 @@ int main(int argc, char *argv[]){
 				printf("ACTUATORS_received %d\n",ACTUATORS_received);	
 				printf("\n");*/
 
-				if(input_stream[3]==221){
+				/*if(input_stream[3]==221){
+					write_latency_to_netCDF(data->lisa_plane.baro_raw.tv);
+					write_period_to_netCDF(data->lisa_plane.baro_raw.tv);
 					int i;
 					printf("Baro_raw content:");	
 					print_mem((void *)&data->lisa_plane.baro_raw,sizeof(Baro_raw));
@@ -193,13 +195,13 @@ int main(int argc, char *argv[]){
 					printf("abs %d\n",data->lisa_plane.baro_raw.abs);
 					printf("diff %d\n",data->lisa_plane.baro_raw.diff);	
 					printf("\n");
-						
-					print_latency(data->lisa_plane.baro_raw.tv);
+					
+					//print_latency(data->lisa_plane.baro_raw.tv);
 									 
 					printf("\n\n\n");
-				}
+				}*/
 				
-				printf("\n");
+
 				/*if(input_stream[3]==203){
 					int i;
 					printf("Imu_gyro_raw content:");
@@ -216,8 +218,11 @@ int main(int argc, char *argv[]){
 
 				}*/
 				
-				/*if(input_stream[3]==204){
-					int i;
+				if(input_stream[3]==IMU_ACCEL_RAW){
+					//write_latency_to_netCDF(data->lisa_plane.imu_accel_raw.tv);
+					write_period_to_netCDF(data->lisa_plane.imu_accel_raw.tv);
+					
+					/*int i;
 					printf("Imu_accel_raw content:");
 					print_mem((void *)&data->lisa_plane.imu_accel_raw,sizeof(Imu_accel_raw));
 
@@ -226,13 +231,13 @@ int main(int argc, char *argv[]){
 					printf("ax %d\n",data->lisa_plane.imu_accel_raw.ax);
 					printf("ay %d\n",data->lisa_plane.imu_accel_raw.ay);
 					printf("az %d\n",data->lisa_plane.imu_accel_raw.az);
-					printf("\n");
+					printf("\n");*/
 					
-					print_latency(data->lisa_plane.imu_accel_raw.tv);
+					//print_latency(data->lisa_plane.imu_accel_raw.tv);
 			 
-					printf("\n\n\n");
+					//printf("\n\n\n");
 
-				}*/
+				}
 				
 				/*if(input_stream[3]==57){
 					int i;
