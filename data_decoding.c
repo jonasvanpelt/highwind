@@ -30,11 +30,6 @@ static Data pong;
 static Data* read_data;
 static Data* write_data;
 
-timeval previous_timestamp;
-int	is_first_record=1;
-
-double sum=0;
-int count=0;
 
 /********************************
  * FUNCTIONS
@@ -257,15 +252,7 @@ int strip_timestamp(uint8_t buffer[]){
 	return new_length;	
 }
 
-int timeval_subtract(timeval *result,timeval *t2,timeval *t1)
-{
-    long int diff = (t2->tv_usec + 1000000 * t2->tv_sec) - (t1->tv_usec + 1000000 * t1->tv_sec);
-    result->tv_sec = diff / 1000000;
-    result->tv_usec = diff % 1000000;
-    return (diff<0);	//Return 1 if the difference is negative, otherwise 0. 
-}
-
-
+/*
 void timestamp_to_timeString(timeval tv,char time_string[]){	
 	time_t nowtime;
 	struct tm *nowtm;
@@ -275,48 +262,9 @@ void timestamp_to_timeString(timeval tv,char time_string[]){
 	strftime(tmbuf, sizeof tmbuf, "%Y-%m-%d %H:%M:%S", nowtm);
 	snprintf(time_string, 64, "%s.%06d", tmbuf, (int)tv.tv_usec);
 }
-
-void write_latency_to_netCDF(timeval tvSent){
-	timeval tvNow;
-	timeval tvResult;
-	FILE *file; 
-	
-	gettimeofday(&tvNow, NULL);
-	timeval_subtract(&tvResult,&tvNow,&tvSent);
-	//printf("latency %ld.%06ld sec\n", tvResult.tv_sec, tvResult.tv_usec);
-    file = fopen("latency.csv","a+"); 
-	fprintf(file,"%ld,%06ld\n", tvResult.tv_sec, tvResult.tv_usec);
-	fclose(file);	
-}
-
-void print_avg(){
-		//printf("avg %f\n",sum/count);
-}
+*/
 
 
-void write_period_to_netCDF(timeval tvSent){
-	FILE *file; 
-	timeval tvResult;
-	double diff;
-	
-	if(is_first_record){
-		is_first_record=0;
-	}else{
-		timeval_subtract(&tvResult,&tvSent,&previous_timestamp);
-		diff = ((double)tvResult.tv_sec * 1e6 + tvResult.tv_usec) * 1e-3;
-		file = fopen("period.csv","a+"); 
-		//printf("period %ld.%06ld sec\n", tvResult.tv_sec, tvResult.tv_usec);
-		fprintf(file,"%ld,%06ld\n", tvResult.tv_sec, tvResult.tv_usec);
-		fclose(file);
-		/*sum+=diff;
-		count++;
-		if(count%2000 == 0){
-				print_avg();
-		}*/
-	}
-	
-	previous_timestamp=tvSent;
-}
 
 
 

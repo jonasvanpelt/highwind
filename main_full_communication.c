@@ -75,6 +75,7 @@ int main(int argc, char *argv[]){
 	}
 	
 	//init log (mount sd card if necessary)
+	
 	int err = init_log();
 	LOG_err_handler(err);
 	

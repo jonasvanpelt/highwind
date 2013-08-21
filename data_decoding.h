@@ -126,7 +126,6 @@ typedef struct { // id = 57
 } Airspeed_ets;
 	
 typedef struct { // id = 155
-	uint8_t raw[73];
 	int32_t ecef_x;
 	int32_t ecef_y;
 	int32_t ecef_z;
@@ -216,9 +215,6 @@ extern Data* get_read_pointer();
 extern void calculate_checksum(uint8_t buffer[],uint8_t *checksum_1,uint8_t *checksum2);
 extern int add_timestamp(uint8_t buffer[]);
 extern int strip_timestamp(uint8_t buffer[]);
-extern void timestamp_to_timeString(timeval tv,char time_string[]);
-extern int timeval_subtract(timeval *result,timeval *t2, timeval *t1);
-void write_latency_to_netCDF(timeval tvSent);
 
 #ifdef __cplusplus
 }

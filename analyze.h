@@ -14,7 +14,6 @@
 typedef struct timeval timeval;
 
 typedef struct{
-	int count;
 	double sum;
 	int buffsize;
 	int index;
@@ -31,9 +30,10 @@ typedef struct{
  * ******************************/
  
 void init_analyze(Analyze *an,int buffsize);
-int calculate_period(Analyze *an,timeval tvSent); /*calculates the period between current and previous timestamp and stores it in buffer in milliseconds*/
+int calculate_frequency(Analyze *an,timeval tvSent); /*calculates the freq of the package in hz*/
+int calculate_latency(Analyze *an,timeval tvSent,timeval tvNow); /*calculates the latency between tvNow and tvSent*/
 void dump_buffer_to_file(Analyze *an,const char *file_name);
 void destroy_analyze(Analyze *an);
-
+double get_avg(Analyze *an);
 #endif /*ANALYZE_H_*/
 
