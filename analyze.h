@@ -23,17 +23,15 @@ typedef struct{
 	double *buffer;
 }Analyze;
 
-
-
 /********************************
  * PROTOTYPES PUBLIC
  * ******************************/
  
-void init_analyze(Analyze *an,int buffsize);
-int calculate_frequency(Analyze *an,timeval tvSent); /*calculates the freq of the package in hz*/
-int calculate_latency(Analyze *an,timeval tvSent,timeval tvNow); /*calculates the latency between tvNow and tvSent*/
-void dump_buffer_to_file(Analyze *an,const char *file_name);
-void destroy_analyze(Analyze *an);
-double get_avg(Analyze *an);
+extern void init_analyze(Analyze *an,int buffsize);
+extern int calculate_frequency(Analyze *an,timeval tvSent); /*calculates the freq of the package in hz*/
+extern int calculate_latency(Analyze *an,timeval tvSent,timeval tvNow); /*calculates the latency between tvNow and tvSent*/
+extern void dump_buffer_to_file(Analyze *an,const char *file_name);
+extern void destroy_analyze(Analyze *an);
+extern double get_avg(Analyze *an);
 #endif /*ANALYZE_H_*/
 

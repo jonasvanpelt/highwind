@@ -27,9 +27,9 @@
 /************************************
  * PROTOTYPES
  * **********************************/
-void *lisa_to_pc(void *connection);
-void *data_logging_lisa(void *);
-void *data_logging_groundstation(void *arg);
+static void *lisa_to_pc(void *connection);
+static void *data_logging_lisa(void *);
+static void *data_logging_groundstation(void *arg);
 static void UDP_err_handler( UDP_errCode err,int exit_on_error );
 static void UART_err_handler( UART_errCode err );
 static void sendError(DEC_errCode err,library lib);
@@ -66,8 +66,6 @@ static CircularBuffer cb_data_ground_pong;
 static CircularBuffer *cb_read_ground = &cb_data_ground_ping;
 static CircularBuffer *cb_write_ground = &cb_data_ground_pong;
 static int reading_flag_ground=0;
-
-
 #endif
 
  /***********************************
@@ -96,14 +94,11 @@ int main(int argc, char *argv[]){
 	}
 
 	#if LOGGING > 0
-
 	//init circular data log buffers
 	 cbInit(cb_read_lisa, CBSIZE);
 	 cbInit(cb_write_lisa, CBSIZE);
 	 cbInit(cb_read_ground, CBSIZE);
 	 cbInit(cb_write_ground, CBSIZE);
-
-
 	 #endif
 
 	//open uart port
@@ -154,13 +149,6 @@ int main(int argc, char *argv[]){
 
 		if(err==UDP_ERR_NONE){
 
-			/*printf("INCOMING OUTPUT RAW:");
-			int j;
-			for(j=0;j<input_stream[1];j++){
-				printf("%d ",input_stream[j]);
-			}
-			printf("\n");*/
-
 			#if LOGGING > 0
 			
 			if(!cbIsFull(cb_write_ground)){
@@ -169,7 +157,6 @@ int main(int argc, char *argv[]){
 			 }else{
 				if(reading_flag_ground==0){
 					switch_cb_ground_pointers();
-					//printf("switching ground pointers\n");
 				}else{
 					printf("GROUND WRITE WAS NOT READY \n");
 					exit(1); //FOR DEBUGGING
@@ -221,7 +208,7 @@ int main(int argc, char *argv[]){
 /************************************
  * FUNCTIONS
  * **********************************/
-void *lisa_to_pc(void *arg){
+static void *lisa_to_pc(void *arg){
 /*-------------------------START OF SECOND THREAD: LISA TO PC------------------------*/
 
 	static UDP udp_client;
@@ -247,9 +234,6 @@ void *lisa_to_pc(void *arg){
 					system("echo 0 > /sys/class/gpio/gpio60/value");
 					test=0;
 				}
-					
-	
-
 			}*/
 
 			//add timestamp
@@ -277,7 +261,7 @@ void *lisa_to_pc(void *arg){
 			#endif
 		}else{
 		//send error message to server: not receiving data on uart port
-			printf("error on uart, see log\n"); //FOR DEBUGGING
+			printf("error on uart, see log...\n"); //FOR DEBUGGING
 			UART_err_handler(message_length);
 		}
 
@@ -294,7 +278,7 @@ void *lisa_to_pc(void *arg){
 
 #if LOGGING > 0
 
-void *data_logging_lisa(void *arg){
+static void *data_logging_lisa(void *arg){
 /*-------------------------START OF THIRD THREAD: LISA TO PC LOGGING------------------------*/
 
 	ElemType cb_elem = {0};
@@ -317,7 +301,7 @@ void *data_logging_lisa(void *arg){
 /*-------------------------END OF THIRD THREAD: LISA TO PC LOGGING------------------------*/
 }
 
-void *data_logging_groundstation(void *arg){
+static void *data_logging_groundstation(void *arg){
 /*-------------------------START OF FOURTH THREAD: GROUNDSTATION TO LISA LOGGING------------------------*/
 
 	ElemType cb_elem = {0};
@@ -343,7 +327,6 @@ void *data_logging_groundstation(void *arg){
 }
 
 #endif
-
 
 static void UDP_err_handler( UDP_errCode err,int exit_on_error)
 {

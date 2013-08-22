@@ -1,5 +1,5 @@
 /*
- * AUTHOR: Maarten Arits
+ * AUTHOR: Maarten Arits and Jonas Van Pelt
  */
 
 #ifndef UART_COMMUNCATION_H_ 
@@ -52,6 +52,7 @@ struct timeval timers[10];
  * ******************************/
  
 extern UART_errCode serial_port_create();
+extern UART_errCode serial_port_setup(void); //returns the number of read bytes
 extern int serial_input_check(void);
 extern UART_errCode serial_port_write(uint8_t output[],long unsigned int message_length) ;
 extern UART_errCode serial_port_close(void);

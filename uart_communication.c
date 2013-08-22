@@ -23,23 +23,20 @@
  * PROTOTYPES PRIVATE
  * ******************************/
  
-extern UART_errCode serial_port_setup(void); //returns the number of read bytes
-extern int serial_port_read(uint32_t length);
-extern UART_errCode serial_port_create(void);
-extern int serial_port_get_baud(void);
-extern UART_errCode  serial_port_open_raw(const char* device, speed_t speed);
-extern UART_errCode  serial_port_open(const char* device, void(*term_conf_callback)(struct termios*, speed_t*));
-extern void serial_port_free(void);
-extern void serial_port_flush(void);
-extern UART_errCode serial_port_flush_input(void);
-extern UART_errCode serial_port_flush_output(void);
-extern void serial_buffer_clear(void);
-extern void serial_output_buffer_clear(void);
-extern void serial_input_buffer_clear(void);
-extern void benchmark_start(int timer);
-extern void benchmark_stop(int timer);
-extern void packets_clear(void);
-extern uint8_t serial_port_get_length(void);
+static int serial_port_read(uint32_t length);
+static int serial_port_get_baud(void);
+static UART_errCode  serial_port_open_raw(const char* device, speed_t speed);
+static UART_errCode  serial_port_open(const char* device, void(*term_conf_callback)(struct termios*, speed_t*));
+static void serial_port_free(void);
+static void serial_port_flush(void);
+static UART_errCode serial_port_flush_input(void);
+static UART_errCode serial_port_flush_output(void);
+static void serial_buffer_clear(void);
+static void serial_output_buffer_clear(void);
+static void serial_input_buffer_clear(void);
+static void packets_clear(void);
+static uint8_t serial_port_get_length(void);
+static int wait_for_data();
 
 /********************************
  * GLOBALS
@@ -57,7 +54,7 @@ int serial_input_buffer_size = sizeof(serial_input.buffer);
  * FUNCTIONS
  * ******************************/
 
-int wait_for_data(){
+static int wait_for_data(){
 	//todo: some error handling here
 	struct pollfd fds[1];
 	int timeout = -1; //time out forever
@@ -87,7 +84,6 @@ int serial_input_check() //returns the number of read bytes
 	struct timeval current;
 	int flag_time=0;
 
-	benchmark_start(0);
 	//Find number of bytes in buffer and read when enough
 	  
 	wait_for_data();
@@ -175,7 +171,6 @@ int serial_input_check() //returns the number of read bytes
 					printf("lost / received: %d / %d ", packets.serial.lost, packets.serial.received);
 					printf("\n");
 				#endif
-				benchmark_stop(0);
 			}
 		}
 
@@ -184,18 +179,6 @@ int serial_input_check() //returns the number of read bytes
 		return UART_ERR_READ_NO_DATA_IN_BUF; //-1
 	}
 	return message_length;
-}
-
-void packets_clear(void)
-{
-	#if DEBUG  > 1
-		printf("Entering packets_clear\n");
-	#endif
-	
-	packets.serial.received=0;
-	packets.serial.lost=0;
-	packets.udp.received=0;
-	packets.udp.lost=0;
 }
 
 serial_port* serial_port_new(void) {
@@ -207,7 +190,7 @@ serial_port* serial_port_new(void) {
 	return serial_stream;
 }
 
-void serial_port_free(void) {
+static void serial_port_free(void) {
 	#if DEBUG  > 1
 		printf("Entering serial_port_free\n");
 	#endif
@@ -215,7 +198,7 @@ void serial_port_free(void) {
 	free(serial_stream);
 }
 
-void serial_port_flush(void) {
+static void serial_port_flush(void) {
 	#if DEBUG  > 1
 		printf("Entering serial_port_flush\n");
 	#endif
@@ -227,7 +210,7 @@ void serial_port_flush(void) {
 }
 
 
-UART_errCode serial_port_flush_input(void) {
+static UART_errCode serial_port_flush_input(void) {
 	#if DEBUG  > 1
 		printf("Entering serial_port_flush_input\n");
 	#endif
@@ -240,7 +223,7 @@ UART_errCode serial_port_flush_input(void) {
 	return UART_ERR_NONE;
 }
 
-UART_errCode serial_port_flush_output(void) {
+static UART_errCode serial_port_flush_output(void) {
 	#if DEBUG  > 1
 		printf("Entering serial_port_flush_output\n");
 	#endif
@@ -254,7 +237,7 @@ UART_errCode serial_port_flush_output(void) {
 	return UART_ERR_NONE;
 }
 
-UART_errCode  serial_port_open_raw(const char* device, speed_t speed) {
+static UART_errCode  serial_port_open_raw(const char* device, speed_t speed) {
 	#if DEBUG  > 1
 		printf("Entering serial_port_open_raw\n");
 	#endif
@@ -288,7 +271,7 @@ UART_errCode  serial_port_open_raw(const char* device, speed_t speed) {
 	return UART_ERR_NONE;
 }
 
-UART_errCode  serial_port_open(const char* device, void(*term_conf_callback)(struct termios*, speed_t*)) {
+static UART_errCode  serial_port_open(const char* device, void(*term_conf_callback)(struct termios*, speed_t*)) {
 	#if DEBUG  > 1
 		printf("Entering serial_port_open\n");
 	#endif
@@ -342,7 +325,7 @@ UART_errCode serial_port_close(void) {
 
 }
 
-uint8_t serial_port_get_length(void){
+static uint8_t serial_port_get_length(void){
 	#if DEBUG  > 1
 		printf("Entering serial_port_get_length\n");
 	#endif
@@ -374,7 +357,6 @@ uint8_t serial_port_get_length(void){
 	return serial_input.buffer[0];
 }
 	
-	
 
 UART_errCode serial_port_setup(void)
 {
@@ -393,7 +375,7 @@ UART_errCode serial_port_setup(void)
 	return UART_ERR_NONE;
 }
 
-int serial_port_get_baud() 
+static int serial_port_get_baud() 
 {
 	#if DEBUG  > 1
 		printf("Entering serial_port_get_baud\n");
@@ -487,7 +469,7 @@ UART_errCode serial_port_create()
 	return UART_ERR_NONE;
 }
 
-int serial_port_read(uint32_t length) 
+static int serial_port_read(uint32_t length) 
 {
 	#if DEBUG  > 1
 		printf("Entering serial_port_read\n");
@@ -513,7 +495,7 @@ UART_errCode serial_port_write(uint8_t output[],long unsigned int message_length
 	return UART_ERR_NONE;                                                                                                           
 }
 
-void serial_buffer_clear(void)
+static void serial_buffer_clear(void)
 {
 	#if DEBUG  > 1
 		printf("Entering serial_buffer_clear\n");
@@ -521,7 +503,7 @@ void serial_buffer_clear(void)
 	serial_input_buffer_clear();
 }
 
-void serial_input_buffer_clear(void)
+static void serial_input_buffer_clear(void)
 {
 	#if DEBUG  > 1
 		printf("Entering serial_input_buffer_clear\n");
@@ -534,63 +516,3 @@ void serial_input_buffer_clear(void)
 }
 
 
-void benchmark_start(int timer)
-{
-	#if DEBUG  > 1
-		printf("Entering benchmark_start\n");
-	#endif
-	
-#if DEBUG > 1
-	if(timer<10 && timer >-1)
-	{
-		gettimeofday(&timers[timer], NULL);
-	}
-#endif
-}
-
-void benchmark_stop(int timer)
-{
-	#if DEBUG  > 1
-		printf("Entering benchmark_stop\n");
-	#endif
-	
-#if DEBUG > 1 
-	struct timeval current_time; 
-	struct benchmark {
-		uint32_t seconds;
-		uint32_t mseconds;
-		uint32_t useconds;
-	};
-
-	struct benchmark bench;
-
-	if(timer<10 && timer >-1)
-	{
-		gettimeofday(&current_time, NULL);
-
-		bench.seconds = current_time.tv_sec - timers[timer].tv_sec;
-		
-		bench.mseconds = (current_time.tv_usec - timers[timer].tv_usec)/1000;
-		if (bench.mseconds < 0)
-		{
-			bench.seconds--;
-			bench.mseconds +=1000;
-		}
-
-		bench.useconds = (current_time.tv_usec - timers[timer].tv_usec)-(bench.mseconds*1000);
-		if (bench.useconds < 0)
-		{
-			bench.mseconds--;
-			bench.useconds +=1000;
-		}	
-		if (bench.mseconds < 0)
-		{
-			bench.seconds--;
-			bench.mseconds +=1000;
-		}
-		printf("timer %d: %ds %dms %dus ", timer, bench.seconds, bench.mseconds, bench.useconds);
-	} else {
-		printf("Timer %d is not started! Timer 0-9 available", timer);
-	}
-#endif
-}

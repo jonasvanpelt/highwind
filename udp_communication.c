@@ -18,8 +18,7 @@
 /********************************
  * PROTOTYPES PRIVATE
  * ******************************/
-extern UDP_errCode openUDPSocket(UDP *udp,unsigned int timeout);
-
+static UDP_errCode openUDPSocket(UDP *udp,unsigned int timeout);
 
 /********************************
  * FUNCTIONS
@@ -69,7 +68,7 @@ UDP_errCode closeUDPClientSocket(UDP *udp_client){
 		return UDP_ERR_NONE;
 }
 
-UDP_errCode openUDPSocket(UDP *udp,unsigned int timeout){
+static UDP_errCode openUDPSocket(UDP *udp,unsigned int timeout){
 	#if DEBUG  > 1
 		printf("Entering openUDPSocket\n");
 	#endif

@@ -1,3 +1,7 @@
+/*
+ * AUTHOR:Jonas Van Pelt and Maarten Arits
+ */
+
 #ifndef DATA_DECODING_H_ 
 #define DATA_DECODING_H_
 

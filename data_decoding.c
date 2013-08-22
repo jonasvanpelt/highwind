@@ -1,3 +1,6 @@
+/*
+ * AUTHOR:Jonas Van Pelt and Maarten Arits
+ */
 #include <stdlib.h>
 #include "data_decoding.h"
 #include <string.h>
@@ -15,7 +18,7 @@
 /********************************
  * PROTOTYPES PRIVATE
  * ******************************/
-DEC_errCode data_decode(uint8_t sender,uint8_t stream[], int length);
+static DEC_errCode data_decode(uint8_t sender,uint8_t stream[], int length);
 
 /********************************
  * GLOBALS
@@ -85,7 +88,7 @@ DEC_errCode data_update(uint8_t stream[])
 	return data_decode(sender, stream, length);
 }
 
-DEC_errCode data_decode(uint8_t sender,uint8_t stream[], int length) // start = 0
+static DEC_errCode data_decode(uint8_t sender,uint8_t stream[], int length) // start = 0
 {
 	#if DEBUG  > 1
 		printf("Entering data_decode\n");
@@ -97,7 +100,7 @@ DEC_errCode data_decode(uint8_t sender,uint8_t stream[], int length) // start = 
 			switch(stream[MESSAGE_ID_INDEX])
 			{
 				case BEAGLE_ERROR: 
-					data_write(stream, (void *)&write_data->bone_plane.error, sizeof(Beagle_error));
+					data_write(stream, (void *)&write_data->bone_plane.error, sizeof(Beagle_error)-1);
 					write_data->bone_plane.error.message.new_data = 0;
 					break;
 				default: return DEC_ERR_UNKNOWN_BONE_PACKAGE; break;
@@ -190,10 +193,16 @@ DEC_errCode data_encode(uint8_t message[],long unsigned int message_length,uint8
 
 Data* get_read_pointer()
 {
+	#if DEBUG  > 1
+		printf("Entering get_read_pointer\n");
+	#endif
 		return read_data;
 }
 
 void calculate_checksum(uint8_t buffer[],uint8_t *checksum_1,uint8_t *checksum_2){
+	#if DEBUG  > 1
+		printf("Entering calculate_checksum\n");
+	#endif
 	int i;
 	int length = buffer[1];
 	*checksum_1=0;
@@ -208,6 +217,10 @@ void calculate_checksum(uint8_t buffer[],uint8_t *checksum_1,uint8_t *checksum_2
 }
 
 int add_timestamp(uint8_t buffer[]){
+	#if DEBUG  > 1
+		printf("Entering add_timestamp\n");
+	#endif
+	
 	int length_original=buffer[1],i,j;
 	uint8_t checksum_1,checksum_2;
 	int new_length=length_original+16; //timeval is 16 bytes
@@ -236,6 +249,10 @@ int add_timestamp(uint8_t buffer[]){
 }
 
 int strip_timestamp(uint8_t buffer[]){
+	#if DEBUG  > 1
+		printf("Entering strip_timestamp\n");
+	#endif
+	
 	int length=buffer[1],i,j;
 	uint8_t checksum_1,checksum_2;
 	int new_length=length-16; //timeval is 16 bytes

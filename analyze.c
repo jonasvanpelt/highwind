@@ -1,17 +1,28 @@
+/*
+ * AUTHOR: Jonas Van Pelt
+ */
+ 
 #include <stdlib.h>
 #include <stdio.h>
 #include "analyze.h"
 
+#ifndef DEBUG 
+#define DEBUG 0
+#endif
+
 /********************************
  * PROTOTYPES PRIVATE
  * ******************************/
- int timeval_subtract(timeval *result,timeval *t2,timeval *t1);
+static int timeval_subtract(timeval *result,timeval *t2,timeval *t1);
  
-
 /********************************
  * FUNCTIONS
  * ******************************/
- void init_analyze(Analyze *an,int buffsize){
+ void init_analyze(Analyze *an,int buffsize){	 
+	#if DEBUG  > 1
+		printf("Entering init_analyze\n");
+	#endif
+	 
 	an->buffsize=buffsize;
 	an->sum=0;
 	an->avg=0;
@@ -25,6 +36,10 @@
 }
  
 int calculate_frequency(Analyze *an,timeval tvSent){
+	#if DEBUG  > 1
+		printf("Entering calculate_frequency\n");
+	#endif
+	
 	if(an->index < an->buffsize){
 		
 		if(an->is_first_data){
@@ -51,6 +66,9 @@ int calculate_frequency(Analyze *an,timeval tvSent){
 }
 
 int calculate_latency(Analyze *an,timeval tvSent,timeval tvNow){
+	#if DEBUG  > 1
+		printf("Entering calculate_latency\n");
+	#endif
 	
 	if(an->index < an->buffsize){
 		timeval tvResult;
@@ -71,10 +89,17 @@ int calculate_latency(Analyze *an,timeval tvSent,timeval tvNow){
 }
 
 double get_avg(Analyze *an){
+	#if DEBUG  > 1
+		printf("Entering get_avg\n");
+	#endif	
 	return an->avg;
 }
 
-void timestamp_to_timeString(timeval tv,char time_string[]){	
+void timestamp_to_timeString(timeval tv,char time_string[]){
+	#if DEBUG  > 1
+		printf("Entering timestamp_to_timeString\n");
+	#endif
+		
 	time_t nowtime;
 	struct tm *nowtm;
 	char tmbuf[64];
@@ -86,6 +111,10 @@ void timestamp_to_timeString(timeval tv,char time_string[]){
 
 
 void dump_buffer_to_file(Analyze *an,const char *file_name){
+	#if DEBUG  > 1
+		printf("Entering dump_buffer_to_file\n");
+	#endif
+	
 	FILE *file; 
 	int i;
 	file = fopen(file_name,"w"); 
@@ -95,17 +124,23 @@ void dump_buffer_to_file(Analyze *an,const char *file_name){
 	fclose(file);
 }
 
-int timeval_subtract(timeval *result,timeval *t2,timeval *t1)
-{
-    long int diff = (t2->tv_usec + 1000000 * t2->tv_sec) - (t1->tv_usec + 1000000 * t1->tv_sec);
-    result->tv_sec = diff / 1000000;
-    result->tv_usec = diff % 1000000;
-    return (diff<0);	//Return 1 if the difference is negative, otherwise 0. 
-}
-
 void destroy_analyze(Analyze *an){
+	#if DEBUG  > 1
+		printf("Entering destroy_analyze\n");
+	#endif	
 	an->buffsize=0;
 	an->sum=0;
 	an->avg=0;
 	free(an->buffer);
+}
+
+static int timeval_subtract(timeval *result,timeval *t2,timeval *t1){
+	#if DEBUG  > 1
+		printf("Entering timeval_subtract\n");
+	#endif
+		
+    long int diff = (t2->tv_usec + 1000000 * t2->tv_sec) - (t1->tv_usec + 1000000 * t1->tv_sec);
+    result->tv_sec = diff / 1000000;
+    result->tv_usec = diff % 1000000;
+    return (diff<0);	//return 1 if the difference is negative, otherwise 0. 
 }
