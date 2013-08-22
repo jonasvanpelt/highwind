@@ -216,9 +216,6 @@ int main(int argc, char *argv[]){
 					UART_ERROR_received=1;
 				}else if(input_stream[3]==ACTUATORS){
 					ACTUATORS_received=1;
-				}else{
-						printf("UNKNOWN DATA with id %d\n",input_stream[3]);
-						exit(1); //FOR DEBUGGING
 				}
 				
 				/*printf("IMU_GYRO_RAW_received %d\n",IMU_GYRO_RAW_received);
@@ -462,6 +459,12 @@ int main(int argc, char *argv[]){
 					print_latency(data->lisa_plane.actuators.tv);*/
 
 				}
+				
+				if(input_stream[3]==BEAGLE_ERROR){
+					printf("beagle bone error content:");
+					print_mem((void *)&data->bone_plane.error,sizeof(Beagle_error));
+				}
+				
 							
 			}else{
 					printf("UNKNOW PACKAGE with id %d\n",input_stream[3]);
@@ -620,8 +623,8 @@ static void *server_to_planebone(void *connection){
 		//3. send data to eth port using UDP
 		UDP_err_handler(sendUDPClientData(&udp_client,&encoded_data,sizeof(encoded_data)));	
 		
-		usleep(20000); //60 hz
-		//sleep(1);
+		//usleep(20000); //60 hz
+		sleep(1);
 	}
 	UDP_err_handler(closeUDPClientSocket(&udp_client));
 
@@ -661,7 +664,7 @@ static void UDP_err_handler( UDP_errCode err )
 			error_write(SOURCEFILE,"failed receiving UDP data: timeout");
 			break;
 		case UDP_ERR_SET_TIMEOUT:
-		error_write(SOURCEFILE,"failed setting UDP timeout on socket");
+			error_write(SOURCEFILE,"failed setting UDP timeout on socket");
 		break;
 		case UDP_ERR_UNDEFINED:
 			error_write(SOURCEFILE,"undefined UDP error");

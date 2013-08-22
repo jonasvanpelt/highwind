@@ -169,7 +169,7 @@ int main(int argc, char *argv[]){
 			 }else{
 				if(reading_flag_ground==0){
 					switch_cb_ground_pointers();
-					printf("switching ground pointers\n");
+					//printf("switching ground pointers\n");
 				}else{
 					printf("GROUND WRITE WAS NOT READY \n");
 					exit(1); //FOR DEBUGGING
@@ -253,7 +253,7 @@ void *lisa_to_pc(void *arg){
 			 }else{
 				if(reading_flag_lisa==0){
 					switch_cb_lisa_pointers();
-					printf("switching lisa pointers\n");
+					//printf("switching lisa pointers\n");
 				}else{
 					printf("LISA WRITE WAS NOT READY \n");
 					exit(1); //FOR DEBUGGING
