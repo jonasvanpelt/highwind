@@ -236,7 +236,7 @@ void *lisa_to_pc(void *arg){
 	while(1)
 	{
 		message_length = serial_input_check(); //blocking !!!
-		if(message_length !=UART_ERR_READ){
+		if(message_length > 0){
 
 			//add timestamp
 			message_length=add_timestamp(serial_input.buffer);
@@ -378,8 +378,17 @@ static void UART_err_handler( UART_errCode err )
 	switch( err ) {
 			case UART_ERR_NONE:
 				break;
-			case  UART_ERR_READ:
-				error_write(SOURCEFILE,"failed reading data from UART");
+			case  UART_ERR_READ_CHECKSUM:
+				error_write(SOURCEFILE,"serial port wrong checksum");
+				break;
+			case  UART_ERR_READ_LENGTH:
+				error_write(SOURCEFILE,"serial port failed reading message length");
+				break;
+			case  UART_ERR_READ_MESSAGE:
+				error_write(SOURCEFILE,"serial port failed reading message based on length");
+				break;
+			case  UART_ERR_READ_NO_DATA_IN_BUF:
+				error_write(SOURCEFILE,"serial port no data in buffer after wait");
 				break;
 			case UART_ERR_SERIAL_PORT_FLUSH_INPUT:
 				error_write(SOURCEFILE,"serial port flush input failed");
@@ -401,9 +410,6 @@ static void UART_err_handler( UART_errCode err )
 			case UART_ERR_SERIAL_PORT_WRITE:
 				error_write(SOURCEFILE,"serial port write failed");
 				break;
-			case UART_ERR_CHECKSUM:
-				error_write(SOURCEFILE,"wrong checksum on uart");
-				break;	
 			case UART_ERR_UNDEFINED:
 				error_write(SOURCEFILE,"undefined UART error");
 				break;

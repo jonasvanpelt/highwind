@@ -95,12 +95,11 @@ int serial_input_check() //returns the number of read bytes
 
 	if(serial_input_buffer_chars > 0) //look for char in buffer
 	{
-		
 		message_length = serial_port_get_length();
 
 		if(message_length == 0){
 			packets.serial.lost++;
-			return UART_ERR_READ;
+			return UART_ERR_READ_LENGTH;
 		}
 
 		gettimeofday(&start, NULL);
@@ -115,8 +114,7 @@ int serial_input_check() //returns the number of read bytes
 			if(flag_infinite==1000){
 				serial_port_flush_input();
 			}	
-			flag_infinite++;
-			
+			flag_infinite++;	
 		}
 
 		serial_input_buffer_chars = serial_port_read(message_length-2); //reads the port out and stores the number of chars red
@@ -124,7 +122,7 @@ int serial_input_check() //returns the number of read bytes
 		if (serial_input_buffer_chars == -1) 
 		{	
 			packets.serial.lost++;
-			return UART_ERR_READ;
+			return UART_ERR_READ_MESSAGE;
 
 		} else {
 
@@ -142,7 +140,7 @@ int serial_input_check() //returns the number of read bytes
 			{
 				serial_port_flush_input();
 				packets.serial.lost++;
-				return UART_ERR_READ; //-1
+				return UART_ERR_READ_CHECKSUM; //-1
 
 			} else {
 
@@ -183,7 +181,7 @@ int serial_input_check() //returns the number of read bytes
 
 	}else{
 					
-		return UART_ERR_READ; //-1
+		return UART_ERR_READ_NO_DATA_IN_BUF; //-1
 	}
 	return message_length;
 }
@@ -426,6 +424,7 @@ int serial_port_get_baud()
 		case B38400:  inputSpeed = 38400; break;
 		case B57600:  inputSpeed = 57600; break;
 		case B115200: inputSpeed = 115200; break;
+		case B921600: inputSpeed = 921600; break;
 	}
 	return inputSpeed;
 }
@@ -495,11 +494,7 @@ int serial_port_read(uint32_t length)
 	#endif
 	 
 	int n = read(serial_stream->fd, serial_input.buffer, length);
-
-	if (n < 1) 
-	{
-		return UART_ERR_READ;
-	}                    
+                  
 	return n;
 }
 
