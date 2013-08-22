@@ -231,7 +231,7 @@ void *lisa_to_pc(void *arg){
 	//read data from UART
 
 	UDP_err_handler(openUDPClientSocket(&udp_client,connection.server_ip,connection.port_number_lisa_to_pc,UDP_SOCKET_TIMEOUT),1);
-
+	//static int test = 0;
 
 	while(1)
 	{
@@ -239,11 +239,18 @@ void *lisa_to_pc(void *arg){
 		if(message_length > 0){
 			
 			//to test latency from lisa pull pin high when airspeed package arrives
-			if(serial_input.buffer[3]==AIRSPEED_ETS){
+			/*if(serial_input.buffer[3]==AIRSPEED_ETS){
+				if (test==0){
 					system("echo 1 > /sys/class/gpio/gpio60/value");
-			}else{
+					test=1;
+				}else{
 					system("echo 0 > /sys/class/gpio/gpio60/value");
-			}
+					test=0;
+				}
+					
+	
+
+			}*/
 
 			//add timestamp
 			message_length=add_timestamp(serial_input.buffer);
