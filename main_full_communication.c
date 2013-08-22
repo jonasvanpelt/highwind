@@ -263,7 +263,7 @@ void *lisa_to_pc(void *arg){
 			#endif
 		}else{
 		//send error message to server: not receiving data on uart port
-			printf("no data on uart\n");
+			printf("error on uart, see log\n"); //FOR DEBUGGING
 			UART_err_handler(message_length);
 		}
 
@@ -377,7 +377,6 @@ static void UART_err_handler( UART_errCode err )
 	//write error to local log
 	switch( err ) {
 			case UART_ERR_NONE:
-
 				break;
 			case  UART_ERR_READ:
 				error_write(SOURCEFILE,"failed reading data from UART");
@@ -402,6 +401,9 @@ static void UART_err_handler( UART_errCode err )
 			case UART_ERR_SERIAL_PORT_WRITE:
 				error_write(SOURCEFILE,"serial port write failed");
 				break;
+			case UART_ERR_CHECKSUM:
+				error_write(SOURCEFILE,"wrong checksum on uart");
+				break;	
 			case UART_ERR_UNDEFINED:
 				error_write(SOURCEFILE,"undefined UART error");
 				break;
