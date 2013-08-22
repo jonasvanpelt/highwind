@@ -253,9 +253,9 @@ void *lisa_to_pc(void *arg){
 			 }else{
 				if(reading_flag_lisa==0){
 					switch_cb_lisa_pointers();
-					printf("switching pointers\n");
+					printf("switching lisa pointers\n");
 				}else{
-					printf("WRITE WAS NOT READY \n");
+					printf("LISA WRITE WAS NOT READY \n");
 					exit(1); //FOR DEBUGGING
 				}
 			 }
