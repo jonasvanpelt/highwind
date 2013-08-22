@@ -620,7 +620,7 @@ static void *server_to_planebone(void *connection){
 		//3. send data to eth port using UDP
 		UDP_err_handler(sendUDPClientData(&udp_client,&encoded_data,sizeof(encoded_data)));	
 		
-		//usleep(100000);
+		//usleep(20000); //60 hz
 		sleep(1);
 	}
 	UDP_err_handler(closeUDPClientSocket(&udp_client));

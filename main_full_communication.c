@@ -18,7 +18,7 @@
 #define LOGGING 1
 #endif
 
-#define CBSIZE 1024
+#define CBSIZE 1024 * 16
 #define OUTPUT_BUFFER 36
 #define MAX_STREAM_SIZE 255
 #define UDP_SOCKET_TIMEOUT 1000000000
@@ -35,6 +35,7 @@ static void UART_err_handler( UART_errCode err );
 static void sendError(DEC_errCode err,library lib);
 static void LOG_err_handler( LOG_errCode err );
 static void switch_cb_lisa_pointers();
+static void switch_cb_ground_pointers();
 
  /***********************************
   * GLOBALS
@@ -60,7 +61,12 @@ static CircularBuffer *cb_write_lisa = &cb_data_lisa_pong;
 static int reading_flag_lisa=0;
 
 //log buffer for data from groundstation
-static CircularBuffer cb_data_ground;
+static CircularBuffer cb_data_ground_ping;
+static CircularBuffer cb_data_ground_pong;
+static CircularBuffer *cb_read_ground = &cb_data_ground_ping;
+static CircularBuffer *cb_write_ground = &cb_data_ground_pong;
+static int reading_flag_ground=0;
+
 
 #endif
 
@@ -94,7 +100,9 @@ int main(int argc, char *argv[]){
 	//init circular data log buffers
 	 cbInit(cb_read_lisa, CBSIZE);
 	 cbInit(cb_write_lisa, CBSIZE);
-	 cbInit(&cb_data_ground, CBSIZE);
+	 cbInit(cb_read_ground, CBSIZE);
+	 cbInit(cb_write_ground, CBSIZE);
+
 
 	 #endif
 
@@ -154,14 +162,20 @@ int main(int argc, char *argv[]){
 			printf("\n");*/
 
 			#if LOGGING > 0
-			//write the data to circular buffer for log thread
-			memcpy (&cb_elem.value, &input_stream, sizeof(input_stream));
-			cbWrite(&cb_data_ground, &cb_elem);
-
-			//FOR DEBUGGING: REMOVE ME!!!
-			if(cbIsFull(&cb_data_ground)){
-				printf("groundstation buffer is full\n") ;
-			}
+			
+			if(!cbIsFull(cb_write_ground)){
+				 memcpy (&cb_elem.value, &input_stream, sizeof(input_stream));
+				 cbWrite(cb_write_ground, &cb_elem);
+			 }else{
+				if(reading_flag_ground==0){
+					switch_cb_ground_pointers();
+					printf("switching ground pointers\n");
+				}else{
+					printf("GROUND WRITE WAS NOT READY \n");
+					exit(1); //FOR DEBUGGING
+				}
+			 }
+			
 			#endif
 
 			int new_length = strip_timestamp(input_stream); //lisa expects a package without a timestamp
@@ -196,7 +210,8 @@ int main(int argc, char *argv[]){
 	//free circular buffers
 	cbFree(cb_read_lisa);
 	cbFree(cb_write_lisa);
-	cbFree(&cb_data_ground);
+	cbFree(cb_read_ground);
+	cbFree(cb_write_ground);
 
 	#endif
 
@@ -238,6 +253,7 @@ void *lisa_to_pc(void *arg){
 			 }else{
 				if(reading_flag_lisa==0){
 					switch_cb_lisa_pointers();
+					printf("switching pointers\n");
 				}else{
 					printf("WRITE WAS NOT READY \n");
 					exit(1); //FOR DEBUGGING
@@ -275,11 +291,11 @@ void *data_logging_lisa(void *arg){
 			reading_flag_lisa=1;
 			cbRead(cb_read_lisa, &cb_elem);
 			LOG_err_handler(write_data_lisa_log(cb_elem.value,cb_elem.value[1]));
+			usleep(100);
 		}else{
 			reading_flag_lisa=0;
-			//blocken tot er terug data inzit ?? select/poll ?
-		}
-		usleep(1000);
+			usleep(1000);
+		}	
 	}
 	LOG_err_handler(close_data_lisa_log());
 
@@ -292,15 +308,20 @@ void *data_logging_groundstation(void *arg){
 
 	ElemType cb_elem = {0};
 	LOG_err_handler(open_data_groundstation_log());
-
+	
 	while(1){
-		if (!cbIsEmpty(&cb_data_ground)) {
-			cbRead(&cb_data_ground, &cb_elem);
+		if (!cbIsEmpty(cb_read_ground)) {
+			reading_flag_ground=1;
+			cbRead(cb_read_ground, &cb_elem);
 			LOG_err_handler(write_data_groundstation_log(cb_elem.value,cb_elem.value[1]));
-		}
-		usleep(1000);
+			usleep(100);
+		}else{
+			reading_flag_ground=0;
+			usleep(1000);
+		}	
 	}
-	close_data_groundstation_log();
+
+	LOG_err_handler(close_data_groundstation_log());
 
 	return NULL;
 /*-------------------------END OF FOURTH THREAD: GROUNDSTATION TO LISA LOGGING------------------------*/
@@ -425,4 +446,10 @@ static void switch_cb_lisa_pointers(){
 		CircularBuffer *temp = cb_read_lisa;
 		cb_read_lisa = cb_write_lisa;
 		cb_write_lisa = temp;
+}
+
+static void switch_cb_ground_pointers(){
+		CircularBuffer *temp = cb_read_ground;
+		cb_read_ground = cb_write_ground;
+		cb_write_ground = temp;
 }
