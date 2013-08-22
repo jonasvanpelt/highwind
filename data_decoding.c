@@ -8,9 +8,9 @@
 #define DEBUG 0
 #endif
 
-//#if DEBUG
+#if DEBUG
 #include <stdio.h>
-//#endif
+#endif
 
 /********************************
  * PROTOTYPES PRIVATE
@@ -20,7 +20,6 @@ DEC_errCode data_decode(uint8_t sender,uint8_t stream[], int length);
 /********************************
  * GLOBALS
  * ******************************/
-enum stream_index{STARTBYTE_INDEX=0,LENGTH_INDEX,SENDER_ID_INDEX,MESSAGE_ID_INDEX,MESSAGE_START_INDEX};
  
 //one writes to ping and another can read data from pong and upside down
 static Data ping;
@@ -251,18 +250,6 @@ int strip_timestamp(uint8_t buffer[]){
 	
 	return new_length;	
 }
-
-/*
-void timestamp_to_timeString(timeval tv,char time_string[]){	
-	time_t nowtime;
-	struct tm *nowtm;
-	char tmbuf[64];
-	nowtime = tv.tv_sec;
-	nowtm = localtime(&nowtime);
-	strftime(tmbuf, sizeof tmbuf, "%Y-%m-%d %H:%M:%S", nowtm);
-	snprintf(time_string, 64, "%s.%06d", tmbuf, (int)tv.tv_usec);
-}
-*/
 
 
 

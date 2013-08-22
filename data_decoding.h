@@ -15,11 +15,13 @@ extern "C"
  * ******************************/
 //Lisa's message ids
 enum Message_id{BEAGLE_ERROR = 2 ,SYSMON = 33,UART_ERRORS = 208,ACTUATORS = 105,SVINFO=25,AIRSPEED_ETS = 57, GPS_INT=155, BARO_RAW = 221,IMU_GYRO_RAW = 203, IMU_ACCEL_RAW = 204,IMU_MAG_RAW = 205  };
-typedef enum Message_id message_id;
 
+//sender ids
 enum Sender_id{BEAGLEBONE=2,LISA=165};
-typedef enum Sender_id sender_id;
- 
+
+//import indexes of incoming data array
+enum stream_index{STARTBYTE_INDEX=0,LENGTH_INDEX,SENDER_ID_INDEX,MESSAGE_ID_INDEX,MESSAGE_START_INDEX};
+
 // Decoding error codes 
 enum dec_errCode { DEC_ERR_NONE = 0,DEC_ERR_START_BYTE,DEC_ERR_CHECKSUM,DEC_ERR_UNKNOWN_BONE_PACKAGE,DEC_ERR_UNKNOWN_LISA_PACKAGE,DEC_ERR_UNKNOWN_SENDER,DEC_ERR_LENGTH,DEC_ERR_UNDEFINED};
 typedef enum dec_errCode DEC_errCode;
@@ -30,7 +32,7 @@ typedef enum Library library;
 
 typedef struct timeval timeval;
 
-
+//pragma to set internal memory alignment to 1 byte so we can fill the structs binary
 #pragma pack(push)  /* push current alignment to stack */
 #pragma pack(1)     /* set alignment to 1 byte boundary */
 
@@ -71,7 +73,7 @@ typedef union { // id = 2
 		struct Error_message {
 			uint8_t library;
 			uint8_t error;
-			timeval tv; //16
+			timeval tv; 
 			int8_t new_data;
 		} message;
 	} Beagle_error;
@@ -120,8 +122,8 @@ typedef struct { // id = 25
 typedef struct { // id = 57
 		uint16_t adc;
 		uint16_t offset;
-		float scaled; //4
-		timeval tv; //16
+		float scaled; 
+		timeval tv; 
 		int8_t new_data;
 } Airspeed_ets;
 	
@@ -142,7 +144,7 @@ typedef struct { // id = 155
 	uint16_t pdop;
 	uint8_t numsv;
 	uint8_t fix;
-	timeval tv; //16
+	timeval tv; 
 	int8_t new_data;
 } Gps_int;
 	
@@ -177,7 +179,6 @@ typedef struct { // id = 205
 		int8_t new_data;
 } Imu_mag_raw;
 
-	
 typedef struct { // sender id = 165
 		Svinfo svinfo;
 		Airspeed_ets airspeed_ets;
@@ -207,11 +208,11 @@ typedef struct
  * PROTOTYPES PUBLIC
  * ******************************/
 extern void init_decoding(void);
-extern DEC_errCode data_update(uint8_t stream[]);
+extern DEC_errCode data_update(uint8_t stream[]); /*decodes the incoming package to right structure*/
 extern int32_t data_write(uint8_t stream[], void *destination, int length);
 extern void switch_read_write(void);
 extern DEC_errCode data_encode(uint8_t message[],long unsigned int message_length,uint8_t encoded_data[],int sender_id,int message_id);
-extern Data* get_read_pointer();
+extern Data* get_read_pointer(); /*to get read access to data structure*/
 extern void calculate_checksum(uint8_t buffer[],uint8_t *checksum_1,uint8_t *checksum2);
 extern int add_timestamp(uint8_t buffer[]);
 extern int strip_timestamp(uint8_t buffer[]);

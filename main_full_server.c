@@ -11,7 +11,6 @@
 #include "analyze.h"
 
 
-
 #define MAX_INPUT_STREAM_SIZE 255
 #define MAX_OUTPUT_STREAM_SIZE 36
 #define UDP_SOCKET_TIMEOUT 1000000000
@@ -30,12 +29,11 @@
  * PROTOTYPES
  * **********************************/
 
-void *server_to_planebone(void *connection);
+static void *server_to_planebone(void *connection);
 static void DEC_err_handler(DEC_errCode err ); 
 static void UDP_err_handler( UDP_errCode err ); 
 static void err_receiver();
-void print_mem(void const *vp, int n);
-void print_latency(timeval tvSend);
+static void print_mem(void const *vp, int n);
 
 
  /***********************************
@@ -581,7 +579,7 @@ int main(int argc, char *argv[]){
 	return 0;
 }
 
-void *server_to_planebone(void *connection){
+static void *server_to_planebone(void *connection){
 /*-------------------------START OF SECOND THREAD: SERVER TO PLANEBONE------------------------*/		
 	
 	Connection *conn=(Connection *)connection;
@@ -637,7 +635,7 @@ static void UDP_err_handler( UDP_errCode err )
 {
 	static char SOURCEFILE[] = "udp_communication.c";
 
-	//it makes no sence to send UDP errors to server when there is a UDP problem.
+	//it makes no sense to send UDP errors to server when there is a UDP problem.
 	//write error to local log
 	switch( err ) {
 		case UDP_ERR_NONE:
@@ -705,7 +703,7 @@ static void DEC_err_handler(DEC_errCode err )
 	}
 }
 
-void print_mem(void const *vp, int n)
+static void print_mem(void const *vp, int n)
 {
     unsigned char const *p = vp;
 	int i;
@@ -715,24 +713,6 @@ void print_mem(void const *vp, int n)
     printf("\n");
 };
 
-void print_latency(timeval tvSend){
-	
-		/*char strTime[64]={0};				
-		timeval tvNow;
-		timeval tvDiff;	
-		
-		gettimeofday(&tvNow, NULL);
-						
-		timestamp_to_timeString(tvSend,strTime);
-		printf("send time \t%s\n",strTime);
-		memset(strTime,0,sizeof(strTime));
-					
-		timestamp_to_timeString(tvNow,strTime);	
-		printf("receive time \t%s\n",strTime);
-					
-		timeval_subtract(&tvDiff, &tvNow, &tvSend);	
-		printf("latency %ld.%06ld sec\n", tvDiff.tv_sec, tvDiff.tv_usec);*/
-}
 
 
 
