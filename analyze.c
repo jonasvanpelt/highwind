@@ -50,17 +50,6 @@ int calculate_frequency(Analyze *an,timeval tvSent){
 	
 }
 
-void timestamp_to_timeString(timeval tv,char time_string[]){	
-	time_t nowtime;
-	struct tm *nowtm;
-	char tmbuf[64];
-	nowtime = tv.tv_sec;
-	nowtm = localtime(&nowtime);
-	strftime(tmbuf, sizeof tmbuf, "%Y-%m-%d %H:%M:%S", nowtm);
-	snprintf(time_string, 64, "%s.%06d", tmbuf, (int)tv.tv_usec);
-}
-
-
 int calculate_latency(Analyze *an,timeval tvSent,timeval tvNow){
 	
 	if(an->index < an->buffsize){
@@ -84,6 +73,17 @@ int calculate_latency(Analyze *an,timeval tvSent,timeval tvNow){
 double get_avg(Analyze *an){
 	return an->avg;
 }
+
+void timestamp_to_timeString(timeval tv,char time_string[]){	
+	time_t nowtime;
+	struct tm *nowtm;
+	char tmbuf[64];
+	nowtime = tv.tv_sec;
+	nowtm = localtime(&nowtime);
+	strftime(tmbuf, sizeof tmbuf, "%Y-%m-%d %H:%M:%S", nowtm);
+	snprintf(time_string, 64, "%s.%06d", tmbuf, (int)tv.tv_usec);
+}
+
 
 void dump_buffer_to_file(Analyze *an,const char *file_name){
 	FILE *file; 

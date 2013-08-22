@@ -237,6 +237,13 @@ void *lisa_to_pc(void *arg){
 	{
 		message_length = serial_input_check(); //blocking !!!
 		if(message_length > 0){
+			
+			//to test latency from lisa pull pin high when airspeed package arrives
+			if(serial_input.buffer[3]==AIRSPEED_ETS){
+					system("echo 1 > /sys/class/gpio/gpio60/value");
+			}else{
+					system("echo 0 > /sys/class/gpio/gpio60/value");
+			}
 
 			//add timestamp
 			message_length=add_timestamp(serial_input.buffer);
