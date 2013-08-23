@@ -1,6 +1,11 @@
 /*
  * AUTHOR:Jonas Van Pelt and Maarten Arits
  */
+ 
+/**************************************************************************************
+* LAYOUT OF INCOMING PACKAGE 
+* startbyte (0x99) - length - sender_id, message_id, message ... , checksumA, checksumB
+****************************************************************************************/
 
 #ifndef DATA_DECODING_H_ 
 #define DATA_DECODING_H_
@@ -212,7 +217,7 @@ typedef struct
  * PROTOTYPES PUBLIC
  * ******************************/
 extern void init_decoding(void);
-extern DEC_errCode data_update(uint8_t stream[]); /*decodes the incoming package to right structure*/
+extern DEC_errCode data_decode(uint8_t stream[]);
 extern int32_t data_write(uint8_t stream[], void *destination, int length);
 extern void switch_read_write(void);
 extern DEC_errCode data_encode(uint8_t message[],long unsigned int message_length,uint8_t encoded_data[],int sender_id,int message_id);

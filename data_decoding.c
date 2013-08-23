@@ -1,11 +1,10 @@
 /*
  * AUTHOR:Jonas Van Pelt and Maarten Arits
  */
+ 
 #include <stdlib.h>
 #include "data_decoding.h"
 #include <string.h>
-
-
 
 #ifndef DEBUG 
 #define DEBUG 0
@@ -18,7 +17,7 @@
 /********************************
  * PROTOTYPES PRIVATE
  * ******************************/
-static DEC_errCode data_decode(uint8_t sender,uint8_t stream[], int length);
+static DEC_errCode data_to_struct(uint8_t sender,uint8_t stream[], int length); 
 
 /********************************
  * GLOBALS
@@ -58,10 +57,10 @@ void switch_read_write()
 	write_data = temp;
 }
 
-DEC_errCode data_update(uint8_t stream[])
+DEC_errCode data_decode(uint8_t stream[])
 {
 	#if DEBUG  > 1
-		printf("Entering data_update\n");
+		printf("Entering data_decode\n");
 	#endif
 	
 	int i = 0; 
@@ -85,13 +84,13 @@ DEC_errCode data_update(uint8_t stream[])
 		return DEC_ERR_CHECKSUM;
 	}
 	
-	return data_decode(sender, stream, length);
+	return data_to_struct(sender, stream, length);
 }
 
-static DEC_errCode data_decode(uint8_t sender,uint8_t stream[], int length) // start = 0
+static DEC_errCode data_to_struct(uint8_t sender,uint8_t stream[], int length) // start = 0
 {
 	#if DEBUG  > 1
-		printf("Entering data_decode\n");
+		printf("Entering data_to_struct\n");
 	#endif
 	
 	switch(sender)
