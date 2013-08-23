@@ -12,3 +12,6 @@ gcc main_beaglebone.c udp_communication.c uart_communication.c log.c circular_bu
 
 #carousel2
 ./main_beaglebone 10.33.136.31 8888 7777
+
+
+
