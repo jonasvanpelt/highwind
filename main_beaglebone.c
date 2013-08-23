@@ -436,9 +436,9 @@ static void sendError(DEC_errCode err,library lib){
 		Beagle_error error_message;
 
 		//encode an error package
-		error_message.message.library=lib;
-		error_message.message.error=err;
-		data_encode(error_message.raw,sizeof(error_message.raw),encoded_data,2,2);
+		error_message.library=lib;
+		error_message.error_code=err;
+		data_encode((uint8_t *)&error_message,sizeof(error_message),encoded_data,2,2);
 		message_length=sizeof(encoded_data);
 
 		//send errorcode to server

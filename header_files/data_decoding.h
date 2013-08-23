@@ -79,7 +79,7 @@ typedef union{ //message id 72
 
 typedef struct { // id = 2
 		uint8_t library;
-		uint8_t error;
+		uint8_t error_code;
 		timeval tv; 
 		int8_t new_data;
 } Beagle_error;

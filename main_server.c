@@ -12,7 +12,7 @@
 #include "header_files/data_decoding.h"
 #include "header_files/log.h"
 #include "header_files/analyze.h"
-
+#include "header_files/uart_communication.h"
 
 #define MAX_INPUT_STREAM_SIZE 255
 #define MAX_OUTPUT_STREAM_SIZE 36
@@ -34,7 +34,9 @@
 
 static void *server_to_planebone(void *connection);
 static void DEC_err_handler(DEC_errCode err ); 
-static void UDP_err_handler( UDP_errCode err ); 
+static void UDP_err_handler( UDP_errCode err);
+static void UART_err_handler( UART_errCode err );
+static void LOG_err_handler(LOG_errCode err ); 
 static void err_receiver();
 static void print_mem(void const *vp, int n);
 
@@ -465,8 +467,21 @@ int main(int argc, char *argv[]){
 				if(input_stream[3]==BEAGLE_ERROR){
 					printf("beagle bone error content:");
 					print_mem((void *)&data->bone_plane.error,sizeof(Beagle_error));
-					
-					
+										
+					switch(data->bone_plane.error.library){
+						case UDP_L:
+							UDP_err_handler(data->bone_plane.error.error_code);
+						break;
+						case UART_L:
+							UART_err_handler(data->bone_plane.error.error_code);
+						break;
+						case DECODE_L:
+							DEC_err_handler(data->bone_plane.error.error_code);
+						break;
+						case LOG_L:
+							LOG_err_handler(data->bone_plane.error.error_code);
+						break;
+					}
 				}
 				
 							
@@ -638,18 +653,17 @@ static void *server_to_planebone(void *connection){
 /*------------------------END OF SECOND THREAD------------------------*/
 }	
 
-static void UDP_err_handler( UDP_errCode err )  
+static void UDP_err_handler( UDP_errCode err)
 {
 	static char SOURCEFILE[] = "udp_communication.c";
 
-	//it makes no sense to send UDP errors to server when there is a UDP problem.
+	//it makes no sence to send UDP errors to server when there is a UDP problem.
 	//write error to local log
 	switch( err ) {
 		case UDP_ERR_NONE:
 			break;
 		case  UDP_ERR_INET_ATON:
 			error_write(SOURCEFILE,"failed decoding ip address");
-			exit(EXIT_FAILURE);
 			break;
 		case UDP_ERR_SEND:
 			error_write(SOURCEFILE,"failed sending UDP data");
@@ -658,26 +672,69 @@ static void UDP_err_handler( UDP_errCode err )
 			error_write(SOURCEFILE,"failed closing UDP socket");
 			break;
 		case UDP_ERR_OPEN_SOCKET:
-			error_write(SOURCEFILE,"failed inserting UDP socket");
-			exit(EXIT_FAILURE);
+			error_write(SOURCEFILE,"failed opening UDP socket");
 			break;
 		case UDP_ERR_BIND_SOCKET_PORT:
 			error_write(SOURCEFILE,"failed binding port to socket");
 			break;
 		case UDP_ERR_RECV:
-			error_write(SOURCEFILE,"failed receiving UDP data: timeout");
+			error_write(SOURCEFILE,"failed receiving UDP data");
 			break;
 		case UDP_ERR_SET_TIMEOUT:
 			error_write(SOURCEFILE,"failed setting UDP timeout on socket");
-		break;
+			break;
 		case UDP_ERR_UNDEFINED:
 			error_write(SOURCEFILE,"undefined UDP error");
 			break;
 		default: break;
-	
 	}
 }
 
+static void UART_err_handler( UART_errCode err )
+{
+	static char SOURCEFILE[] = "uart_communication.c";
+
+	switch( err ) {
+			case UART_ERR_NONE:
+				break;
+			case  UART_ERR_READ_CHECKSUM:
+				error_write(SOURCEFILE,"serial port wrong checksum");
+				break;
+			case  UART_ERR_READ_LENGTH:
+				error_write(SOURCEFILE,"serial port failed reading message length");
+				break;
+			case  UART_ERR_READ_MESSAGE:
+				error_write(SOURCEFILE,"serial port failed reading message based on length");
+				break;
+			case  UART_ERR_READ_NO_DATA_IN_BUF:
+				error_write(SOURCEFILE,"serial port no data in buffer after wait");
+				break;
+			case UART_ERR_SERIAL_PORT_FLUSH_INPUT:
+				error_write(SOURCEFILE,"serial port flush input failed");
+				break;
+			case UART_ERR_SERIAL_PORT_FLUSH_OUTPUT:
+				error_write(SOURCEFILE,"serial port flush output failed");
+				break;
+			case UART_ERR_SERIAL_PORT_OPEN:
+				error_write(SOURCEFILE,"serial port open failed");
+				exit(EXIT_FAILURE);
+				break;
+			case UART_ERR_SERIAL_PORT_CLOSE:
+				error_write(SOURCEFILE,"serial port close failed");
+				break;
+			case UART_ERR_SERIAL_PORT_CREATE:
+				error_write(SOURCEFILE,"serial port create failed");
+				exit(EXIT_FAILURE);
+				break;
+			case UART_ERR_SERIAL_PORT_WRITE:
+				error_write(SOURCEFILE,"serial port write failed");
+				break;
+			case UART_ERR_UNDEFINED:
+				error_write(SOURCEFILE,"undefined UART error");
+				break;
+			default: break;
+		}
+}
 static void DEC_err_handler(DEC_errCode err )  
 {
 	static char SOURCEFILE[] = "data_decoding.c";
@@ -705,6 +762,32 @@ static void DEC_err_handler(DEC_errCode err )
 			break;
 		case DEC_ERR_UNDEFINED:
 			error_write(SOURCEFILE,"undefined decoding error");
+			break;
+		default: break;
+	}
+}
+
+static void LOG_err_handler(LOG_errCode err )  
+{
+	static char SOURCEFILE[] = "log.c";
+	//write error to local log
+	switch( err ) {
+		case LOG_ERR_NONE:
+			break;
+		case  LOG_ERR_UNDEFINED:
+			error_write(SOURCEFILE,"undefined log error");
+			break;
+		case LOG_ERR_MOUNT_SD:
+			error_write(SOURCEFILE,"error while mounting sd card");
+			break;
+		case LOG_ERR_OPEN_FILE:
+			error_write(SOURCEFILE,"error opening file");
+			break;
+		case LOG_ERR_WRITE:
+			error_write(SOURCEFILE,"error writing to file");
+			break;
+		case LOG_ERR_CLOSE:
+			error_write(SOURCEFILE,"error closing file");
 			break;
 		default: break;
 	}
