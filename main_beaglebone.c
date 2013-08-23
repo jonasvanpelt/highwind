@@ -451,7 +451,7 @@ static void sendError(DEC_errCode err,library lib){
 }
 
 static void enable_ptp(){
-	int err = system("./ptpd-2.2.0/ptpd2 -b eth0 -g -y 0 -D -f /var/log/ptpd.log");
+	int err = system("./ptpd-2.2.0/src/ptpd2 -b eth0 -g -y 0 -D -f /var/log/ptpd.log");
 	if(err<0){
 		printf("could not enable ptp: error code %d\n",err);
 		exit(EXIT_FAILURE);
