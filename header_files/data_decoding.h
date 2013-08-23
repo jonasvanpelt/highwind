@@ -77,15 +77,12 @@ typedef union{ //message id 72
  * INCOMING MESSAGES
  * **********************************/
 
-typedef union { // id = 2
-		uint8_t raw[19];
-		struct Error_message {
-			uint8_t library;
-			uint8_t error;
-			timeval tv; 
-			int8_t new_data;
-		} message;
-	} Beagle_error;
+typedef struct { // id = 2
+		uint8_t library;
+		uint8_t error;
+		timeval tv; 
+		int8_t new_data;
+} Beagle_error;
 	
 	
 //these structure are created from messages.xml in the paparazzi code + timestamp

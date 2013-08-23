@@ -465,6 +465,8 @@ int main(int argc, char *argv[]){
 				if(input_stream[3]==BEAGLE_ERROR){
 					printf("beagle bone error content:");
 					print_mem((void *)&data->bone_plane.error,sizeof(Beagle_error));
+					
+					
 				}
 				
 							

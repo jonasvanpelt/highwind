@@ -100,7 +100,7 @@ static DEC_errCode data_to_struct(uint8_t sender,uint8_t stream[], int length) /
 			{
 				case BEAGLE_ERROR: 
 					data_write(stream, (void *)&write_data->bone_plane.error, sizeof(Beagle_error)-1);
-					write_data->bone_plane.error.message.new_data = 0;
+					write_data->bone_plane.error.new_data = 0;
 					break;
 				default: return DEC_ERR_UNKNOWN_BONE_PACKAGE; break;
 			}
