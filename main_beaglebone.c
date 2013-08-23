@@ -30,6 +30,7 @@
 static void *lisa_to_pc(void *connection);
 static void *data_logging_lisa(void *);
 static void *data_logging_groundstation(void *arg);
+static void enable_ptp();
 static void UDP_err_handler( UDP_errCode err,int exit_on_error );
 static void UART_err_handler( UART_errCode err );
 static void sendError(DEC_errCode err,library lib);
@@ -92,6 +93,8 @@ int main(int argc, char *argv[]){
 	if(err != LOG_ERR_NONE){
 		exit(EXIT_FAILURE);		//mounting SD card failed
 	}
+	
+	enable_ptp();
 
 	#if LOGGING > 0
 	//init circular data log buffers
@@ -446,6 +449,15 @@ static void sendError(DEC_errCode err,library lib){
 		UDP_err_handler(sendUDPClientData(&udp_client,&encoded_data,message_length),0);
 		UDP_err_handler(closeUDPClientSocket(&udp_client),0);
 }
+
+static void enable_ptp(){
+	int err = system("./ptpd-2.2.0/ptpd2 -b eth0 -g -y 0 -D -f /var/log/ptpd.log");
+	if(err<0){
+		printf("could not enable ptp: error code %d\n",err);
+		exit(EXIT_FAILURE);
+	}
+}
+
 
 static void switch_cb_lisa_pointers(){
 		CircularBuffer *temp = cb_read_lisa;
