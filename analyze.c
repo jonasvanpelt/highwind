@@ -73,7 +73,11 @@ int calculate_latency(Analyze *an,timeval tvSent,timeval tvNow){
 	if(an->index < an->buffsize){
 		timeval tvResult;
 		double diff; 
-		char tmp[60];
+		/*char tmp[60];
+		timestamp_to_timeString(tvSent,tmp);
+		printf("send time stamp %s\n",tmp);
+		timestamp_to_timeString(tvNow,tmp);
+		printf("receive time stamp %s\n\n",tmp);*/
 		timeval_subtract(&tvResult,&tvNow,&tvSent);
 		diff = ((double)tvResult.tv_sec * 1e6 + tvResult.tv_usec) * 1e-3;
 		an->buffer[an->index]=diff;
