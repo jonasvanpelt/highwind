@@ -456,6 +456,8 @@ static void enable_ptp(){
 		printf("could not enable ptp: error code %d\n",err);
 		exit(EXIT_FAILURE);
 	}
+	printf("code %d\n",err);
+
 }
 
 
