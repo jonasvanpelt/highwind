@@ -643,6 +643,7 @@ static void *server_to_planebone(void *connection){
 		UDP_err_handler(sendUDPClientData(&udp_client,&encoded_data,sizeof(encoded_data)));	
 		
 		usleep(20000); //60 hz
+		
 		//sleep(4);
 	}
 	UDP_err_handler(closeUDPClientSocket(&udp_client));
