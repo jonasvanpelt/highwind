@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <string.h>
-#include "log.h"
+#include "header_files/log.h"
 
 
 #ifndef DEBUG 
@@ -21,8 +21,8 @@ static const char FILE_PATH_BONEPLANE_LOG[] = "/media/sdcard/data_boneplane_log.
 /*static const char FILE_PATH_PROGRAM_LOG[]="/media/sdcard/log.txt";
 static const char FILE_PATH_PROGRAM_ERROR[]="/media/sdcard/error.txt";*/
 
-static const char FILE_PATH_PROGRAM_LOG[]="log.txt";
-static const char FILE_PATH_PROGRAM_ERROR[]="error.txt";
+static const char FILE_PATH_PROGRAM_LOG[]="log/log.txt";
+static const char FILE_PATH_PROGRAM_ERROR[]="log/error.txt";
 
 static const char SD_CARD_MOUNT_LOCATION[] = "/media/sdcard/";
 static const char SD_CARD_DEVICE_LOCATION[] = "/dev/mmcblk0p2";

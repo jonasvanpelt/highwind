@@ -12,7 +12,7 @@
 #include <time.h>
 #include <poll.h>
 
-#include "uart_communication.h"
+#include "header_files/uart_communication.h"
 
 #ifndef DEBUG 
 #define DEBUG 0

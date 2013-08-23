@@ -5,7 +5,7 @@
 #include<string.h> //memset
 #include<stdlib.h> //exit
 #include <unistd.h> // close
-#include "udp_communication.h"
+#include "header_files/udp_communication.h"
 
 #ifndef DEBUG 
 #define DEBUG 0

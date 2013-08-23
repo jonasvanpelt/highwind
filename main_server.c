@@ -8,10 +8,10 @@
 #include <string.h>
 #include <time.h>
 
-#include "udp_communication.h"
-#include "data_decoding.h"
-#include "log.h"
-#include "analyze.h"
+#include "header_files/udp_communication.h"
+#include "header_files/data_decoding.h"
+#include "header_files/log.h"
+#include "header_files/analyze.h"
 
 
 #define MAX_INPUT_STREAM_SIZE 255

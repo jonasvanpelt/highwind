@@ -4,7 +4,7 @@
  
 #include <stdlib.h>
 #include <stdio.h>
-#include "analyze.h"
+#include "header_files/analyze.h"
 
 #ifndef DEBUG 
 #define DEBUG 0
