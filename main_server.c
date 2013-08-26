@@ -658,8 +658,6 @@ static void UDP_err_handler( UDP_errCode err)
 {
 	static char SOURCEFILE[] = "udp_communication.c";
 
-	//it makes no sence to send UDP errors to server when there is a UDP problem.
-	//write error to local log
 	switch( err ) {
 		case UDP_ERR_NONE:
 			break;

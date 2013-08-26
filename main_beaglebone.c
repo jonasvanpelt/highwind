@@ -54,14 +54,14 @@ static Connection connection;
 
 
 #if LOGGING > 0
-//log buffer for data from lisa
+//log ping pong buffers for data from lisa
 static CircularBuffer cb_data_lisa_ping;
 static CircularBuffer cb_data_lisa_pong;
 static CircularBuffer *cb_read_lisa = &cb_data_lisa_ping;
 static CircularBuffer *cb_write_lisa = &cb_data_lisa_pong;
 static int reading_flag_lisa=0;
 
-//log buffer for data from groundstation
+//log ping pong buffers for data from groundstation
 static CircularBuffer cb_data_ground_ping;
 static CircularBuffer cb_data_ground_pong;
 static CircularBuffer *cb_read_ground = &cb_data_ground_ping;
