@@ -434,7 +434,7 @@ static void sendError(DEC_errCode err,library lib){
 
 		static UDP udp_client;
 		int message_length;
-		char encoded_data[MAX_STREAM_SIZE];
+		uint8_t encoded_data[MAX_STREAM_SIZE];
 		Data data;
 		Beagle_error error_message;
 

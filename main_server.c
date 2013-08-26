@@ -657,7 +657,7 @@ static void *server_to_planebone(void *connection){
 static void UDP_err_handler( UDP_errCode err)
 {
 	static char SOURCEFILE[] = "udp_communication.c";
-
+	
 	switch( err ) {
 		case UDP_ERR_NONE:
 			break;
@@ -689,10 +689,11 @@ static void UDP_err_handler( UDP_errCode err)
 	}
 }
 
-static void UART_err_handler( UART_errCode err )
+static void UART_err_handler( UART_errCode err_p )
 {
 	static char SOURCEFILE[] = "uart_communication.c";
-
+	int8_t err = (int8_t)err_p; //because uart erros can be negative
+		
 	switch( err ) {
 			case UART_ERR_NONE:
 				break;
@@ -716,14 +717,12 @@ static void UART_err_handler( UART_errCode err )
 				break;
 			case UART_ERR_SERIAL_PORT_OPEN:
 				error_write(SOURCEFILE,"serial port open failed");
-				exit(EXIT_FAILURE);
 				break;
 			case UART_ERR_SERIAL_PORT_CLOSE:
 				error_write(SOURCEFILE,"serial port close failed");
 				break;
 			case UART_ERR_SERIAL_PORT_CREATE:
 				error_write(SOURCEFILE,"serial port create failed");
-				exit(EXIT_FAILURE);
 				break;
 			case UART_ERR_SERIAL_PORT_WRITE:
 				error_write(SOURCEFILE,"serial port write failed");
