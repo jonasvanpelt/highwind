@@ -18,6 +18,7 @@
  * PROTOTYPES PRIVATE
  * ******************************/
 static DEC_errCode data_to_struct(uint8_t sender,uint8_t stream[], int length); 
+void data_write(uint8_t stream[],void *destination, int length);
 
 /********************************
  * GLOBALS
@@ -146,7 +147,7 @@ static DEC_errCode data_to_struct(uint8_t sender,uint8_t stream[], int length) /
 	return DEC_ERR_NONE;	
 }
 
-data_write(uint8_t stream[],void *destination, int length)
+void data_write(uint8_t stream[],void *destination, int length)
 {
 	#if DEBUG  > 1
 		printf("Entering data_write\n");

@@ -624,7 +624,7 @@ static void *server_to_planebone(void *connection){
 		output.message.servo_5=i;
 		output.message.servo_6=i;
 		output.message.servo_7=0;
-		i=i+600;
+		i=i+900;
 		if(i>12800){
 			i=0;	
 		}
@@ -644,7 +644,7 @@ static void *server_to_planebone(void *connection){
 		
 		//usleep(20000); //60 hz
 		
-		sleep(4);
+		sleep(1);
 	}
 	UDP_err_handler(closeUDPClientSocket(&udp_client));
 

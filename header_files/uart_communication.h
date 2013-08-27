@@ -12,9 +12,9 @@
 
 #define INPUT_BUFFER 255 
 
-/**
+/********************************
  * GLOBALS
- * */
+ * ******************************/
  
 enum uart_errCode {UART_ERR_READ_CHECKSUM = -4,UART_ERR_READ_LENGTH = -3,UART_ERR_READ_MESSAGE = -2,UART_ERR_READ_NO_DATA_IN_BUF = -1, UART_ERR_NONE=0,UART_ERR_SERIAL_PORT_FLUSH_INPUT,UART_ERR_SERIAL_PORT_FLUSH_OUTPUT,UART_ERR_SERIAL_PORT_OPEN,UART_ERR_SERIAL_PORT_CLOSE,UART_ERR_SERIAL_PORT_CREATE,UART_ERR_SERIAL_PORT_WRITE,UART_ERR_UNDEFINED};
 typedef enum uart_errCode UART_errCode;
@@ -26,7 +26,6 @@ typedef struct{
 }serial_port; 
  
 serial_port *serial_stream;
-
 
 struct Packets {
 	struct Serial {
@@ -43,9 +42,6 @@ union Serial_input {
 	char buffer[INPUT_BUFFER]; 
 } serial_input;
 
-//timers
-
-struct timeval timers[10];
 
 /********************************
  * PROTOTYPES PUBLIC

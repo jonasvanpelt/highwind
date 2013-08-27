@@ -12,25 +12,23 @@
 #define DEBUG 0
 #endif
 
+/********************************
+ * PROTOTYPES PRIVATE
+ * ******************************/
+ 
+static LOG_errCode mount_sd_card();
+ 
+/********************************
+ * GLOBALS
+ * ******************************/
+ 
 FILE *lisa_log_file,*groundstation_log_file,*boneplane_log_file;
 
-static const char FILE_PATH_LISA_LOG[] = "/media/sdcard/data_lisa_log.txt";
-static const char FILE_PATH_GROUND_LOG[] = "/media/sdcard/data_groundstation_log.txt";
-static const char FILE_PATH_BONEPLANE_LOG[] = "/media/sdcard/data_boneplane_log.txt";
 
-/*static const char FILE_PATH_PROGRAM_LOG[]="/media/sdcard/log.txt";
-static const char FILE_PATH_PROGRAM_ERROR[]="/media/sdcard/error.txt";*/
-
-static const char FILE_PATH_PROGRAM_LOG[]="log/log.txt";
-static const char FILE_PATH_PROGRAM_ERROR[]="log/error.txt";
-
-static const char SD_CARD_MOUNT_LOCATION[] = "/media/sdcard/";
-static const char SD_CARD_DEVICE_LOCATION[] = "/dev/mmcblk0p2";
-
-/*static const char FILE_PATH_LISA_LOG[] = "data_lisa_log.txt";
-static const char FILE_PATH_GROUND_LOG[] = "data_groundstation_log.txt";
-static const char FILE_PATH_BONEPLANE_LOG[] = "data_boneplane_log.txt";*/
-
+/********************************
+ * FUNCTIONS
+ * ******************************/
+ 
 LOG_errCode init_log(){
 	#if DEBUG  > 1
 		printf("Entering init_log\n");
@@ -46,7 +44,7 @@ LOG_errCode init_log(){
 	return LOG_ERR_NONE;
 }
 
-LOG_errCode mount_sd_card(){
+static LOG_errCode mount_sd_card(){
 	#if DEBUG  > 1
 		printf("Entering mount_sd_card\n");
 	#endif
