@@ -1,3 +1,4 @@
+
 /*
  * AUTHOR: Maarten Arits and Jonas Van Pelt
  */
@@ -52,7 +53,7 @@ const char device[]="/dev/ttyO4";
 
 static int wait_for_data(){
 	struct pollfd fds[1];
-	int timeout = -1; //time out forever
+	int timeout = 1000000; //time out in millisecond
 	int result;
 	fds[0].fd=serial_stream->fd;
 	fds[0].events=POLLIN;
@@ -73,8 +74,12 @@ static int serial_port_read(uint8_t buffer[],int length)
 	int bytes_in_buffer=0;
 
 	do{
-		wait_for_data();
+		if(wait_for_data()<0){
+			return UART_ERR_READ_TIMEOUT;
+		}
+		
 		ioctl(serial_stream->fd, FIONREAD, &bytes_in_buffer); //set to number of bytes in buffer
+	
 	}while(length < bytes_in_buffer );
 	 
 	int n = read(serial_stream->fd, buffer, length);
@@ -396,5 +401,4 @@ UART_errCode serial_port_write(uint8_t output[],long unsigned int message_length
 	}
 	return UART_ERR_NONE;                                                                                                           
 }
-
 
