@@ -74,10 +74,7 @@ static int serial_port_read(uint8_t buffer[],int length)
 	int bytes_in_buffer=0;
 
 	do{
-		if(wait_for_data()<0){
-			return UART_ERR_READ_TIMEOUT;
-		}
-		
+		wait_for_data();
 		ioctl(serial_stream->fd, FIONREAD, &bytes_in_buffer); //set to number of bytes in buffer
 	
 	}while(length < bytes_in_buffer );
