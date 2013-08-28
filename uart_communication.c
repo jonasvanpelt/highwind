@@ -28,19 +28,16 @@ static int serial_port_read(uint8_t buffer[],int length);
 static UART_errCode serial_port_new(void);
 static UART_errCode serial_port_create();
 static UART_errCode  serial_port_open_raw(const char* device, speed_t speed);
-//static UART_errCode  serial_port_open(const char* device, void(*term_conf_callback)(struct termios*, speed_t*));
 static void serial_port_free(void);
 static void serial_port_flush(void);
 static UART_errCode serial_port_flush_input(void);
 static UART_errCode serial_port_flush_output(void);
-static void packets_clear(void);
 static int wait_for_data();
 
 /********************************
  * GLOBALS
  * ******************************/
- 
- 
+  
 static const char FILENAME[] = "uart_communication.c";
 
 //config
@@ -53,7 +50,7 @@ const char device[]="/dev/ttyO4";
 
 static int wait_for_data(){
 	struct pollfd fds[1];
-	int timeout = -1; //time out in millisecond
+	int timeout = -1; //infinite timeout
 	int result;
 	fds[0].fd=serial_stream->fd;
 	fds[0].events=POLLIN;
@@ -89,7 +86,7 @@ static int serial_port_read(uint8_t buffer[],int length)
 	return n;  //return number of read bytes
 }
 
-int serial_input_get_data(uint8_t buffer[]){
+int serial_input_get_lisa_data(uint8_t buffer[]){
 	
 	//todo: oneindige loops vermijden
 	
@@ -100,7 +97,7 @@ int serial_input_get_data(uint8_t buffer[]){
 	int i;
 	int INDEX_START_BYTE=0,INDEX_LENGTH=1,INDEX_CH1,INDEX_CH2;
 
-	//1. SEARCH FOR START BYTE
+	//1. SEARCH FOR START BYTE 0X99
 	do{
 		if(serial_port_read(&buffer[0],1)==UART_ERR_READ){	//read first byte
 			serial_port_flush_input();
@@ -118,7 +115,6 @@ int serial_input_get_data(uint8_t buffer[]){
 	} 
 	message_length = buffer[1]; 
 	//buffer[1] = length at this moment
-
 	
 	//3. READ MESSAGE
 	if(serial_port_read(&buffer[2],message_length-2)==UART_ERR_READ){	//read only message_length -2 because start byte and length are already in there
@@ -144,7 +140,6 @@ int serial_input_get_data(uint8_t buffer[]){
 		}
 		printf("\n");*/
 		serial_port_flush_input();
-	
 		return UART_ERR_READ_CHECKSUM; 
 		
 	}
@@ -158,7 +153,78 @@ int serial_input_get_data(uint8_t buffer[]){
 	return message_length;
 }
 
- 
+static int serial_port_read_temp(uint8_t buffer[],int length) 
+{
+	static char test_wind[] = "$IIMWV,226.0,R,000.00,N,A*0B\n$WIXDR,C,036.5,C,,*52\n$PLCJ,75FA,7DEA,03,,,,6D7C,837E\n$PLCJEAC90,D35D,3F00,2161,FF\n";
+	static int index=0;
+	int i;
+	//printf("reading index %d ...\n",index);
+
+	buffer[0]=(uint8_t)test_wind[index];
+	index++;
+	
+	if(index==sizeof(test_wind)){
+			exit(1);
+	}
+	
+	return 1;  //return number of read bytes
+}
+
+int serial_input_get_windsensor_data(uint8_t buffer[]){	
+		//check protocol here: http://en.wikipedia.org/wiki/NMEA_0183
+		int bytes_in_buffer;
+		unsigned int checksum_calc=0;
+		unsigned int checksum_recv=0;
+		uint8_t checksum_flag=0;
+		int length,i;
+		
+		//1. SEARCH FOR START BYTE $ = 0x24
+		do{
+			if(serial_port_read_temp(&buffer[0],1)==UART_ERR_READ){	//read first byte
+				serial_port_flush_input();
+				return UART_ERR_READ_START_BYTE;
+			} 
+
+		}while(buffer[0]!='$');
+		//buffer[0] = 0x24 at this moment	
+					
+		//2. READ THE REST OF THE MESSAGE UNTIL <CR> = 0x0d < LF > = 0x0a
+		length = 0;
+		do{
+			length++;
+			if(serial_port_read_temp(&buffer[length],1)==UART_ERR_READ){	
+				//serial_port_flush_input();			
+				return UART_ERR_READ_MESSAGE;
+			}
+
+			if(buffer[length]=='*'){ //0x0a = '*' --> if present then there is a checksum
+					//printf("checksum present at index %d\n",length);
+					checksum_flag=1;
+			}
+		
+		}while(buffer[length]!='\n'); 
+		
+		//3.CHECK CHECKSUM IF PRESENT
+		//the checksum is the bitwise exclusive OR of ASCII codes of all characters between the $ and *
+		if(checksum_flag==1){
+			
+			sscanf(&buffer[length-2],"%x",(unsigned int *)&checksum_recv); //convert fake asci hex to real hex
+
+			for(i=1;i<length-3;i++){
+				checksum_calc ^= (char)buffer[i];
+			}
+						
+			if(checksum_calc!=checksum_recv){
+				//serial_port_flush_input();	
+				printf("checksum calc %x\n",checksum_calc);
+				printf("checksum real %x\n",checksum_recv);
+				return UART_ERR_READ_CHECKSUM; 
+			}	
+		}	
+		
+		return length; //number of read bytes
+}
+
 
 static UART_errCode serial_port_new(void) {
 	#if DEBUG  > 1
@@ -256,34 +322,6 @@ static UART_errCode  serial_port_open_raw(const char* device, speed_t speed) {
 	serial_port_flush();
 	return UART_ERR_NONE;
 }
-
-/*static UART_errCode  serial_port_open(const char* device, void(*term_conf_callback)(struct termios*, speed_t*)) {
-	#if DEBUG  > 1
-		printf("Entering serial_port_open\n");
-	#endif
-
-	speed_t speed;
-	if ((serial_stream->fd = open(device, O_RDWR | O_NONBLOCK)) < 0) {
-		return UART_ERR_SERIAL_PORT_OPEN;
-	}
-	if (tcgetattr(serial_stream->fd, &serial_stream->orig_termios) < 0) {
-		close(serial_stream->fd);
-		return UART_ERR_SERIAL_PORT_OPEN;
-	}
-	serial_stream->cur_termios = serial_stream->orig_termios;
-	term_conf_callback(&serial_stream->cur_termios, &speed);
-	if (cfsetispeed(&serial_stream->cur_termios, speed)) {
-		close(serial_stream->fd);
-		return UART_ERR_SERIAL_PORT_OPEN;
-	}
-	if (tcsetattr(serial_stream->fd, TCSADRAIN, &serial_stream->cur_termios)) {
-		close(serial_stream->fd);
-		return UART_ERR_SERIAL_PORT_OPEN;
-	}
-	serial_port_flush();
-	return UART_ERR_NONE;
-
-}*/
 
 UART_errCode serial_port_close(void) {
 	#if DEBUG  > 1

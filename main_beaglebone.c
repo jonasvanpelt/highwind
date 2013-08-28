@@ -72,8 +72,10 @@ static int reading_flag_ground=0;
  /***********************************
   * MAIN
   * *********************************/
+  
+    
 int main(int argc, char *argv[]){
-
+	
 	//parse arguments
 	if(argc == 4){
 		//first argument is always name of program or empty string
@@ -224,7 +226,7 @@ static void *lisa_to_pc(void *arg){
 
 	while(1)
 	{
-		message_length = serial_input_get_data(input_buffer); //blocking !!!
+		message_length = serial_input_get_lisa_data(input_buffer); //blocking !!!
 		if(message_length > 0){
 			
 			//to test latency from lisa pull pin high when airspeed package arrives
@@ -450,7 +452,7 @@ static void sendError(DEC_errCode err,library lib){
 }
 
 static void enable_ptp(){
-	int err = system("./ptpd-2.2.0/src/ptpd2 -b eth0 -g -y 0 -D -f /var/log/ptpd.log");
+	int err = system("./ptpd-2.2.0/src/ptpd2 -b eth0 -g -y 0 -D -f /var/log/ptpd.log -L");
 	if(err!=0 && err != 768){ //768 = ptp already running
 		printf("could not enable ptp: error code %d\n",err);
 		exit(EXIT_FAILURE);

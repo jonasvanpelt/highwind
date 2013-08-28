@@ -3,7 +3,7 @@
  */
  
 /**************************************************************************************
-* LAYOUT OF INCOMING PACKAGE 
+* LAYOUT OF INCOMING LISA PACKAGE 
 * startbyte (0x99) - length - sender_id, message_id, message ... , checksumA, checksumB
 ****************************************************************************************/
 
