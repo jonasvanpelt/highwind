@@ -76,7 +76,7 @@ static int serial_port_read(uint8_t buffer[],int length)
 	do{
 		wait_for_data();
 		ioctl(serial_stream->fd, FIONREAD, &bytes_in_buffer); //set to number of bytes in buffer
-		printf("bytes in buff %d\n",bytes_in_buffer);
+		//printf("bytes in buff %d\n",bytes_in_buffer);
 	
 	}while(bytes_in_buffer < length );
 	 
@@ -103,6 +103,7 @@ int serial_input_get_data(uint8_t buffer[]){
 	//1. SEARCH FOR START BYTE
 	do{
 		if(serial_port_read(&buffer[0],1)==UART_ERR_READ){	//read first byte
+			serial_port_flush_input();
 			return UART_ERR_READ_START_BYTE;
 		} 
 	
@@ -112,6 +113,7 @@ int serial_input_get_data(uint8_t buffer[]){
 	
 	//2. READ MESSAGE LENGTH
 	if(serial_port_read(&buffer[1],1)==UART_ERR_READ){	//read first byte
+			serial_port_flush_input();
 			return UART_ERR_READ_LENGTH;
 	} 
 	message_length = buffer[1]; 
@@ -120,7 +122,8 @@ int serial_input_get_data(uint8_t buffer[]){
 	
 	//3. READ MESSAGE
 	if(serial_port_read(&buffer[2],message_length-2)==UART_ERR_READ){	//read only message_length -2 because start byte and length are already in there
-			return UART_ERR_READ_MESSAGE;
+		serial_port_flush_input();			
+		return UART_ERR_READ_MESSAGE;
 	} 
 	
 	//4 CHECK CHECKSUMS
@@ -135,14 +138,22 @@ int serial_input_get_data(uint8_t buffer[]){
 	
 	if (buffer[INDEX_CH1]!= checksum_1 || buffer[INDEX_CH2] != checksum_2)
 	{
+		/*printf("message raw check: ");
+		for(i=0;i<message_length;i++){
+				printf("%d ",buffer[i]);
+		}
+		printf("\n");*/
+		serial_port_flush_input();
+	
 		return UART_ERR_READ_CHECKSUM; 
+		
 	}
 	
-	printf("message raw: ");
+	/*printf("message raw: ");
 	for(i=0;i<message_length;i++){
 			printf("%d ",buffer[i]);
 	}
-	printf("\n");
+	printf("\n");*/
 	
 	return message_length;
 }
