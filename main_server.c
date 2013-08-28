@@ -697,6 +697,9 @@ static void UART_err_handler( UART_errCode err_p )
 	switch( err ) {
 			case UART_ERR_NONE:
 				break;
+			case  UART_ERR_READ_START_BYTE:
+				error_write(SOURCEFILE,"serial port failed to read start byte");
+				break;
 			case  UART_ERR_READ_CHECKSUM:
 				error_write(SOURCEFILE,"serial port wrong checksum");
 				break;
@@ -705,9 +708,6 @@ static void UART_err_handler( UART_errCode err_p )
 				break;
 			case  UART_ERR_READ_MESSAGE:
 				error_write(SOURCEFILE,"serial port failed reading message based on length");
-				break;
-			case  UART_ERR_READ_NO_DATA_IN_BUF:
-				error_write(SOURCEFILE,"serial port no data in buffer after wait");
 				break;
 			case UART_ERR_SERIAL_PORT_FLUSH_INPUT:
 				error_write(SOURCEFILE,"serial port flush input failed");

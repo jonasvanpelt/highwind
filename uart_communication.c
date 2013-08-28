@@ -76,8 +76,9 @@ static int serial_port_read(uint8_t buffer[],int length)
 	do{
 		wait_for_data();
 		ioctl(serial_stream->fd, FIONREAD, &bytes_in_buffer); //set to number of bytes in buffer
+		printf("bytes in buff %d\n",bytes_in_buffer);
 	
-	}while(length < bytes_in_buffer );
+	}while(bytes_in_buffer < length );
 	 
 	int n = read(serial_stream->fd, buffer, length);
 	 
@@ -98,13 +99,15 @@ int serial_input_get_data(uint8_t buffer[]){
 	uint8_t checksum_2=0;
 	int i;
 	int INDEX_START_BYTE=0,INDEX_LENGTH=1,INDEX_CH1,INDEX_CH2;
-	
+
 	//1. SEARCH FOR START BYTE
 	do{
 		if(serial_port_read(&buffer[0],1)==UART_ERR_READ){	//read first byte
 			return UART_ERR_READ_START_BYTE;
 		} 
-	}while(buffer[0]!=0x99);	
+	
+	}while(buffer[0]!=0x99);
+
 	//buffer[0] = 0x99 at this moment
 	
 	//2. READ MESSAGE LENGTH
@@ -398,4 +401,3 @@ UART_errCode serial_port_write(uint8_t output[],long unsigned int message_length
 	}
 	return UART_ERR_NONE;                                                                                                           
 }
-
