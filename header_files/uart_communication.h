@@ -27,17 +27,6 @@ typedef struct{
  
 serial_port *serial_stream;
 
-struct Packets {
-	struct Serial {
-		uint32_t received;
-		uint32_t lost;
-	} serial;
-	struct UDP {
-		uint32_t received;
-		uint32_t lost;
-	} udp;
-} packets;
-
 union Serial_input {
 	char buffer[INPUT_BUFFER]; 
 } serial_input;
@@ -47,12 +36,10 @@ union Serial_input {
  * PROTOTYPES PUBLIC
  * ******************************/
  
-extern UART_errCode serial_port_create();
-extern UART_errCode serial_port_setup(void); //returns the number of read bytes
-extern int serial_input_check(void);
+extern UART_errCode serial_port_setup(void); 
+extern int serial_input_check(void); //returns the number of read bytes or a negative error message and puts the result in serial_input
 extern UART_errCode serial_port_write(uint8_t output[],long unsigned int message_length) ;
 extern UART_errCode serial_port_close(void);
-extern serial_port* serial_port_new(void);
 
 
 #endif /*UART_COMMUNCATION_H_*/

@@ -104,8 +104,6 @@ int main(int argc, char *argv[]){
 	 cbInit(cb_write_ground, CBSIZE);
 	 #endif
 
-	//open uart port
-	serial_stream=serial_port_new();
 
 	UART_err_handler(serial_port_setup());
 

@@ -24,9 +24,11 @@
  * ******************************/
  
 static int serial_port_read(uint32_t length);
+static UART_errCode serial_port_new(void);
+static UART_errCode serial_port_create();
 static int serial_port_get_baud(void);
 static UART_errCode  serial_port_open_raw(const char* device, speed_t speed);
-static UART_errCode  serial_port_open(const char* device, void(*term_conf_callback)(struct termios*, speed_t*));
+//static UART_errCode  serial_port_open(const char* device, void(*term_conf_callback)(struct termios*, speed_t*));
 static void serial_port_free(void);
 static void serial_port_flush(void);
 static UART_errCode serial_port_flush_input(void);
@@ -68,8 +70,18 @@ static int wait_for_data(){
 	}
 	return 0;
 }
+
+/*int serial_input_get_data(uint8_t buffer){
+	//1. search for start byte
+	//2. read length
+	//3. read message
+	//4  check checksums
+	
+	
+		return 0;
+}*/
  
-int serial_input_check() //returns the number of read bytes
+int serial_input_check()
 {
 	#if DEBUG  > 1
 		printf("Entering serial_input_check\n");
@@ -94,7 +106,6 @@ int serial_input_check() //returns the number of read bytes
 		message_length = serial_port_get_length();
 
 		if(message_length == 0){
-			packets.serial.lost++;
 			return UART_ERR_READ_LENGTH;
 		}
 
@@ -117,7 +128,6 @@ int serial_input_check() //returns the number of read bytes
 	
 		if (serial_input_buffer_chars == -1) 
 		{	
-			packets.serial.lost++;
 			return UART_ERR_READ_MESSAGE;
 
 		} else {
@@ -135,12 +145,13 @@ int serial_input_check() //returns the number of read bytes
 			if (serial_input.buffer[message_length-4]!= checksum_1 || serial_input.buffer[message_length-3] != checksum_2)
 			{
 				serial_port_flush_input();
-				packets.serial.lost++;
 				return UART_ERR_READ_CHECKSUM; //-1
 
 			} else {
 
 				//first two bits (start and length ) should be in buffer, now
+				//Hier een memcopy doen !!! en ms op andere plaatsen ook!
+				
 				char temp[message_length-2];
 				int i;
 				for(i=0;i<message_length-2;i++)
@@ -155,22 +166,6 @@ int serial_input_check() //returns the number of read bytes
 					serial_input.buffer[i]=temp[i-2];	
 				}
 				
-				packets.serial.received++;
-
-				#if DEBUG > 0
-					printf("\nraw: ");
-					for(i=0;i<message_length;i++){
-						printf("%d ",serial_input.buffer[i]);
-					}
-					printf("\n");	
-
-					printf("start: %X ", serial_input.buffer[0]);
-					printf("length: %d ", serial_input.buffer[1]);
-					printf("checksum 1 calc: %d ", checksum_1);
-					printf("checksum 2 calc: %d ", checksum_2);
-					printf("lost / received: %d / %d ", packets.serial.lost, packets.serial.received);
-					printf("\n");
-				#endif
 			}
 		}
 
@@ -181,13 +176,18 @@ int serial_input_check() //returns the number of read bytes
 	return message_length;
 }
 
-serial_port* serial_port_new(void) {
+static UART_errCode serial_port_new(void) {
 	#if DEBUG  > 1
 		printf("Entering serial_port_new\n");
 	#endif
 	
 	serial_port* serial_stream = (serial_port*) malloc(sizeof(serial_port));
-	return serial_stream;
+	
+	if(serial_stream==NULL){
+			return UART_ERR_SERIAL_PORT_CREATE;
+	}
+	
+	return UART_ERR_NONE;
 }
 
 static void serial_port_free(void) {
@@ -224,9 +224,11 @@ static UART_errCode serial_port_flush_input(void) {
 }
 
 static UART_errCode serial_port_flush_output(void) {
+	
 	#if DEBUG  > 1
 		printf("Entering serial_port_flush_output\n");
 	#endif
+	
 	/*
 	 * flush any input that might be on the port so we start fresh.
 	 */
@@ -271,7 +273,7 @@ static UART_errCode  serial_port_open_raw(const char* device, speed_t speed) {
 	return UART_ERR_NONE;
 }
 
-static UART_errCode  serial_port_open(const char* device, void(*term_conf_callback)(struct termios*, speed_t*)) {
+/*static UART_errCode  serial_port_open(const char* device, void(*term_conf_callback)(struct termios*, speed_t*)) {
 	#if DEBUG  > 1
 		printf("Entering serial_port_open\n");
 	#endif
@@ -297,7 +299,7 @@ static UART_errCode  serial_port_open(const char* device, void(*term_conf_callba
 	serial_port_flush();
 	return UART_ERR_NONE;
 
-}
+}*/
 
 UART_errCode serial_port_close(void) {
 	#if DEBUG  > 1
@@ -338,7 +340,7 @@ static uint8_t serial_port_get_length(void){
 	serial_input_buffer_clear();
 	
 	while(serial_input.buffer[0] != 0x99){
-	    	wait_for_data(); 
+	    wait_for_data(); 
 		ioctl(serial_stream->fd, FIONREAD, &serial_input_buffer_chars);        //set bytes to number of bytes in buffer
 		if (serial_input_buffer_chars>0){
 			serial_port_read(1);
@@ -351,10 +353,10 @@ static uint8_t serial_port_get_length(void){
 	wait_for_data();
 	ioctl(serial_stream->fd, FIONREAD, &serial_input_buffer_chars);   
 	if (serial_input_buffer_chars>0){
-		serial_input_buffer_chars =serial_port_read(1);
+		serial_input_buffer_chars =serial_port_read(1); //overwrite start byte with length
 	}
 
-	return serial_input.buffer[0];
+	return serial_input.buffer[0]; //length of message
 }
 	
 
@@ -363,15 +365,24 @@ UART_errCode serial_port_setup(void)
 	#if DEBUG  > 1
 		printf("Entering serial_port_setup\n");
 	#endif
-	if(serial_port_create()==UART_ERR_SERIAL_PORT_CREATE)
-	{
-		return UART_ERR_SERIAL_PORT_CREATE;
+	
+	int err;
+	
+	err = serial_port_new();
+	if(err!=UART_ERR_NONE){
+			return err;
 	}
 	
-	if(serial_port_open_raw(device, speed)==UART_ERR_SERIAL_PORT_OPEN)
-	{
-		return UART_ERR_SERIAL_PORT_OPEN;
-	} 
+	err = serial_port_create();
+	if(err!=UART_ERR_NONE){
+			return err;
+	}
+	
+	err = serial_port_open_raw(device, speed);
+	if(err!=UART_ERR_NONE){
+		return err;
+	}
+	
 	return UART_ERR_NONE;
 }
 
@@ -411,7 +422,7 @@ static int serial_port_get_baud()
 	return inputSpeed;
 }
 
-UART_errCode serial_port_create()
+static UART_errCode serial_port_create()
 {
 	#if DEBUG  > 1
 		printf("Entering serial_port_create\n");
@@ -500,6 +511,7 @@ static void serial_buffer_clear(void)
 	#if DEBUG  > 1
 		printf("Entering serial_buffer_clear\n");
 	#endif
+	
 	serial_input_buffer_clear();
 }
 
