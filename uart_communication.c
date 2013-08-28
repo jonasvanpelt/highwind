@@ -53,7 +53,7 @@ const char device[]="/dev/ttyO4";
 
 static int wait_for_data(){
 	struct pollfd fds[1];
-	int timeout = 1000000; //time out in millisecond
+	int timeout = -1; //time out in millisecond
 	int result;
 	fds[0].fd=serial_stream->fd;
 	fds[0].events=POLLIN;
