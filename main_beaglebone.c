@@ -215,6 +215,7 @@ static void *lisa_to_pc(void *arg){
 	static UDP udp_client;
 	int message_length;
 	ElemType cb_elem = {0};
+	uint8_t input_buffer[INPUT_BUFFER_SIZE];
 
 	//read data from UART
 
@@ -223,7 +224,7 @@ static void *lisa_to_pc(void *arg){
 
 	while(1)
 	{
-		message_length = serial_input_check(); //blocking !!!
+		message_length = serial_input_get_data(input_buffer); //blocking !!!
 		if(message_length > 0){
 			
 			//to test latency from lisa pull pin high when airspeed package arrives
@@ -238,16 +239,16 @@ static void *lisa_to_pc(void *arg){
 			}*/
 
 			//add timestamp
-			message_length=add_timestamp(serial_input.buffer);
+			message_length=add_timestamp(input_buffer);
 
 			//send data to eth port using UDP
-			UDP_err_handler(sendUDPClientData(&udp_client,&(serial_input.buffer),message_length),0);
+			UDP_err_handler(sendUDPClientData(&udp_client,input_buffer,message_length),0);
 
 			#if LOGGING > 0
 
 			//write the data to circual buffer for log thread
 			 if(!cbIsFull(cb_write_lisa)){
-				 memcpy (&cb_elem.value, &(serial_input.buffer), message_length);
+				 memcpy (&cb_elem.value, input_buffer, message_length);
 				 cbWrite(cb_write_lisa, &cb_elem);
 			 }else{
 				if(reading_flag_lisa==0){

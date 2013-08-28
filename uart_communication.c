@@ -23,21 +23,16 @@
  * PROTOTYPES PRIVATE
  * ******************************/
  
-static int serial_port_read(uint32_t length);
+static int serial_port_read(uint8_t buffer[],int length); 
 static UART_errCode serial_port_new(void);
 static UART_errCode serial_port_create();
-static int serial_port_get_baud(void);
 static UART_errCode  serial_port_open_raw(const char* device, speed_t speed);
 //static UART_errCode  serial_port_open(const char* device, void(*term_conf_callback)(struct termios*, speed_t*));
 static void serial_port_free(void);
 static void serial_port_flush(void);
 static UART_errCode serial_port_flush_input(void);
 static UART_errCode serial_port_flush_output(void);
-static void serial_buffer_clear(void);
-static void serial_output_buffer_clear(void);
-static void serial_input_buffer_clear(void);
 static void packets_clear(void);
-static uint8_t serial_port_get_length(void);
 static int wait_for_data();
 
 /********************************
@@ -50,14 +45,12 @@ static const char FILENAME[] = "uart_communication.c";
 //config
 speed_t speed = B921600;
 const char device[]="/dev/ttyO4";
-int serial_input_buffer_size = sizeof(serial_input.buffer);
 
 /********************************
  * FUNCTIONS
  * ******************************/
 
 static int wait_for_data(){
-	//todo: some error handling here
 	struct pollfd fds[1];
 	int timeout = -1; //time out forever
 	int result;
@@ -71,117 +64,92 @@ static int wait_for_data(){
 	return 0;
 }
 
-/*int serial_input_get_data(uint8_t buffer){
-	//1. search for start byte
-	//2. read length
-	//3. read message
-	//4  check checksums
-	
-	
-		return 0;
-}*/
- 
-int serial_input_check()
+static int serial_port_read(uint8_t buffer[],int length) 
 {
 	#if DEBUG  > 1
-		printf("Entering serial_input_check\n");
+		printf("Entering serial_port_read\n");
 	#endif
 	
-	int i;
-	int serial_input_buffer_chars;
-	uint8_t checksum_1;
-	uint8_t checksum_2;
-	uint8_t message_length;
-	struct timeval start;
-	struct timeval current;
-	int flag_time=0;
+	int bytes_in_buffer=0;
 
-	//Find number of bytes in buffer and read when enough
-	  
-	wait_for_data();
-	ioctl(serial_stream->fd, FIONREAD, &serial_input_buffer_chars);        //set to number of bytes in buffer
+	do{
+		wait_for_data();
+		ioctl(serial_stream->fd, FIONREAD, &bytes_in_buffer); //set to number of bytes in buffer
+	}while(length < bytes_in_buffer );
+	 
+	int n = read(serial_stream->fd, buffer, length);
+	 
+	if(n==-1){
+		return UART_ERR_READ;
+	}  
+	    
+	return n;  //return number of read bytes
+}
 
-	if(serial_input_buffer_chars > 0) //look for char in buffer
-	{
-		message_length = serial_port_get_length();
-
-		if(message_length == 0){
-			return UART_ERR_READ_LENGTH;
-		}
-
-		gettimeofday(&start, NULL);
-		serial_input_buffer_chars=0;      
-
-		int flag_infinite=0;
-
-		while(serial_input_buffer_chars<message_length-2){
-			wait_for_data();	
-			ioctl(serial_stream->fd, FIONREAD, &serial_input_buffer_chars);   
-
-			if(flag_infinite==1000){
-				serial_port_flush_input();
-			}	
-			flag_infinite++;	
-		}
-
-		serial_input_buffer_chars = serial_port_read(message_length-2); //reads the port out and stores the number of chars red
+int serial_input_get_data(uint8_t buffer[]){
 	
-		if (serial_input_buffer_chars == -1) 
-		{	
+	//todo: oneindige loops vermijden
+	
+	uint8_t message_length;
+	int bytes_in_buffer;
+	uint8_t checksum_1=0;
+	uint8_t checksum_2=0;
+	int i;
+	int INDEX_START_BYTE=0,INDEX_LENGTH=1,INDEX_CH1,INDEX_CH2;
+	
+	//1. SEARCH FOR START BYTE
+	do{
+		if(serial_port_read(&buffer[0],1)==UART_ERR_READ){	//read first byte
+			return UART_ERR_READ_START_BYTE;
+		} 
+	}while(buffer[0]!=0x99);	
+	//buffer[0] = 0x99 at this moment
+	
+	//2. READ MESSAGE LENGTH
+	if(serial_port_read(&buffer[1],1)==UART_ERR_READ){	//read first byte
+			return UART_ERR_READ_LENGTH;
+	} 
+	message_length = buffer[1]; 
+	//buffer[1] = length at this moment
+
+	
+	//3. READ MESSAGE
+	if(serial_port_read(&buffer[2],message_length-2)==UART_ERR_READ){	//read only message_length -2 because start byte and length are already in there
 			return UART_ERR_READ_MESSAGE;
-
-		} else {
-
-			checksum_1 = message_length; //part of the checksum
-			checksum_2 = checksum_1; // add checksum_0 to 0
-
-			for(i=0;i<message_length-4;i++) // count until checksum 1 --> length - 2 (checksums) - 2 (ofset)
-			{
-				checksum_1 += (uint8_t) serial_input.buffer[i];
-				checksum_2 += checksum_1;
-			}
-
-
-			if (serial_input.buffer[message_length-4]!= checksum_1 || serial_input.buffer[message_length-3] != checksum_2)
-			{
-				serial_port_flush_input();
-				return UART_ERR_READ_CHECKSUM; //-1
-
-			} else {
-
-				//first two bits (start and length ) should be in buffer, now
-				//Hier een memcopy doen !!! en ms op andere plaatsen ook!
-				
-				char temp[message_length-2];
-				int i;
-				for(i=0;i<message_length-2;i++)
-				{
-					temp[i]=serial_input.buffer[i];	
-				}
-				serial_input_buffer_clear();
-				serial_input.buffer[0]=0x99;
-				serial_input.buffer[1]=message_length;
-				for(i=2;i<message_length;i++)
-				{
-					serial_input.buffer[i]=temp[i-2];	
-				}
-				
-			}
-		}
-
-	}else{
-					
-		return UART_ERR_READ_NO_DATA_IN_BUF; //-1
+	} 
+	
+	//4 CHECK CHECKSUMS
+	INDEX_CH1 = message_length-2;
+	INDEX_CH2 = message_length-1;
+	
+	for(i=1;i<message_length-2;i++) //read until message_length - checksum_1 - checksum_2
+	{
+		checksum_1 += buffer[i];
+		checksum_2 += checksum_1;
 	}
+	
+	if (buffer[INDEX_CH1]!= checksum_1 || buffer[INDEX_CH2] != checksum_2)
+	{
+		return UART_ERR_READ_CHECKSUM; 
+	}
+	
+	printf("message raw: ");
+	for(i=0;i<message_length;i++){
+			printf("%d ",buffer[i]);
+	}
+	printf("\n");
+	
 	return message_length;
 }
+
+ 
 
 static UART_errCode serial_port_new(void) {
 	#if DEBUG  > 1
 		printf("Entering serial_port_new\n");
 	#endif
 	
-	serial_port* serial_stream = (serial_port*) malloc(sizeof(serial_port));
+	serial_stream = (serial_port*) malloc(sizeof(serial_port));
 	
 	if(serial_stream==NULL){
 			return UART_ERR_SERIAL_PORT_CREATE;
@@ -327,38 +295,7 @@ UART_errCode serial_port_close(void) {
 
 }
 
-static uint8_t serial_port_get_length(void){
-	#if DEBUG  > 1
-		printf("Entering serial_port_get_length\n");
-	#endif
-	
-	int i = 0;
-	int serial_input_buffer_chars =0;
-	int flag = 0;
-	int flag_infinite=0;
-	
-	serial_input_buffer_clear();
-	
-	while(serial_input.buffer[0] != 0x99){
-	    wait_for_data(); 
-		ioctl(serial_stream->fd, FIONREAD, &serial_input_buffer_chars);        //set bytes to number of bytes in buffer
-		if (serial_input_buffer_chars>0){
-			serial_port_read(1);
-		}
-		if(flag_infinite==1000){
-			serial_port_flush_input();
-		}	
-		flag_infinite++;
-	}
-	wait_for_data();
-	ioctl(serial_stream->fd, FIONREAD, &serial_input_buffer_chars);   
-	if (serial_input_buffer_chars>0){
-		serial_input_buffer_chars =serial_port_read(1); //overwrite start byte with length
-	}
 
-	return serial_input.buffer[0]; //length of message
-}
-	
 
 UART_errCode serial_port_setup(void)
 {
@@ -384,42 +321,6 @@ UART_errCode serial_port_setup(void)
 	}
 	
 	return UART_ERR_NONE;
-}
-
-static int serial_port_get_baud() 
-{
-	#if DEBUG  > 1
-		printf("Entering serial_port_get_baud\n");
-	#endif
-	
-	struct termios termAttr;
-	int inputSpeed = -1;
-	speed_t baudRate;
-	tcgetattr(serial_stream->fd, &termAttr);
-	/* Get the input speed.                              */
-	baudRate = cfgetispeed(&termAttr);
-	switch (baudRate) 
-	{
-		case B0:      inputSpeed = 0; break;
-		case B50:     inputSpeed = 50; break;
-		case B110:    inputSpeed = 110; break;
-		case B134:    inputSpeed = 134; break;
-		case B150:    inputSpeed = 150; break;
-		case B200:    inputSpeed = 200; break;
-		case B300:    inputSpeed = 300; break;
-		case B600:    inputSpeed = 600; break;
-		case B1200:   inputSpeed = 1200; break;
-		case B1800:   inputSpeed = 1800; break;
-		case B2400:   inputSpeed = 2400; break;
-		case B4800:   inputSpeed = 4800; break;
-		case B9600:   inputSpeed = 9600; break;
-		case B19200:  inputSpeed = 19200; break;
-		case B38400:  inputSpeed = 38400; break;
-		case B57600:  inputSpeed = 57600; break;
-		case B115200: inputSpeed = 115200; break;
-		case B921600: inputSpeed = 921600; break;
-	}
-	return inputSpeed;
 }
 
 static UART_errCode serial_port_create()
@@ -480,16 +381,6 @@ static UART_errCode serial_port_create()
 	return UART_ERR_NONE;
 }
 
-static int serial_port_read(uint32_t length) 
-{
-	#if DEBUG  > 1
-		printf("Entering serial_port_read\n");
-	#endif
-	 
-	int n = read(serial_stream->fd, serial_input.buffer, length);
-                  
-	return n;
-}
 
 UART_errCode serial_port_write(uint8_t output[],long unsigned int message_length) 
 {
@@ -504,27 +395,6 @@ UART_errCode serial_port_write(uint8_t output[],long unsigned int message_length
 		return UART_ERR_SERIAL_PORT_WRITE;
 	}
 	return UART_ERR_NONE;                                                                                                           
-}
-
-static void serial_buffer_clear(void)
-{
-	#if DEBUG  > 1
-		printf("Entering serial_buffer_clear\n");
-	#endif
-	
-	serial_input_buffer_clear();
-}
-
-static void serial_input_buffer_clear(void)
-{
-	#if DEBUG  > 1
-		printf("Entering serial_input_buffer_clear\n");
-	#endif
-	int i;
-	for(i=0;i<serial_input_buffer_size;i++)
-	{
-		serial_input.buffer[i]=0x00;
-	}
 }
 
 

@@ -10,13 +10,13 @@
 #include <unistd.h>
 #include <stdint.h>
 
-#define INPUT_BUFFER 255 
+#define INPUT_BUFFER_SIZE 255 
 
 /********************************
  * GLOBALS
  * ******************************/
  
-enum uart_errCode {UART_ERR_READ_CHECKSUM = -4,UART_ERR_READ_LENGTH = -3,UART_ERR_READ_MESSAGE = -2,UART_ERR_READ_NO_DATA_IN_BUF = -1, UART_ERR_NONE=0,UART_ERR_SERIAL_PORT_FLUSH_INPUT,UART_ERR_SERIAL_PORT_FLUSH_OUTPUT,UART_ERR_SERIAL_PORT_OPEN,UART_ERR_SERIAL_PORT_CLOSE,UART_ERR_SERIAL_PORT_CREATE,UART_ERR_SERIAL_PORT_WRITE,UART_ERR_UNDEFINED};
+enum uart_errCode {UART_ERR_READ= -6 ,UART_ERR_READ_START_BYTE = -5,UART_ERR_READ_CHECKSUM = -4,UART_ERR_READ_LENGTH = -3,UART_ERR_READ_MESSAGE = -2,UART_ERR_READ_NO_DATA_IN_BUF = -1, UART_ERR_NONE=0,UART_ERR_SERIAL_PORT_FLUSH_INPUT,UART_ERR_SERIAL_PORT_FLUSH_OUTPUT,UART_ERR_SERIAL_PORT_OPEN,UART_ERR_SERIAL_PORT_CLOSE,UART_ERR_SERIAL_PORT_CREATE,UART_ERR_SERIAL_PORT_WRITE,UART_ERR_UNDEFINED};
 typedef enum uart_errCode UART_errCode;
  
 typedef struct{
@@ -27,17 +27,13 @@ typedef struct{
  
 serial_port *serial_stream;
 
-union Serial_input {
-	char buffer[INPUT_BUFFER]; 
-} serial_input;
-
 
 /********************************
  * PROTOTYPES PUBLIC
  * ******************************/
  
 extern UART_errCode serial_port_setup(void); 
-extern int serial_input_check(void); //returns the number of read bytes or a negative error message and puts the result in serial_input
+extern int serial_input_get_data(uint8_t buffer[]); //returns the number of read bytes or a negative error message and puts the result in serial_input
 extern UART_errCode serial_port_write(uint8_t output[],long unsigned int message_length) ;
 extern UART_errCode serial_port_close(void);
 
