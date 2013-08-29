@@ -190,3 +190,28 @@ LOG_errCode log_write(char *file_name,char *message){
 	}	
 }
 
+void LOG_err_handler(LOG_errCode err,void (*write_error_ptr)(char *,char *,int))  
+{
+	static char SOURCEFILE[] = "log.c";
+	//write error to local log
+	switch( err ) {
+		case LOG_ERR_NONE:
+			break;
+		case  LOG_ERR_UNDEFINED:
+			write_error_ptr(SOURCEFILE,"undefined log error",err);
+			break;
+		case LOG_ERR_MOUNT_SD:
+			write_error_ptr(SOURCEFILE,"error while mounting sd card",err);
+			break;
+		case LOG_ERR_OPEN_FILE:
+			write_error_ptr(SOURCEFILE,"error opening file",err);
+			break;
+		case LOG_ERR_WRITE:
+			write_error_ptr(SOURCEFILE,"error writing to file",err);
+			break;
+		case LOG_ERR_CLOSE:
+			write_error_ptr(SOURCEFILE,"error closing file",err);
+			break;
+		default: break;
+	}
+}

@@ -69,11 +69,16 @@ typedef struct{
  * PROTOTYPES PUBLIC
  * ******************************/
  
+
+ 
 extern UART_errCode serial_port_setup(void); 
 extern int serial_input_get_lisa_data(uint8_t buffer[]); //returns the number of read bytes or a negative error message and puts the result in serial_input
 extern int serial_input_get_windsensor_data(uint8_t buffer[]);
 extern UART_errCode serial_port_write(uint8_t output[],long unsigned int message_length);
 extern UART_errCode serial_port_close(void);
+
+extern void UART_err_handler( UART_errCode err_p,void (*write_error_ptr)(char *,char *,int));
+
 
 
 #endif /*UART_COMMUNCATION_H_*/

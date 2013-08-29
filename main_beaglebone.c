@@ -31,18 +31,19 @@ static void *lisa_to_pc(void *connection);
 static void *data_logging_lisa(void *);
 static void *data_logging_groundstation(void *arg);
 static void enable_ptp();
-static void UDP_err_handler( UDP_errCode err,int exit_on_error );
-static void UART_err_handler( UART_errCode err );
 static void sendError(DEC_errCode err,library lib);
-static void LOG_err_handler( LOG_errCode err );
 static void switch_cb_lisa_pointers();
 static void switch_cb_ground_pointers();
+static void write_uart_error(char *file_name,char *message,int err_code);
+static void write_udp_error(char *file_name,char *message,int err_code);
+static void write_decode_error(char *file_name,char *message,int err_code);
+static void write_log_error(char *file_name,char *message,int err_code);
 
  /***********************************
   * GLOBALS
   * *********************************/
 
-static char FILENAME[] = "main_full_communication.c";
+static char FILENAME[] = "main_bealgebone.c";
 
 typedef struct{
 		int port_number_lisa_to_pc;
@@ -69,13 +70,23 @@ static CircularBuffer *cb_write_ground = &cb_data_ground_pong;
 static int reading_flag_ground=0;
 #endif
 
+//function pointer to write errors to log
+void (*write_uart_error_ptr)(char *,char *,int);
+void (*write_upd_error_ptr)(char *,char *,int);
+void (*write_decode_error_ptr)(char *,char *,int);
+void (*write_log_error_ptr)(char *,char *,int);
+
  /***********************************
   * MAIN
   * *********************************/
   
-    
+
 int main(int argc, char *argv[]){
-	
+	write_uart_error_ptr = &write_uart_error;  //initialize the function pointer to write error
+	write_upd_error_ptr = &write_udp_error; 
+	write_decode_error_ptr = &write_decode_error;  
+	write_log_error_ptr = &write_log_error;  
+ 
 	//parse arguments
 	if(argc == 4){
 		//first argument is always name of program or empty string
@@ -90,7 +101,7 @@ int main(int argc, char *argv[]){
 	//init log (mount sd card if necessary)
 
 	int err = init_log();
-	LOG_err_handler(err);
+	LOG_err_handler(err,write_log_error_ptr);
 
 	if(err != LOG_ERR_NONE){
 		exit(EXIT_FAILURE);		//mounting SD card failed
@@ -107,7 +118,7 @@ int main(int argc, char *argv[]){
 	 #endif
 
 
-	UART_err_handler(serial_port_setup());
+	UART_err_handler(serial_port_setup(),write_uart_error_ptr);
 
 	//thread variables
 	pthread_t thread_lisa_to_pc,thread_data_logging_lisa,thread_data_logging_ground;
@@ -142,13 +153,13 @@ int main(int argc, char *argv[]){
 	//init the data decode pointers
 	init_decoding();
 
-	UDP_err_handler(openUDPServerSocket(&udp_server,connection.port_number_pc_to_lisa,UDP_SOCKET_TIMEOUT),1);
+	UDP_err_handler(openUDPServerSocket(&udp_server,connection.port_number_pc_to_lisa,UDP_SOCKET_TIMEOUT),write_upd_error_ptr);
 
 	while(1){
 
 		//1. retreive UDP data form PC from ethernet port.
 		err=receiveUDPServerData(&udp_server,(void *)&input_stream,sizeof(input_stream)); //blocking !!!
-		UDP_err_handler(err,0);
+		UDP_err_handler(err,write_upd_error_ptr);
 
 		if(err==UDP_ERR_NONE){
 
@@ -170,12 +181,12 @@ int main(int argc, char *argv[]){
 
 			int new_length = strip_timestamp(input_stream); //lisa expects a package without a timestamp
 
-			UART_err_handler(serial_port_write(input_stream,new_length));
+			UART_err_handler(serial_port_write(input_stream,new_length),write_uart_error_ptr);
 		}
 
 	}
-	serial_port_close();
-	UDP_err_handler(closeUDPServerSocket(&udp_server),0);
+	UART_err_handler(serial_port_close(),write_uart_error_ptr);
+	UDP_err_handler(closeUDPServerSocket(&udp_server),write_upd_error_ptr);
 	/*------------------------END OF FIRST THREAD------------------------*/
 
 
@@ -219,10 +230,8 @@ static void *lisa_to_pc(void *arg){
 	ElemType cb_elem = {0};
 	uint8_t input_buffer[INPUT_BUFFER_SIZE];
 
-	//read data from UART
 
-	UDP_err_handler(openUDPClientSocket(&udp_client,connection.server_ip,connection.port_number_lisa_to_pc,UDP_SOCKET_TIMEOUT),1);
-	//static int test = 0;
+	UDP_err_handler(openUDPClientSocket(&udp_client,connection.server_ip,connection.port_number_lisa_to_pc,UDP_SOCKET_TIMEOUT),write_upd_error_ptr);
 
 	while(1)
 	{
@@ -244,7 +253,7 @@ static void *lisa_to_pc(void *arg){
 			message_length=add_timestamp(input_buffer);
 
 			//send data to eth port using UDP
-			UDP_err_handler(sendUDPClientData(&udp_client,input_buffer,message_length),0);
+			UDP_err_handler(sendUDPClientData(&udp_client,input_buffer,message_length),write_upd_error_ptr);
 
 			#if LOGGING > 0
 
@@ -266,14 +275,14 @@ static void *lisa_to_pc(void *arg){
 		}else{
 		//send error message to server: not receiving data on uart port
 			printf("error on uart, see log...\n"); //FOR DEBUGGING
-			UART_err_handler(message_length);
+			UART_err_handler(message_length,write_uart_error_ptr);
 		}
 
 	}
 
-	serial_port_close();
-	serial_port_free();
-	UDP_err_handler(closeUDPClientSocket(&udp_client),0);
+	UART_err_handler(serial_port_close(),write_uart_error_ptr);
+
+	UDP_err_handler(closeUDPClientSocket(&udp_client),write_upd_error_ptr);
 
 	return NULL;
 /*------------------------END OF SECOND THREAD------------------------*/
@@ -286,20 +295,20 @@ static void *data_logging_lisa(void *arg){
 /*-------------------------START OF THIRD THREAD: LISA TO PC LOGGING------------------------*/
 
 	ElemType cb_elem = {0};
-	LOG_err_handler(open_data_lisa_log());
+	LOG_err_handler(open_data_lisa_log(),write_log_error_ptr);
 
 	while(1){
 		if (!cbIsEmpty(cb_read_lisa)) {
 			reading_flag_lisa=1;
 			cbRead(cb_read_lisa, &cb_elem);
-			LOG_err_handler(write_data_lisa_log(cb_elem.value,cb_elem.value[1]));
+			LOG_err_handler(write_data_lisa_log(cb_elem.value,cb_elem.value[1]),write_log_error_ptr);
 			usleep(100);
 		}else{
 			reading_flag_lisa=0;
 			usleep(1000);
 		}	
 	}
-	LOG_err_handler(close_data_lisa_log());
+	LOG_err_handler(close_data_lisa_log(),write_log_error_ptr);
 
 	return NULL;
 /*-------------------------END OF THIRD THREAD: LISA TO PC LOGGING------------------------*/
@@ -309,13 +318,13 @@ static void *data_logging_groundstation(void *arg){
 /*-------------------------START OF FOURTH THREAD: GROUNDSTATION TO LISA LOGGING------------------------*/
 
 	ElemType cb_elem = {0};
-	LOG_err_handler(open_data_groundstation_log());
+	LOG_err_handler(open_data_groundstation_log(),write_log_error_ptr);
 	
 	while(1){
 		if (!cbIsEmpty(cb_read_ground)) {
 			reading_flag_ground=1;
 			cbRead(cb_read_ground, &cb_elem);
-			LOG_err_handler(write_data_groundstation_log(cb_elem.value,cb_elem.value[1]));
+			LOG_err_handler(write_data_groundstation_log(cb_elem.value,cb_elem.value[1]),write_log_error_ptr);
 			usleep(100);
 		}else{
 			reading_flag_ground=0;
@@ -323,7 +332,7 @@ static void *data_logging_groundstation(void *arg){
 		}	
 	}
 
-	LOG_err_handler(close_data_groundstation_log());
+	LOG_err_handler(close_data_groundstation_log(),write_log_error_ptr);
 
 	return NULL;
 /*-------------------------END OF FOURTH THREAD: GROUNDSTATION TO LISA LOGGING------------------------*/
@@ -332,104 +341,6 @@ static void *data_logging_groundstation(void *arg){
 
 #endif
 
-static void UDP_err_handler( UDP_errCode err,int exit_on_error)
-{
-	static char SOURCEFILE[] = "udp_communication.c";
-
-	//it makes no sence to send UDP errors to server when there is a UDP problem.
-	//write error to local log
-	switch( err ) {
-		case UDP_ERR_NONE:
-			break;
-		case  UDP_ERR_INET_ATON:
-			error_write(SOURCEFILE,"failed decoding ip address");
-			break;
-		case UDP_ERR_SEND:
-			error_write(SOURCEFILE,"failed sending UDP data");
-			break;
-		case UDP_ERR_CLOSE_SOCKET:
-			error_write(SOURCEFILE,"failed closing UDP socket");
-			break;
-		case UDP_ERR_OPEN_SOCKET:
-			error_write(SOURCEFILE,"failed opening UDP socket");
-			break;
-		case UDP_ERR_BIND_SOCKET_PORT:
-			error_write(SOURCEFILE,"failed binding port to socket");
-			break;
-		case UDP_ERR_RECV:
-			error_write(SOURCEFILE,"failed receiving UDP data");
-			break;
-		case UDP_ERR_SET_TIMEOUT:
-			error_write(SOURCEFILE,"failed setting UDP timeout on socket");
-			break;
-		case UDP_ERR_UNDEFINED:
-			error_write(SOURCEFILE,"undefined UDP error");
-			break;
-		default: break;
-	}
-	if(exit_on_error && err != UDP_ERR_NONE)
-		exit(EXIT_FAILURE);
-}
-
-static void UART_err_handler( UART_errCode err )
-{
-	static char SOURCEFILE[] = "uart_communication.c";
-
-	//write error to local log
-	switch( err ) {
-			case UART_ERR_NONE:
-				break;
-			case  UART_ERR_READ_START_BYTE:
-				error_write(SOURCEFILE,"serial port failed to read start byte");
-				break;
-			case  UART_ERR_READ_CHECKSUM:
-				error_write(SOURCEFILE,"serial port wrong checksum");
-				break;
-			case  UART_ERR_READ_LENGTH:
-				error_write(SOURCEFILE,"serial port failed reading message length");
-				break;
-			case  UART_ERR_READ_MESSAGE:
-				error_write(SOURCEFILE,"serial port failed reading message based on length");
-				break;
-			case UART_ERR_SERIAL_PORT_FLUSH_INPUT:
-				error_write(SOURCEFILE,"serial port flush input failed");
-				break;
-			case UART_ERR_SERIAL_PORT_FLUSH_OUTPUT:
-				error_write(SOURCEFILE,"serial port flush output failed");
-				break;
-			case UART_ERR_SERIAL_PORT_OPEN:
-				error_write(SOURCEFILE,"serial port open failed");
-				exit(EXIT_FAILURE);
-				break;
-			case UART_ERR_SERIAL_PORT_CLOSE:
-				error_write(SOURCEFILE,"serial port close failed");
-				break;
-			case UART_ERR_SERIAL_PORT_CREATE:
-				error_write(SOURCEFILE,"serial port create failed");
-				exit(EXIT_FAILURE);
-				break;
-			case UART_ERR_SERIAL_PORT_WRITE:
-				error_write(SOURCEFILE,"serial port write failed");
-				break;
-			case UART_ERR_UNDEFINED:
-				error_write(SOURCEFILE,"undefined UART error");
-				break;
-			default: break;
-		}
-
-	if(err != UART_ERR_NONE){
-		sendError(err,UART_L);
-	}
-}
-
-static void LOG_err_handler( LOG_errCode err )
-{
-	//send error to server
-	if(err != LOG_ERR_NONE){
-		sendError(err,LOG_L);
-	}
-
-}
 
 static void sendError(DEC_errCode err,library lib){
 
@@ -445,10 +356,10 @@ static void sendError(DEC_errCode err,library lib){
 		data_encode((uint8_t *)&error_message,sizeof(error_message),encoded_data,2,2);
 		message_length=sizeof(encoded_data);
 
-		//send errorcode to server
-		UDP_err_handler(openUDPClientSocket(&udp_client,connection.server_ip,connection.port_number_lisa_to_pc,UDP_SOCKET_TIMEOUT),0);
-		UDP_err_handler(sendUDPClientData(&udp_client,&encoded_data,message_length),0);
-		UDP_err_handler(closeUDPClientSocket(&udp_client),0);
+		//send errorcode to server, no error handling here otherwise we get infinite loop try to send error
+		openUDPClientSocket(&udp_client,connection.server_ip,connection.port_number_lisa_to_pc,UDP_SOCKET_TIMEOUT);
+		sendUDPClientData(&udp_client,&encoded_data,message_length);
+		closeUDPClientSocket(&udp_client);
 }
 
 static void enable_ptp(){
@@ -458,7 +369,6 @@ static void enable_ptp(){
 		exit(EXIT_FAILURE);
 	}
 }
-
 
 static void switch_cb_lisa_pointers(){
 		CircularBuffer *temp = cb_read_lisa;
@@ -470,4 +380,32 @@ static void switch_cb_ground_pointers(){
 		CircularBuffer *temp = cb_read_ground;
 		cb_read_ground = cb_write_ground;
 		cb_write_ground = temp;
+}
+
+static void write_uart_error(char *file_name,char *message,int err_code)
+{
+	//TODO: make it thread safe!!
+    error_write(file_name,message);
+    sendError(err_code,UART_L);
+}
+
+static void write_udp_error(char *file_name,char *message,int err_code)
+{
+	//TODO: make it thread safe!!
+    error_write(file_name,message);
+    sendError(err_code,UDP_L);
+}
+
+static void write_decode_error(char *file_name,char *message,int err_code)
+{
+	//TODO: make it thread safe!!
+    error_write(file_name,message);
+    sendError(err_code,DECODE_L);
+}
+
+static void write_log_error(char *file_name,char *message,int err_code)
+{
+	//TODO: make it thread safe!!
+    error_write(file_name,message);
+    sendError(err_code,LOG_L);
 }

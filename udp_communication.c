@@ -143,4 +143,38 @@ UDP_errCode closeUDPServerSocket(UDP *udp_server){
 		return UDP_ERR_NONE;
 }
 
+void UDP_err_handler( UDP_errCode err,void (*write_error_ptr)(char *,char *,int))
+{
+	static char SOURCEFILE[] = "udp_communication.c";
+	
+	switch( err ) {
+		case UDP_ERR_NONE:
+			break;
+		case  UDP_ERR_INET_ATON:
+			write_error_ptr(SOURCEFILE,"failed decoding ip address",err);
+			break;
+		case UDP_ERR_SEND:
+			write_error_ptr(SOURCEFILE,"failed sending UDP data",err);
+			break;
+		case UDP_ERR_CLOSE_SOCKET:
+			write_error_ptr(SOURCEFILE,"failed closing UDP socket",err);
+			break;
+		case UDP_ERR_OPEN_SOCKET:
+			write_error_ptr(SOURCEFILE,"failed opening UDP socket",err);
+			break;
+		case UDP_ERR_BIND_SOCKET_PORT:
+			write_error_ptr(SOURCEFILE,"failed binding port to socket",err);
+			break;
+		case UDP_ERR_RECV:
+			write_error_ptr(SOURCEFILE,"failed receiving UDP data",err);
+			break;
+		case UDP_ERR_SET_TIMEOUT:
+			write_error_ptr(SOURCEFILE,"failed setting UDP timeout on socket",err);
+			break;
+		case UDP_ERR_UNDEFINED:
+			write_error_ptr(SOURCEFILE,"undefined UDP error",err);
+			break;
+		default: break;
+	}
+}
 

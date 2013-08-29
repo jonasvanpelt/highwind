@@ -235,7 +235,7 @@ int add_timestamp(uint8_t buffer[]){
 	timestampBeagle.tv.tv_usec=(uint64_t)tv_8.tv_usec;
 
 	//update message length
-	buffer[1]=new_length; 
+	buffer[LENGTH_INDEX]=new_length; 
 	
 	//add timestamp to buffer
 	memcpy(&(buffer[length_original-2]),(void *)&timestampBeagle.tv,sizeof(timestampBeagle.tv)); //overwrite previous checksums (-2)
@@ -253,7 +253,7 @@ int strip_timestamp(uint8_t buffer[]){
 		printf("Entering strip_timestamp\n");
 	#endif
 	
-	int length=buffer[1],i,j;
+	int length=buffer[LENGTH_INDEX],i,j;
 	uint8_t checksum_1,checksum_2;
 	int new_length=length-16; //timeval is 16 bytes
 
@@ -268,7 +268,37 @@ int strip_timestamp(uint8_t buffer[]){
 	return new_length;	
 }
 
-
+void DEC_err_handler(DEC_errCode err,void (*write_error_ptr)(char *,char *,int))  
+{
+	static char SOURCEFILE[] = "data_decoding.c";
+	//write error to local log
+	switch( err ) {
+		case DEC_ERR_NONE:
+			break;
+		case  DEC_ERR_START_BYTE:
+			write_error_ptr(SOURCEFILE,"start byte is not 0x99",err);
+			break;
+		case DEC_ERR_CHECKSUM:
+			write_error_ptr(SOURCEFILE,"wrong checksum",err);
+			break;
+		case DEC_ERR_UNKNOWN_BONE_PACKAGE:
+			write_error_ptr(SOURCEFILE,"received unknown package from beaglebone",err);
+			break;
+		case DEC_ERR_UNKNOWN_LISA_PACKAGE:
+			write_error_ptr(SOURCEFILE,"received unknown package from lisa",err);
+			break;
+		case DEC_ERR_UNKNOWN_SENDER:
+			write_error_ptr(SOURCEFILE,"received package from unknown sender",err);
+			break;
+		case DEC_ERR_LENGTH:
+			write_error_ptr(SOURCEFILE,"decoded not entire package length",err);
+			break;
+		case DEC_ERR_UNDEFINED:
+			write_error_ptr(SOURCEFILE,"undefined decoding error",err);
+			break;
+		default: break;
+	}
+}
 
 
 

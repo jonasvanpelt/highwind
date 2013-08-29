@@ -42,4 +42,6 @@ extern LOG_errCode close_data_groundstation_log();
 extern LOG_errCode log_write(char *file_name,char *message);
 extern LOG_errCode error_write(char *file_name,char *message);
 
+void LOG_err_handler(LOG_errCode err,void (*write_error_ptr)(char *,char *,int)); 
+
 #endif /*LOG_H_*/

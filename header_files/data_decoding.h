@@ -221,7 +221,8 @@ extern Data* get_read_pointer(); /*to get read access to data structure*/
 extern void calculate_checksum(uint8_t buffer[],uint8_t *checksum_1,uint8_t *checksum2);
 extern int add_timestamp(uint8_t buffer[]);/*add timestamp to existing package, updates the checksum and the length byte*/
 extern int strip_timestamp(uint8_t buffer[]);/*removes timestamp, update checksums and length byte*/
-
+void DEC_err_handler(DEC_errCode err,void (*write_error_ptr)(char *,char *,int));  
+ 
 #ifdef __cplusplus
 }
 #endif

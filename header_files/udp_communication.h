@@ -46,6 +46,8 @@ extern UDP_errCode openUDPServerSocket(UDP *udp_server,int port,unsigned int tim
 extern UDP_errCode receiveUDPServerData(UDP *udp_server,void *data,size_t data_len);
 extern UDP_errCode closeUDPServerSocket(UDP *udp_server);
 
+void UDP_err_handler( UDP_errCode err,void (*write_error_ptr)(char *,char *,int));
+
 #ifdef __cplusplus
 }
 #endif

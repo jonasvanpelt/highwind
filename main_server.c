@@ -9,10 +9,10 @@
 #include <time.h>
 
 #include "header_files/udp_communication.h"
+#include "header_files/uart_communication.h"
 #include "header_files/data_decoding.h"
 #include "header_files/log.h"
 #include "header_files/analyze.h"
-#include "header_files/uart_communication.h"
 
 #define MAX_INPUT_STREAM_SIZE 255
 #define MAX_OUTPUT_STREAM_SIZE 36
@@ -33,33 +33,33 @@
  * **********************************/
 
 static void *server_to_planebone(void *connection);
-static void DEC_err_handler(DEC_errCode err ); 
-static void UDP_err_handler( UDP_errCode err);
-static void UART_err_handler( UART_errCode err );
-static void LOG_err_handler(LOG_errCode err ); 
-static void err_receiver();
 static void print_mem(void const *vp, int n);
-
+void write_error(char *file_name,char *message,int err_code);
 
  /***********************************
   * GLOBALS
   * *********************************/
   
-static char FILENAME[] = "main_full_server.c";
-
-    
+static char FILENAME[] = "main_server.c";
+ 
 typedef struct{
 		int port_number_server_to_planebone;
 		int port_number_planebone_to_server;
 		char *planebone_ip;
 } Connection;
 
+//function pointer to write errors to log
+void (*write_error_ptr)(char *,char *,int);
 
+			
  /***********************************
   * MAIN
   * *********************************/
 int main(int argc, char *argv[]){
 	Connection connection;
+	write_error_ptr = &write_error;  //initialize the function pointer to write error
+	
+	UART_err_handler(UART_ERR_READ_LENGTH,write_error_ptr);
 
 	//parse arguments	
 	if(argc == 4){
@@ -86,7 +86,7 @@ int main(int argc, char *argv[]){
 	uint8_t input_stream[MAX_INPUT_STREAM_SIZE];
 	timeval tv_now;
 
-	UDP_err_handler(openUDPServerSocket(&udp_server,connection.port_number_planebone_to_server,UDP_SOCKET_TIMEOUT));
+	UDP_err_handler(openUDPServerSocket(&udp_server,connection.port_number_planebone_to_server,UDP_SOCKET_TIMEOUT),write_error_ptr);
 	
 	//init the data decode pointers
 	init_decoding();
@@ -167,7 +167,7 @@ int main(int argc, char *argv[]){
 	while(1){
 		//1. retreive UDP data form planebone from ethernet port.
 		err = receiveUDPServerData(&udp_server,(void *)&input_stream,sizeof(input_stream)); //blocking !!!
-		UDP_err_handler(err); 
+		UDP_err_handler(err,write_error_ptr); 
 	
 		if(err == UDP_ERR_NONE){
 			gettimeofday(&tv_now,NULL); //timestamp from receiving to calculate latency
@@ -193,7 +193,7 @@ int main(int argc, char *argv[]){
 			
 			//2. decode data 		
 			int err  = data_decode(input_stream);
-			DEC_err_handler(err);
+			DEC_err_handler(err,write_error_ptr);
 	
 			if(err==DEC_ERR_NONE){ 
 			
@@ -255,7 +255,6 @@ int main(int argc, char *argv[]){
 					printf("\n\n\n");*/
 				}
 				
-
 				if(input_stream[3]==IMU_GYRO_RAW){
 					
 					#if ANALYZE
@@ -470,21 +469,20 @@ int main(int argc, char *argv[]){
 										
 					switch(data->bone_plane.error.library){
 						case UDP_L:
-							UDP_err_handler(data->bone_plane.error.error_code);
+							UDP_err_handler(data->bone_plane.error.error_code,write_error_ptr);
 						break;
 						case UART_L:
-							UART_err_handler(data->bone_plane.error.error_code);
+							UART_err_handler(data->bone_plane.error.error_code,write_error_ptr);
 						break;
 						case DECODE_L:
-							DEC_err_handler(data->bone_plane.error.error_code);
+							DEC_err_handler(data->bone_plane.error.error_code,write_error_ptr);
 						break;
 						case LOG_L:
-							LOG_err_handler(data->bone_plane.error.error_code);
+							LOG_err_handler(data->bone_plane.error.error_code,write_error_ptr);
 						break;
 					}
 				}
-				
-							
+									
 			}else{
 					printf("UNKNOW PACKAGE with id %d\n",input_stream[3]);
 					exit(1);
@@ -588,7 +586,7 @@ int main(int argc, char *argv[]){
 		
 	}
 	
-	UDP_err_handler(closeUDPServerSocket(&udp_server));
+	UDP_err_handler(closeUDPServerSocket(&udp_server),write_error_ptr);
 
 	/*------------------------END OF FIRST THREAD------------------------*/
 
@@ -607,7 +605,7 @@ static void *server_to_planebone(void *connection){
 	Connection *conn=(Connection *)connection;
 	static UDP udp_client;
 	
-	UDP_err_handler(openUDPClientSocket(&udp_client,conn->planebone_ip,conn->port_number_server_to_planebone,UDP_SOCKET_TIMEOUT));
+	UDP_err_handler(openUDPClientSocket(&udp_client,conn->planebone_ip,conn->port_number_server_to_planebone,UDP_SOCKET_TIMEOUT),write_error_ptr);
 	int i=0;
 	
 	while(1)
@@ -630,7 +628,7 @@ static void *server_to_planebone(void *connection){
 		}
 	
 		//2. encode the data	
-		DEC_err_handler(data_encode(output.raw,sizeof(output.raw),encoded_data,1,72));
+		DEC_err_handler(data_encode(output.raw,sizeof(output.raw),encoded_data,1,72),write_error_ptr);
 	
 		/*printf("OUTPUT RAW:");
 		int j;
@@ -640,13 +638,13 @@ static void *server_to_planebone(void *connection){
 		printf("\n");*/
 
 		//3. send data to eth port using UDP
-		UDP_err_handler(sendUDPClientData(&udp_client,&encoded_data,sizeof(encoded_data)));	
+		UDP_err_handler(sendUDPClientData(&udp_client,&encoded_data,sizeof(encoded_data)),write_error_ptr);	
 		
 		//usleep(20000); //60 hz
 		
 		sleep(1);
 	}
-	UDP_err_handler(closeUDPClientSocket(&udp_client));
+	UDP_err_handler(closeUDPClientSocket(&udp_client),write_error_ptr);
 
 
 
@@ -654,142 +652,12 @@ static void *server_to_planebone(void *connection){
 /*------------------------END OF SECOND THREAD------------------------*/
 }	
 
-static void UDP_err_handler( UDP_errCode err)
+void write_error(char *file_name,char *message,int err_code)
 {
-	static char SOURCEFILE[] = "udp_communication.c";
-	
-	switch( err ) {
-		case UDP_ERR_NONE:
-			break;
-		case  UDP_ERR_INET_ATON:
-			error_write(SOURCEFILE,"failed decoding ip address");
-			break;
-		case UDP_ERR_SEND:
-			error_write(SOURCEFILE,"failed sending UDP data");
-			break;
-		case UDP_ERR_CLOSE_SOCKET:
-			error_write(SOURCEFILE,"failed closing UDP socket");
-			break;
-		case UDP_ERR_OPEN_SOCKET:
-			error_write(SOURCEFILE,"failed opening UDP socket");
-			break;
-		case UDP_ERR_BIND_SOCKET_PORT:
-			error_write(SOURCEFILE,"failed binding port to socket");
-			break;
-		case UDP_ERR_RECV:
-			error_write(SOURCEFILE,"failed receiving UDP data");
-			break;
-		case UDP_ERR_SET_TIMEOUT:
-			error_write(SOURCEFILE,"failed setting UDP timeout on socket");
-			break;
-		case UDP_ERR_UNDEFINED:
-			error_write(SOURCEFILE,"undefined UDP error");
-			break;
-		default: break;
-	}
+	//TODO: make it thread safe!!
+    error_write(file_name,message);
 }
 
-static void UART_err_handler( UART_errCode err_p )
-{
-	static char SOURCEFILE[] = "uart_communication.c";
-	int8_t err = (int8_t)err_p; //because uart erros can be negative
-		
-	switch( err ) {
-			case UART_ERR_NONE:
-				break;
-			case  UART_ERR_READ_START_BYTE:
-				error_write(SOURCEFILE,"serial port failed to read start byte");
-				break;
-			case  UART_ERR_READ_CHECKSUM:
-				error_write(SOURCEFILE,"serial port wrong checksum");
-				break;
-			case  UART_ERR_READ_LENGTH:
-				error_write(SOURCEFILE,"serial port failed reading message length");
-				break;
-			case  UART_ERR_READ_MESSAGE:
-				error_write(SOURCEFILE,"serial port failed reading message based on length");
-				break;
-			case UART_ERR_SERIAL_PORT_FLUSH_INPUT:
-				error_write(SOURCEFILE,"serial port flush input failed");
-				break;
-			case UART_ERR_SERIAL_PORT_FLUSH_OUTPUT:
-				error_write(SOURCEFILE,"serial port flush output failed");
-				break;
-			case UART_ERR_SERIAL_PORT_OPEN:
-				error_write(SOURCEFILE,"serial port open failed");
-				break;
-			case UART_ERR_SERIAL_PORT_CLOSE:
-				error_write(SOURCEFILE,"serial port close failed");
-				break;
-			case UART_ERR_SERIAL_PORT_CREATE:
-				error_write(SOURCEFILE,"serial port create failed");
-				break;
-			case UART_ERR_SERIAL_PORT_WRITE:
-				error_write(SOURCEFILE,"serial port write failed");
-				break;
-			case UART_ERR_UNDEFINED:
-				error_write(SOURCEFILE,"undefined UART error");
-				break;
-			default: break;
-		}
-}
-static void DEC_err_handler(DEC_errCode err )  
-{
-	static char SOURCEFILE[] = "data_decoding.c";
-	//write error to local log
-	switch( err ) {
-		case DEC_ERR_NONE:
-			break;
-		case  DEC_ERR_START_BYTE:
-			error_write(SOURCEFILE,"start byte is not 0x99");
-			break;
-		case DEC_ERR_CHECKSUM:
-			error_write(SOURCEFILE,"wrong checksum");
-			break;
-		case DEC_ERR_UNKNOWN_BONE_PACKAGE:
-			error_write(SOURCEFILE,"received unknown package from beaglebone");
-			break;
-		case DEC_ERR_UNKNOWN_LISA_PACKAGE:
-			error_write(SOURCEFILE,"received unknown package from lisa");
-			break;
-		case DEC_ERR_UNKNOWN_SENDER:
-			error_write(SOURCEFILE,"received package from unknown sender");
-			break;
-		case DEC_ERR_LENGTH:
-			error_write(SOURCEFILE,"decoded not entire package length");
-			break;
-		case DEC_ERR_UNDEFINED:
-			error_write(SOURCEFILE,"undefined decoding error");
-			break;
-		default: break;
-	}
-}
-
-static void LOG_err_handler(LOG_errCode err )  
-{
-	static char SOURCEFILE[] = "log.c";
-	//write error to local log
-	switch( err ) {
-		case LOG_ERR_NONE:
-			break;
-		case  LOG_ERR_UNDEFINED:
-			error_write(SOURCEFILE,"undefined log error");
-			break;
-		case LOG_ERR_MOUNT_SD:
-			error_write(SOURCEFILE,"error while mounting sd card");
-			break;
-		case LOG_ERR_OPEN_FILE:
-			error_write(SOURCEFILE,"error opening file");
-			break;
-		case LOG_ERR_WRITE:
-			error_write(SOURCEFILE,"error writing to file");
-			break;
-		case LOG_ERR_CLOSE:
-			error_write(SOURCEFILE,"error closing file");
-			break;
-		default: break;
-	}
-}
 
 static void print_mem(void const *vp, int n)
 {
