@@ -249,7 +249,7 @@ void calculate_checksum(uint8_t buffer[],uint8_t *checksum_1,uint8_t *checksum_2
 		printf("Entering calculate_checksum\n");
 	#endif
 	int i;
-	int length = buffer[LENGTH_INDEX]
+	int length = buffer[LENGTH_INDEX];
 	*checksum_1=0;
 	*checksum_2=0;
 	
