@@ -198,7 +198,10 @@ DEC_errCode NMEA_asci_encode(uint8_t buffer[],uint8_t encoded_data[]){
 				printf("unit %c\n",temp.unit);
 				printf("\n");*/
 			}	
+	}else{
+		return DEC_ERR_UNKNOWN_WIND_PACKAGE;
 	}
+	return DEC_ERR_NONE;
 }
 
 DEC_errCode data_encode(uint8_t message[],long unsigned int message_length,uint8_t encoded_data[],int sender_id,int message_id)
@@ -241,7 +244,8 @@ Data* get_read_pointer()
 	#if DEBUG  > 1
 		printf("Entering get_read_pointer\n");
 	#endif
-		return read_data;
+	
+	return read_data;
 }
 
 void calculate_checksum(uint8_t buffer[],uint8_t *checksum_1,uint8_t *checksum_2){

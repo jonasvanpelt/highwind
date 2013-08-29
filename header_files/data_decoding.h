@@ -3,7 +3,7 @@
  */
  
 /**************************************************************************************
-* LAYOUT OF INCOMING LISA PACKAGE 
+* LAYOUT OF INCOMING PACKAGES 
 * startbyte (0x99) - length - sender_id, message_id, message ... , checksumA, checksumB
 ****************************************************************************************/
 
@@ -22,7 +22,7 @@ extern "C"
 /********************************
  * GLOBALS
  * ******************************/
-//Lisa's message ids
+//message ids
 enum Message_id{BEAGLE_ERROR = 2 ,SYSMON = 33,UART_ERRORS = 208,ACTUATORS = 105,SVINFO=25,AIRSPEED_ETS = 57, GPS_INT=155, BARO_RAW = 221,IMU_GYRO_RAW = 203, IMU_ACCEL_RAW = 204,IMU_MAG_RAW = 205,NMEA_IIMWV_ID = 3, NMEA_WIXDR_ID = 4  };
 
 //sender ids
