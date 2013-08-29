@@ -88,6 +88,10 @@ static int serial_port_read(uint8_t buffer[],int length)
 
 int serial_input_get_lisa_data(uint8_t buffer[]){
 	
+	#if DEBUG  > 1
+		printf("Entering serial_input_get_lisa_data\n");
+	#endif
+	
 	//todo: oneindige loops vermijden
 	
 	uint8_t message_length;
@@ -171,6 +175,11 @@ static int serial_port_read_temp(uint8_t buffer[],int length)
 }
 
 int serial_input_get_windsensor_data(uint8_t buffer[]){	
+	
+	#if DEBUG  > 1
+		printf("Entering serial_input_get_windsensor_data\n");
+	#endif
+	
 		//check protocol here: http://en.wikipedia.org/wiki/NMEA_0183
 		int bytes_in_buffer;
 		unsigned int checksum_calc=0;
@@ -227,6 +236,7 @@ int serial_input_get_windsensor_data(uint8_t buffer[]){
 
 
 static UART_errCode serial_port_new(void) {
+	
 	#if DEBUG  > 1
 		printf("Entering serial_port_new\n");
 	#endif
@@ -290,9 +300,11 @@ static UART_errCode serial_port_flush_output(void) {
 }
 
 static UART_errCode  serial_port_open_raw(const char* device, speed_t speed) {
+	
 	#if DEBUG  > 1
 		printf("Entering serial_port_open_raw\n");
 	#endif
+	
 	if ((serial_stream->fd = open(device, O_RDWR | O_NONBLOCK | O_NOCTTY)) < 0) {
 		return UART_ERR_SERIAL_PORT_OPEN;
 	}
@@ -324,6 +336,7 @@ static UART_errCode  serial_port_open_raw(const char* device, speed_t speed) {
 }
 
 UART_errCode serial_port_close(void) {
+	
 	#if DEBUG  > 1
 		printf("Entering serial_port_close\n");
 	#endif
@@ -455,6 +468,10 @@ UART_errCode serial_port_write(uint8_t output[],long unsigned int message_length
 
 void UART_err_handler( UART_errCode err_p,void (*write_error_ptr)(char *,char *,int))
 {
+	#if DEBUG  > 1
+		printf("Entering UART_err_handler\n");
+	#endif
+	
 	static char SOURCEFILE[] = "uart_communication.c";
 	int8_t err = (int8_t)err_p; //because uart erros can be negative
 		

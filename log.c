@@ -7,7 +7,6 @@
 #include <string.h>
 #include "header_files/log.h"
 
-
 #ifndef DEBUG 
 #define DEBUG 0
 #endif
@@ -192,6 +191,10 @@ LOG_errCode log_write(char *file_name,char *message){
 
 void LOG_err_handler(LOG_errCode err,void (*write_error_ptr)(char *,char *,int))  
 {
+	#if DEBUG  > 1
+		printf("Entering LOG_err_handler\n");
+	#endif
+	
 	static char SOURCEFILE[] = "log.c";
 	//write error to local log
 	switch( err ) {

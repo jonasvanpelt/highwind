@@ -166,6 +166,10 @@ void data_write(uint8_t stream[],void *destination, int length)
 }
 
 DEC_errCode NMEA_asci_encode(uint8_t buffer[],uint8_t encoded_data[]){
+	
+	#if DEBUG  > 1
+		printf("Entering NMEA_asci_encode\n");
+	#endif
 
 	if(strncmp(&buffer[1],"IIMWV",5)==0){
 		NMEA_IIMWV wind;
@@ -245,7 +249,7 @@ void calculate_checksum(uint8_t buffer[],uint8_t *checksum_1,uint8_t *checksum_2
 		printf("Entering calculate_checksum\n");
 	#endif
 	int i;
-	int length = buffer[1];
+	int length = buffer[LENGTH_INDEX]
 	*checksum_1=0;
 	*checksum_2=0;
 	
@@ -299,7 +303,7 @@ int strip_timestamp(uint8_t buffer[]){
 	int new_length=length-16; //timeval is 16 bytes
 
 	//update message length
-	buffer[1]=new_length; 
+	buffer[LENGTH_INDEX]=new_length; 
 	
 	//recalculate checksum
 	calculate_checksum(buffer,&checksum_1,&checksum_2);
@@ -311,6 +315,10 @@ int strip_timestamp(uint8_t buffer[]){
 
 void DEC_err_handler(DEC_errCode err,void (*write_error_ptr)(char *,char *,int))  
 {
+	#if DEBUG  > 1
+		printf("Entering DEC_err_handler\n");
+	#endif
+	
 	static char SOURCEFILE[] = "data_decoding.c";
 	//write error to local log
 	switch( err ) {

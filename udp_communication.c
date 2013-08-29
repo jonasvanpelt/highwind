@@ -24,6 +24,7 @@ static UDP_errCode openUDPSocket(UDP *udp,unsigned int timeout);
  * FUNCTIONS
  * ******************************/
 UDP_errCode openUDPClientSocket(UDP *udp_client,const char *server_ip,int port,unsigned int timeout){
+	
 	#if DEBUG  > 1
 		printf("Entering openUDPClientSocket\n");
 	#endif
@@ -45,6 +46,7 @@ UDP_errCode openUDPClientSocket(UDP *udp_client,const char *server_ip,int port,u
 }
 
 UDP_errCode sendUDPClientData(UDP *udp_client,void *data,size_t data_len){
+	
 	#if DEBUG  > 1
 		printf("Entering sendUDPClientData\n");
 	#endif
@@ -58,6 +60,7 @@ UDP_errCode sendUDPClientData(UDP *udp_client,void *data,size_t data_len){
 }
 
 UDP_errCode closeUDPClientSocket(UDP *udp_client){
+	
 	#if DEBUG  > 1
 		printf("Entering closeUDPClientSocket\n");
 	#endif
@@ -69,6 +72,7 @@ UDP_errCode closeUDPClientSocket(UDP *udp_client){
 }
 
 static UDP_errCode openUDPSocket(UDP *udp,unsigned int timeout){
+	
 	#if DEBUG  > 1
 		printf("Entering openUDPSocket\n");
 	#endif
@@ -95,6 +99,7 @@ static UDP_errCode openUDPSocket(UDP *udp,unsigned int timeout){
 
 
 UDP_errCode openUDPServerSocket(UDP *udp_server,int port,unsigned int timeout){
+	
 	#if DEBUG  > 1
 		printf("Entering openUDPServerSocket\n");
 	#endif
@@ -117,6 +122,7 @@ UDP_errCode openUDPServerSocket(UDP *udp_server,int port,unsigned int timeout){
 }
 
 UDP_errCode receiveUDPServerData(UDP *udp_server,void *data,size_t data_len){
+	
 	#if DEBUG  > 1
 		printf("Entering receiveUDPServerData\n");
 	#endif
@@ -133,6 +139,7 @@ UDP_errCode receiveUDPServerData(UDP *udp_server,void *data,size_t data_len){
 
 
 UDP_errCode closeUDPServerSocket(UDP *udp_server){
+	
 	#if DEBUG  > 1
 		printf("Entering closeUDPServerSocket\n");
 	#endif
@@ -145,6 +152,10 @@ UDP_errCode closeUDPServerSocket(UDP *udp_server){
 
 void UDP_err_handler( UDP_errCode err,void (*write_error_ptr)(char *,char *,int))
 {
+	#if DEBUG  > 1
+		printf("Entering UDP_err_handler\n");
+	#endif
+	
 	static char SOURCEFILE[] = "udp_communication.c";
 	
 	switch( err ) {
