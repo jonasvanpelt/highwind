@@ -144,12 +144,14 @@ static DEC_errCode data_to_struct(uint8_t sender,uint8_t stream[], int length) /
 			switch(stream[MESSAGE_ID_INDEX]){
 					case NMEA_IIMWV_ID:
 						data_write(stream, (void *)&write_data->bone_wind.nmea_iimmwv, sizeof(NMEA_IIMWV)-1);
-					break;
+						break;
 					case NMEA_WIXDR_ID:
 						data_write(stream, (void *)&write_data->bone_wind.nmea_wixdr, sizeof(NMEA_WIXDR)-1);
-					break;
+						break;
+					default: return DEC_ERR_UNKNOWN_WIND_PACKAGE; break;
 			}
-				default: return DEC_ERR_UNKNOWN_SENDER; break;
+		break;
+		default: return DEC_ERR_UNKNOWN_SENDER; break;
 	}	
 	return DEC_ERR_NONE;	
 }
@@ -325,6 +327,9 @@ void DEC_err_handler(DEC_errCode err,void (*write_error_ptr)(char *,char *,int))
 			break;
 		case DEC_ERR_UNKNOWN_LISA_PACKAGE:
 			write_error_ptr(SOURCEFILE,"received unknown package from lisa",err);
+			break;
+		case DEC_ERR_UNKNOWN_WIND_PACKAGE:
+			write_error_ptr(SOURCEFILE,"received unknown package from wind bone",err);
 			break;
 		case DEC_ERR_UNKNOWN_SENDER:
 			write_error_ptr(SOURCEFILE,"received package from unknown sender",err);

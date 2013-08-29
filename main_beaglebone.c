@@ -230,7 +230,6 @@ static void *lisa_to_pc(void *arg){
 	ElemType cb_elem = {0};
 	uint8_t input_buffer[INPUT_BUFFER_SIZE];
 
-
 	UDP_err_handler(openUDPClientSocket(&udp_client,connection.server_ip,connection.port_number_lisa_to_pc,UDP_SOCKET_TIMEOUT),write_udp_error_ptr);
 
 	while(1)

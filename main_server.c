@@ -226,7 +226,7 @@ int main(int argc, char *argv[]){
 					NMEA_WIXDR_received=1;
 				}
 				
-				printf("IMU_GYRO_RAW_received %d\n",IMU_GYRO_RAW_received);
+				/*printf("IMU_GYRO_RAW_received %d\n",IMU_GYRO_RAW_received);
 				printf("IMU_ACCEL_RAW_received %d\n",IMU_ACCEL_RAW_received);
 				printf("IMU_MAG_RAW_received %d\n",IMU_MAG_RAW_received);
 				printf("BARO_RAW_received %d\n",BARO_RAW_received);
@@ -237,7 +237,7 @@ int main(int argc, char *argv[]){
 				printf("UART_ERROR_received %d\n",UART_ERROR_received);	
 				printf("ACTUATORS_received %d\n",ACTUATORS_received);
 				printf("NMEA_IIMWV_received %d\n",NMEA_IIMWV_received);	
-				printf("NMEA_WIXDR_received %d\n",NMEA_WIXDR_received);		
+				printf("NMEA_WIXDR_received %d\n",NMEA_WIXDR_received);	*/	
 				
 				printf("\n");
 
@@ -488,6 +488,38 @@ int main(int argc, char *argv[]){
 							LOG_err_handler(data->bone_plane.error.error_code,write_error_ptr);
 						break;
 					}
+				}
+				
+				if(input_stream[3]==NMEA_IIMWV_ID){
+					
+					int i;
+					printf("NMEA_IIMWV_ID content:");
+					print_mem((void *)&data->bone_wind.nmea_iimmwv,sizeof(NMEA_IIMWV));
+
+					printf("wind angle %lf\n",data->bone_wind.nmea_iimmwv.wind_angle);
+					printf("relative %c\n",data->bone_wind.nmea_iimmwv.relative);
+					printf("wind speed %lf\n",data->bone_wind.nmea_iimmwv.wind_speed);
+					printf("wind speed unit %c\n",data->bone_wind.nmea_iimmwv.wind_speed_unit);
+					printf("status %c\n",data->bone_wind.nmea_iimmwv.status);
+					char temp[64];
+					timestamp_to_timeString(data->bone_wind.nmea_iimmwv.tv,temp);
+					printf("send time: %s\n",temp);
+					printf("\n");
+
+				}
+				
+				if(input_stream[3]==NMEA_WIXDR_ID){
+					
+					int i;
+					printf("NMEA_WIXDR_ID content:");
+					print_mem((void *)&data->bone_wind.nmea_wixdr,sizeof(NMEA_WIXDR));
+					
+					printf("Temperature %lf\n",data->bone_wind.nmea_wixdr.temperature);
+					printf("unit %c\n",data->bone_wind.nmea_wixdr.unit);
+					char temp[64];
+					timestamp_to_timeString(data->bone_wind.nmea_wixdr.tv,temp);
+					printf("send time: %s\n",temp);
+					printf("\n");
 				}
 									
 			}else{

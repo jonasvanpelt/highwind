@@ -155,7 +155,7 @@ int serial_input_get_lisa_data(uint8_t buffer[]){
 
 static int serial_port_read_temp(uint8_t buffer[],int length) 
 {
-	static char test_wind[] = "$IIMWV,226.0,R,000.00,N,A*0B\n$WIXDR,C,036.5,C,,*52\n";
+	const char test_wind[] = "$IIMWV,226.0,R,000.00,N,A*0B\n$WIXDR,C,036.5,C,,*52\n";
 	static int index=0;
 	int i;
 	//printf("reading index %d ...\n",index);

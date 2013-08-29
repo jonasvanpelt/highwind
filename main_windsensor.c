@@ -88,7 +88,7 @@ int main(int argc, char *argv[]){
 			}printf("\n");
 			
 			//send data to eth port using UDP
-			UDP_err_handler(sendUDPClientData(&udp_client,input_buffer,encoded_data[LENGTH_INDEX]),write_udp_error_ptr);
+			UDP_err_handler(sendUDPClientData(&udp_client,encoded_data,encoded_data[LENGTH_INDEX]),write_udp_error_ptr);
 		
 		}else{
 			//send error message to server: not receiving data on uart port
