@@ -23,10 +23,10 @@ extern "C"
  * GLOBALS
  * ******************************/
 //Lisa's message ids
-enum Message_id{BEAGLE_ERROR = 2 ,SYSMON = 33,UART_ERRORS = 208,ACTUATORS = 105,SVINFO=25,AIRSPEED_ETS = 57, GPS_INT=155, BARO_RAW = 221,IMU_GYRO_RAW = 203, IMU_ACCEL_RAW = 204,IMU_MAG_RAW = 205  };
+enum Message_id{BEAGLE_ERROR = 2 ,SYSMON = 33,UART_ERRORS = 208,ACTUATORS = 105,SVINFO=25,AIRSPEED_ETS = 57, GPS_INT=155, BARO_RAW = 221,IMU_GYRO_RAW = 203, IMU_ACCEL_RAW = 204,IMU_MAG_RAW = 205,NMEA_IIMWV_ID = 3, NMEA_WIXDR_ID = 4  };
 
 //sender ids
-enum Sender_id{BEAGLEBONE=2,LISA=165};
+enum Sender_id{PLANE_BONE=2,LISA=165,WIND_BONE=3};
 
 //import indexes of incoming data array
 enum stream_index{STARTBYTE_INDEX=0,LENGTH_INDEX,SENDER_ID_INDEX,MESSAGE_ID_INDEX,MESSAGE_START_INDEX};
@@ -185,6 +185,24 @@ typedef struct { // id = 205
 		int8_t new_data;
 } Imu_mag_raw;
 
+//WINDSENSOR DATATYPES
+typedef struct{
+	double wind_angle; //(0.0...359.0 °)
+	char relative; //(R= relative, T=true)
+	double wind_speed;
+	char wind_speed_unit; //(N=knots,K = KPH, M = MPH)
+	char status; //(A=valid)
+	timeval tv;
+	int8_t new_data;
+}NMEA_IIMWV;
+
+typedef struct{
+	double temperature;
+	char unit;
+	timeval tv;
+	int8_t new_data;
+}NMEA_WIXDR;
+
 typedef struct { // sender id = 165
 		Svinfo svinfo;
 		Airspeed_ets airspeed_ets;
@@ -201,11 +219,17 @@ typedef struct { // sender id = 165
 typedef struct { // sender id = 2
 		Beagle_error error;
 } Bone_plane;	
+
+typedef struct{
+		NMEA_IIMWV nmea_iimmwv;
+		NMEA_WIXDR nmea_wixdr;
+}Bone_wind;
 	
 typedef struct
 {
 	Bone_plane bone_plane;
 	Lisa_plane lisa_plane;
+	Bone_wind bone_wind;
 } Data;
 
 #pragma pack(pop)   /* restore original alignment from stack */
@@ -221,6 +245,7 @@ extern Data* get_read_pointer(); /*to get read access to data structure*/
 extern void calculate_checksum(uint8_t buffer[],uint8_t *checksum_1,uint8_t *checksum2);
 extern int add_timestamp(uint8_t buffer[]);/*add timestamp to existing package, updates the checksum and the length byte*/
 extern int strip_timestamp(uint8_t buffer[]);/*removes timestamp, update checksums and length byte*/
+DEC_errCode NMEA_asci_encode(uint8_t buffer[],uint8_t encoded_data[]);
 void DEC_err_handler(DEC_errCode err,void (*write_error_ptr)(char *,char *,int));  
  
 #ifdef __cplusplus

@@ -59,8 +59,6 @@ int main(int argc, char *argv[]){
 	Connection connection;
 	write_error_ptr = &write_error;  //initialize the function pointer to write error
 	
-	UART_err_handler(UART_ERR_READ_LENGTH,write_error_ptr);
-
 	//parse arguments	
 	if(argc == 4){
 		//first argument is always name of program or empty string
@@ -114,6 +112,8 @@ int main(int argc, char *argv[]){
 	int SYSMON_received=0;
 	int UART_ERROR_received=0;
 	int ACTUATORS_received=0;
+	int NMEA_IIMWV_received = 0;
+	int NMEA_WIXDR_received = 0;
 	int err;
 	
 	#if ANALYZE
@@ -220,9 +220,13 @@ int main(int argc, char *argv[]){
 					UART_ERROR_received=1;
 				}else if(input_stream[3]==ACTUATORS){
 					ACTUATORS_received=1;
+				}else if(input_stream[3]==NMEA_IIMWV_ID){
+					NMEA_IIMWV_received=1;
+				}else if(input_stream[3]==NMEA_WIXDR_ID){
+					NMEA_WIXDR_received=1;
 				}
 				
-				/*printf("IMU_GYRO_RAW_received %d\n",IMU_GYRO_RAW_received);
+				printf("IMU_GYRO_RAW_received %d\n",IMU_GYRO_RAW_received);
 				printf("IMU_ACCEL_RAW_received %d\n",IMU_ACCEL_RAW_received);
 				printf("IMU_MAG_RAW_received %d\n",IMU_MAG_RAW_received);
 				printf("BARO_RAW_received %d\n",BARO_RAW_received);
@@ -231,8 +235,11 @@ int main(int argc, char *argv[]){
 				printf("SVINFO_received %d\n",SVINFO_received);	
 				printf("SYSMON_received %d\n",SYSMON_received);	
 				printf("UART_ERROR_received %d\n",UART_ERROR_received);	
-				printf("ACTUATORS_received %d\n",ACTUATORS_received);	
-				printf("\n");*/
+				printf("ACTUATORS_received %d\n",ACTUATORS_received);
+				printf("NMEA_IIMWV_received %d\n",NMEA_IIMWV_received);	
+				printf("NMEA_WIXDR_received %d\n",NMEA_WIXDR_received);		
+				
+				printf("\n");
 
 				if(input_stream[3]==BARO_RAW){
 					#if ANALYZE
@@ -604,14 +611,15 @@ static void *server_to_planebone(void *connection){
 	
 	Connection *conn=(Connection *)connection;
 	static UDP udp_client;
+	//1. read data from i don't now where
+	uint8_t encoded_data[MAX_OUTPUT_STREAM_SIZE];
 	
 	UDP_err_handler(openUDPClientSocket(&udp_client,conn->planebone_ip,conn->port_number_server_to_planebone,UDP_SOCKET_TIMEOUT),write_error_ptr);
 	int i=0;
 	
 	while(1)
 	{
-		//1. read data from i don't now where
-		uint8_t encoded_data[MAX_OUTPUT_STREAM_SIZE];
+		
 		Output output;
 
 		//create test data
@@ -657,7 +665,6 @@ void write_error(char *file_name,char *message,int err_code)
 	//TODO: make it thread safe!!
     error_write(file_name,message);
 }
-
 
 static void print_mem(void const *vp, int n)
 {

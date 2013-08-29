@@ -10,9 +10,7 @@
 #define DEBUG 0
 #endif
 
-#if DEBUG
 #include <stdio.h>
-#endif
 
 /********************************
  * PROTOTYPES PRIVATE
@@ -96,7 +94,7 @@ static DEC_errCode data_to_struct(uint8_t sender,uint8_t stream[], int length) /
 	
 	switch(sender)
 	{
-		case BEAGLEBONE: //sender_id of beaglebone
+		case PLANE_BONE: //sender_id of beaglebone
 			switch(stream[MESSAGE_ID_INDEX])
 			{
 				case BEAGLE_ERROR: 
@@ -142,6 +140,15 @@ static DEC_errCode data_to_struct(uint8_t sender,uint8_t stream[], int length) /
 				default: return DEC_ERR_UNKNOWN_LISA_PACKAGE;break;
 			}
 		 break;
+		 case WIND_BONE:
+			switch(stream[MESSAGE_ID_INDEX]){
+					case NMEA_IIMWV_ID:
+						data_write(stream, (void *)&write_data->bone_wind.nmea_iimmwv, sizeof(NMEA_IIMWV)-1);
+					break;
+					case NMEA_WIXDR_ID:
+						data_write(stream, (void *)&write_data->bone_wind.nmea_wixdr, sizeof(NMEA_WIXDR)-1);
+					break;
+			}
 				default: return DEC_ERR_UNKNOWN_SENDER; break;
 	}	
 	return DEC_ERR_NONE;	
@@ -154,6 +161,38 @@ void data_write(uint8_t stream[],void *destination, int length)
 	#endif
 
 	memcpy(destination,&(stream[MESSAGE_START_INDEX]),length);	
+}
+
+DEC_errCode NMEA_asci_encode(uint8_t buffer[],uint8_t encoded_data[]){
+
+	if(strncmp(&buffer[1],"IIMWV",5)==0){
+		NMEA_IIMWV wind;
+		sscanf(&buffer[7],"%lf",&wind.wind_angle);
+		sscanf(&buffer[13],"%c",&wind.relative);
+		sscanf(&buffer[15],"%lf",&wind.wind_speed);
+		sscanf(&buffer[22],"%c",&wind.wind_speed_unit);
+		sscanf(&buffer[24],"%c",&wind.status);
+		data_encode((uint8_t *)&wind,sizeof(NMEA_IIMWV)-16-1,encoded_data,WIND_BONE,NMEA_IIMWV_ID); //- timestamp and - new data flag
+
+		/*printf("wind angle %lf\n",wind.wind_angle);
+		printf("relative %c\n",wind.relative);
+		printf("wind speed %lf\n",wind.wind_speed);
+		printf("wind speed unit %c\n",wind.wind_speed_unit);
+		printf("status %c\n",wind.status);
+		printf("\n");*/
+
+		}else if(strncmp(&buffer[1],"WIXDR",5)==0){
+			if(buffer[7]=='C'){
+				NMEA_WIXDR temp;
+				sscanf(&buffer[9],"%lf",&temp.temperature);
+				sscanf(&buffer[15],"%c",&temp.unit);
+				data_encode((uint8_t *)&temp,sizeof(NMEA_WIXDR)-16-1,encoded_data,WIND_BONE,NMEA_WIXDR_ID); //- timestamp and - new data flag
+
+				/*printf("Temperature %lf\n",temp.temperature);
+				printf("unit %c\n",temp.unit);
+				printf("\n");*/
+			}	
+	}
 }
 
 DEC_errCode data_encode(uint8_t message[],long unsigned int message_length,uint8_t encoded_data[],int sender_id,int message_id)

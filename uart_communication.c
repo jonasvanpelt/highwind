@@ -155,7 +155,7 @@ int serial_input_get_lisa_data(uint8_t buffer[]){
 
 static int serial_port_read_temp(uint8_t buffer[],int length) 
 {
-	static char test_wind[] = "$IIMWV,226.0,R,000.00,N,A*0B\n$WIXDR,C,036.5,C,,*52\n$PLCJ,75FA,7DEA,03,,,,6D7C,837E\n$PLCJEAC90,D35D,3F00,2161,FF\n";
+	static char test_wind[] = "$IIMWV,226.0,R,000.00,N,A*0B\n$WIXDR,C,036.5,C,,*52\n";
 	static int index=0;
 	int i;
 	//printf("reading index %d ...\n",index);
@@ -193,7 +193,7 @@ int serial_input_get_windsensor_data(uint8_t buffer[]){
 		do{
 			length++;
 			if(serial_port_read_temp(&buffer[length],1)==UART_ERR_READ){	
-				//serial_port_flush_input();			
+				serial_port_flush_input();			
 				return UART_ERR_READ_MESSAGE;
 			}
 
@@ -215,7 +215,7 @@ int serial_input_get_windsensor_data(uint8_t buffer[]){
 			}
 						
 			if(checksum_calc!=checksum_recv){
-				//serial_port_flush_input();	
+				serial_port_flush_input();	
 				printf("checksum calc %x\n",checksum_calc);
 				printf("checksum real %x\n",checksum_recv);
 				return UART_ERR_READ_CHECKSUM; 

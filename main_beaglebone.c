@@ -72,7 +72,7 @@ static int reading_flag_ground=0;
 
 //function pointer to write errors to log
 void (*write_uart_error_ptr)(char *,char *,int);
-void (*write_upd_error_ptr)(char *,char *,int);
+void (*write_udp_error_ptr)(char *,char *,int);
 void (*write_decode_error_ptr)(char *,char *,int);
 void (*write_log_error_ptr)(char *,char *,int);
 
@@ -83,7 +83,7 @@ void (*write_log_error_ptr)(char *,char *,int);
 
 int main(int argc, char *argv[]){
 	write_uart_error_ptr = &write_uart_error;  //initialize the function pointer to write error
-	write_upd_error_ptr = &write_udp_error; 
+	write_udp_error_ptr = &write_udp_error; 
 	write_decode_error_ptr = &write_decode_error;  
 	write_log_error_ptr = &write_log_error;  
  
@@ -153,13 +153,13 @@ int main(int argc, char *argv[]){
 	//init the data decode pointers
 	init_decoding();
 
-	UDP_err_handler(openUDPServerSocket(&udp_server,connection.port_number_pc_to_lisa,UDP_SOCKET_TIMEOUT),write_upd_error_ptr);
+	UDP_err_handler(openUDPServerSocket(&udp_server,connection.port_number_pc_to_lisa,UDP_SOCKET_TIMEOUT),write_udp_error_ptr);
 
 	while(1){
 
 		//1. retreive UDP data form PC from ethernet port.
 		err=receiveUDPServerData(&udp_server,(void *)&input_stream,sizeof(input_stream)); //blocking !!!
-		UDP_err_handler(err,write_upd_error_ptr);
+		UDP_err_handler(err,write_udp_error_ptr);
 
 		if(err==UDP_ERR_NONE){
 
@@ -186,7 +186,7 @@ int main(int argc, char *argv[]){
 
 	}
 	UART_err_handler(serial_port_close(),write_uart_error_ptr);
-	UDP_err_handler(closeUDPServerSocket(&udp_server),write_upd_error_ptr);
+	UDP_err_handler(closeUDPServerSocket(&udp_server),write_udp_error_ptr);
 	/*------------------------END OF FIRST THREAD------------------------*/
 
 
@@ -231,7 +231,7 @@ static void *lisa_to_pc(void *arg){
 	uint8_t input_buffer[INPUT_BUFFER_SIZE];
 
 
-	UDP_err_handler(openUDPClientSocket(&udp_client,connection.server_ip,connection.port_number_lisa_to_pc,UDP_SOCKET_TIMEOUT),write_upd_error_ptr);
+	UDP_err_handler(openUDPClientSocket(&udp_client,connection.server_ip,connection.port_number_lisa_to_pc,UDP_SOCKET_TIMEOUT),write_udp_error_ptr);
 
 	while(1)
 	{
@@ -253,7 +253,7 @@ static void *lisa_to_pc(void *arg){
 			message_length=add_timestamp(input_buffer);
 
 			//send data to eth port using UDP
-			UDP_err_handler(sendUDPClientData(&udp_client,input_buffer,message_length),write_upd_error_ptr);
+			UDP_err_handler(sendUDPClientData(&udp_client,input_buffer,message_length),write_udp_error_ptr);
 
 			#if LOGGING > 0
 
@@ -282,7 +282,7 @@ static void *lisa_to_pc(void *arg){
 
 	UART_err_handler(serial_port_close(),write_uart_error_ptr);
 
-	UDP_err_handler(closeUDPClientSocket(&udp_client),write_upd_error_ptr);
+	UDP_err_handler(closeUDPClientSocket(&udp_client),write_udp_error_ptr);
 
 	return NULL;
 /*------------------------END OF SECOND THREAD------------------------*/
@@ -393,7 +393,7 @@ static void write_udp_error(char *file_name,char *message,int err_code)
 {
 	//TODO: make it thread safe!!
     error_write(file_name,message);
-    sendError(err_code,UDP_L);
+    //udp errors cannot be send
 }
 
 static void write_decode_error(char *file_name,char *message,int err_code)
