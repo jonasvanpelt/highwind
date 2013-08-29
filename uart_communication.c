@@ -388,12 +388,13 @@ static UART_errCode serial_port_create()
 	FILE *fp ;
 	int fd;
 
-	fp = fopen("/sys/devices/bone_capemgr.9/slots", "r");
+	fp = fopen("/sys/devices/bone_capemgr.8/slots", "r");
 	if (fp == NULL){
+		
 		return UART_ERR_SERIAL_PORT_CREATE;
 	} 
 
-
+	//search enable-uart5 is present int the file
 	while(flag!=1 && fp!=NULL && fgets(tmp, sizeof(tmp), fp)!=NULL)
 	{
 		if (strstr(tmp, "enable-uart5"))
@@ -401,6 +402,7 @@ static UART_errCode serial_port_create()
 			flag = 1;
 		}
 	}
+	
 	#if DEBUG
 	
 	if(flag)
@@ -417,19 +419,19 @@ static UART_errCode serial_port_create()
 	{
 		return UART_ERR_NONE;
 	} else {
-		fd = open("/sys/devices/bone_capemgr.9/slots", O_RDWR);
+		fd = open("/sys/devices/bone_capemgr.8/slots", O_RDWR);
 		
 		#if DEBUG
 			printf("Uart5 not enabled, trying to enable...\n");
 	    #endif
 
-		if (write(fd,"enable-uart5", 12)<0)
+		if (system("echo enable-uart5 > /sys/devices/bone_capemgr.8/slots")==0)
 		{
 			close(fd);
-			return UART_ERR_SERIAL_PORT_CREATE;
+			return UART_ERR_NONE;
 		} else {
 			close(fd);
-			return UART_ERR_NONE;
+			return UART_ERR_SERIAL_PORT_CREATE;
 		}
 	}
 	return UART_ERR_NONE;
