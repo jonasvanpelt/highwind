@@ -7,6 +7,14 @@
 * startbyte (0x99) - length - sender_id, message_id, message ... , checksumA, checksumB
 ****************************************************************************************/
 
+
+/**************************************************************************************
+This library is used to decode, encode and modify packages
+* 
+* - for decoding (from incoming array to struct) the library ALWAYS expects the packages to be in the format listed above
+* - You can encode any type of package to the format listed above
+****************************************************************************************/
+
 #ifndef DATA_DECODING_H_ 
 #define DATA_DECODING_H_
 
@@ -245,7 +253,7 @@ extern Data* get_read_pointer(); /*to get read access to data structure*/
 extern void calculate_checksum(uint8_t buffer[],uint8_t *checksum_1,uint8_t *checksum2);
 extern int add_timestamp(uint8_t buffer[]);/*add timestamp to existing package, updates the checksum and the length byte*/
 extern int strip_timestamp(uint8_t buffer[]);/*removes timestamp, update checksums and length byte*/
-DEC_errCode NMEA_asci_encode(uint8_t buffer[],uint8_t encoded_data[]);
+DEC_errCode NMEA_asci_encode(uint8_t buffer[],uint8_t encoded_data[]);/*Encodes NMEA packages coming from windsensor*/
 void DEC_err_handler(DEC_errCode err,void (*write_error_ptr)(char *,char *,int));  
  
 #ifdef __cplusplus

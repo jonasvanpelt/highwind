@@ -228,7 +228,7 @@ DEC_errCode data_encode(uint8_t message[],long unsigned int message_length,uint8
 	//get localtime 
 	gettimeofday(&timestamp, NULL);
 	
-	//convert beaglebone 8 byte timeval to 16 byte timeval for server
+	//convert beaglebone 8 byte timeval to 16 byte timeval for server, if this is server this does not change anything
 	timestampBeagle.tv.tv_sec=(uint64_t)timestamp.tv_sec;
 	timestampBeagle.tv.tv_usec=(uint64_t)timestamp.tv_usec;
 	
@@ -284,7 +284,7 @@ int add_timestamp(uint8_t buffer[]){
 	//get localtime 
 	gettimeofday(&tv_8, NULL);
 
-	//convert beaglebone 8 byte timeval to 16 byte timeval for server
+	//convert beaglebone 8 byte timeval to 16 byte timeval for server, if this is server this does not change anything
 	timestampBeagle.tv.tv_sec=(uint64_t)tv_8.tv_sec;
 	timestampBeagle.tv.tv_usec=(uint64_t)tv_8.tv_usec;
 

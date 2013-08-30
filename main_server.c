@@ -173,7 +173,7 @@ int main(int argc, char *argv[]){
 		if(err == UDP_ERR_NONE){
 			gettimeofday(&tv_now,NULL); //timestamp from receiving to calculate latency
 			
-			//#if DEBUG > 0
+			#if DEBUG > 0
 			
 				printf("message raw: ");
 				int i;
@@ -190,7 +190,7 @@ int main(int argc, char *argv[]){
 				printf("checksum2: %d\n", input_stream[input_stream[1]-1]);
 				printf("\n");
 			
-			//#endif
+			#endif
 			
 			//2. decode data 		
 			int err  = data_decode(input_stream);
@@ -471,8 +471,8 @@ int main(int argc, char *argv[]){
 				}
 				
 				if(input_stream[3]==BEAGLE_ERROR){
-					printf("beagle bone error content:");
-					print_mem((void *)&data->bone_plane.error,sizeof(Beagle_error));
+					//printf("beagle bone error content:");
+					//print_mem((void *)&data->bone_plane.error,sizeof(Beagle_error));
 										
 					switch(data->bone_plane.error.library){
 						case UDP_L:
