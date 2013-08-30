@@ -237,9 +237,8 @@ int main(int argc, char *argv[]){
 				printf("UART_ERROR_received %d\n",UART_ERROR_received);	
 				printf("ACTUATORS_received %d\n",ACTUATORS_received);
 				printf("NMEA_IIMWV_received %d\n",NMEA_IIMWV_received);	
-				printf("NMEA_WIXDR_received %d\n",NMEA_WIXDR_received);	*/	
-				
-				printf("\n");
+				printf("NMEA_WIXDR_received %d\n",NMEA_WIXDR_received);	
+				printf("\n");*/
 
 				if(input_stream[3]==BARO_RAW){
 					#if ANALYZE
