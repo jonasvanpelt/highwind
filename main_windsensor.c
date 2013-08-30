@@ -2,7 +2,6 @@
  * AUTHOR: Jonas Van Pelt
  */
 
-#include <pthread.h>
 #include <sched.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -65,7 +64,6 @@ int main(int argc, char *argv[]){
 	/*-------------------------WINDSENSOR TO SERVER------------------------*/
 	static UDP udp_client;
 	int message_length;
-	ElemType cb_elem = {0};
 	uint8_t input_buffer[INPUT_BUFFER_SIZE];
 	uint8_t encoded_data[INPUT_BUFFER_SIZE];
 	UART_err_handler(serial_port_setup(),write_uart_error_ptr);

@@ -180,6 +180,8 @@ int serial_input_get_windsensor_data(uint8_t buffer[]){
 		printf("Entering serial_input_get_windsensor_data\n");
 	#endif
 	
+	//Naser: Replace serial_port_read_temp with serial_port_read
+	
 		//check protocol here: http://en.wikipedia.org/wiki/NMEA_0183
 		int bytes_in_buffer;
 		unsigned int checksum_calc=0;
@@ -211,7 +213,7 @@ int serial_input_get_windsensor_data(uint8_t buffer[]){
 					checksum_flag=1;
 			}
 		
-		}while(buffer[length]!='\n'); 
+		}while(buffer[length]!='\n'); //Naser: maybe on real uart message does not end with '\n'
 		
 		//3.CHECK CHECKSUM IF PRESENT
 		//the checksum is the bitwise exclusive OR of ASCII codes of all characters between the $ and *
@@ -225,8 +227,8 @@ int serial_input_get_windsensor_data(uint8_t buffer[]){
 						
 			if(checksum_calc!=checksum_recv){
 				serial_port_flush_input();	
-				printf("checksum calc %x\n",checksum_calc);
-				printf("checksum real %x\n",checksum_recv);
+				//printf("checksum calc %x\n",checksum_calc);
+				//printf("checksum real %x\n",checksum_recv);
 				return UART_ERR_READ_CHECKSUM; 
 			}	
 		}	

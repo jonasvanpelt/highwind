@@ -31,7 +31,7 @@ extern "C"
  * GLOBALS
  * ******************************/
 //message ids
-enum Message_id{BEAGLE_ERROR = 2 ,SYSMON = 33,UART_ERRORS = 208,ACTUATORS = 105,SVINFO=25,AIRSPEED_ETS = 57, GPS_INT=155, BARO_RAW = 221,IMU_GYRO_RAW = 203, IMU_ACCEL_RAW = 204,IMU_MAG_RAW = 205,NMEA_IIMWV_ID = 3, NMEA_WIXDR_ID = 4  };
+enum Message_id{BEAGLE_ERROR = 2 ,SYSMON = 33,UART_ERRORS = 208,ACTUATORS = 105,SVINFO=25,AIRSPEED_ETS = 57, GPS_INT=155, BARO_RAW = 221,IMU_GYRO_RAW = 203, IMU_ACCEL_RAW = 204,IMU_MAG_RAW = 205,NMEA_IIMWV_ID = 3, NMEA_WIXDR_ID = 4  ,LINE_ANGLE_ID = 5};
 
 //sender ids
 enum Sender_id{PLANE_BONE=2,LISA=165,WIND_BONE=3};
@@ -211,6 +211,12 @@ typedef struct{
 	int8_t new_data;
 }NMEA_WIXDR;
 
+typedef struct{
+		uint16_t position;
+		Timeval16 tv;
+		int8_t new_data;		
+}LINE_ANGLE;
+
 typedef struct { // sender id = 165
 		Svinfo svinfo;
 		Airspeed_ets airspeed_ets;
@@ -232,12 +238,18 @@ typedef struct{
 		NMEA_IIMWV nmea_iimmwv;
 		NMEA_WIXDR nmea_wixdr;
 }Bone_wind;
-	
+
+
+typedef struct{
+		LINE_ANGLE line_angle;
+}Bone_arm;	
+
 typedef struct
 {
 	Bone_plane bone_plane;
 	Lisa_plane lisa_plane;
 	Bone_wind bone_wind;
+	Bone_arm bone_arm;
 } Data;
 
 #pragma pack(pop)   /* restore original alignment from stack */

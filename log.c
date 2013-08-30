@@ -35,10 +35,11 @@ LOG_errCode init_log(){
 	
 	//check if sdcard is present
 	FILE *file;
-	file = fopen("/media/sdcard/sdcard_present","r"); 
+	file = fopen("/media/rootfs/sdcard_present","r"); 
 	if(file==NULL){	
 		//SD CARD IS NOT PRESENT!, try mounting it	
-		return mount_sd_card();
+		//mount_sd_card();
+		return LOG_ERR_MOUNT_SD;
 	}
 	return LOG_ERR_NONE;
 }
