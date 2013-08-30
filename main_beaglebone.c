@@ -127,7 +127,7 @@ int main(int argc, char *argv[]){
 	pthread_t thread_lisa_to_pc,thread_data_logging_lisa,thread_data_logging_ground;
 
 	//create a second thread which executes lisa_to_pc
-	if(pthread_create(&thread_lisa_to_pc, NULL, lisa_to_pc,&connection)) {
+	if(pthread_create(&thread_lisa_to_pc, NULL, lisa_to_pc,NULL)) {
 		error_write(FILENAME,"error creating lisa thread");
 		exit(EXIT_FAILURE);
 	}
@@ -176,7 +176,6 @@ int main(int argc, char *argv[]){
 					switch_cb_ground_pointers();
 				}else{
 					printf("GROUND WRITE WAS NOT READY \n");
-					exit(1); //FOR DEBUGGING
 				}
 			 }
 			
