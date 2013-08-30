@@ -215,6 +215,7 @@ DEC_errCode data_encode(uint8_t message[],long unsigned int message_length,uint8
 	uint8_t checksum_2 = 0;
 	uint8_t length = message_length+6+16; //message length + 6 info bytes + 16 timestamp bytes
 	timeval timestamp; 
+	TimestampBeagle timestampBeagle;
 	 
 	encoded_data[STARTBYTE_INDEX] = 0x99;
 	encoded_data[LENGTH_INDEX] = length;
@@ -227,8 +228,12 @@ DEC_errCode data_encode(uint8_t message[],long unsigned int message_length,uint8
 	//get localtime 
 	gettimeofday(&timestamp, NULL);
 	
+	//convert beaglebone 8 byte timeval to 16 byte timeval for server
+	timestampBeagle.tv.tv_sec=(uint64_t)timestamp.tv_sec;
+	timestampBeagle.tv.tv_usec=(uint64_t)timestamp.tv_usec;
+	
 	//add timestamp to buffer
-	memcpy(&(encoded_data[message_length+4]),(void *)&timestamp,sizeof(timestamp));
+	memcpy(&(encoded_data[message_length+4]),(void *)&timestampBeagle.tv,sizeof(timestampBeagle.tv));
 	
 	calculate_checksum(encoded_data,&checksum_1,&checksum_2);
 	
@@ -273,7 +278,7 @@ int add_timestamp(uint8_t buffer[]){
 	int length_original=buffer[1],i,j;
 	uint8_t checksum_1,checksum_2;
 	int new_length=length_original+16; //timeval is 16 bytes
-	struct timeval tv_8;
+	struct timeval tv_8;	//beaglebones timestamp is 8 byte, server timestamp is 16 byte :-(
 	TimestampBeagle timestampBeagle;
 
 	//get localtime 

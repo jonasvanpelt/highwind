@@ -56,6 +56,7 @@ void (*write_error_ptr)(char *,char *,int);
   * MAIN
   * *********************************/
 int main(int argc, char *argv[]){
+
 	Connection connection;
 	write_error_ptr = &write_error;  //initialize the function pointer to write error
 	
@@ -172,7 +173,7 @@ int main(int argc, char *argv[]){
 		if(err == UDP_ERR_NONE){
 			gettimeofday(&tv_now,NULL); //timestamp from receiving to calculate latency
 			
-			#if DEBUG > 0
+			//#if DEBUG > 0
 			
 				printf("message raw: ");
 				int i;
@@ -189,7 +190,7 @@ int main(int argc, char *argv[]){
 				printf("checksum2: %d\n", input_stream[input_stream[1]-1]);
 				printf("\n");
 			
-			#endif
+			//#endif
 			
 			//2. decode data 		
 			int err  = data_decode(input_stream);
