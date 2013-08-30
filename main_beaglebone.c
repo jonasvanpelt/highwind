@@ -117,7 +117,7 @@ int main(int argc, char *argv[]){
 	 cbInit(cb_write_ground, CBSIZE);
 	 #endif
 
-	err = serial_port_setup()
+	err = serial_port_setup();
 	UART_err_handler(err,write_uart_error_ptr);
 	if(err != UART_ERR_NONE){
 		exit(EXIT_FAILURE);
