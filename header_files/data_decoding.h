@@ -192,14 +192,14 @@ typedef struct{
 	double wind_speed;
 	char wind_speed_unit; //(N=knots,K = KPH, M = MPH)
 	char status; //(A=valid)
-	timeval tv;
+	Timeval16 tv;
 	int8_t new_data;
 }NMEA_IIMWV;
 
 typedef struct{
 	double temperature;
 	char unit;
-	timeval tv;
+	Timeval16 tv;
 	int8_t new_data;
 }NMEA_WIXDR;
 
