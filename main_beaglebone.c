@@ -117,8 +117,11 @@ int main(int argc, char *argv[]){
 	 cbInit(cb_write_ground, CBSIZE);
 	 #endif
 
-
-	UART_err_handler(serial_port_setup(),write_uart_error_ptr);
+	err = serial_port_setup()
+	UART_err_handler(err,write_uart_error_ptr);
+	if(err != UART_ERR_NONE){
+		exit(EXIT_FAILURE);
+	}
 
 	//thread variables
 	pthread_t thread_lisa_to_pc,thread_data_logging_lisa,thread_data_logging_ground;
