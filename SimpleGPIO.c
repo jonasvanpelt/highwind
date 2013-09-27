@@ -34,7 +34,7 @@
  * * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * */
 
-#include "SimpleGPIO.h"
+#include "header_files/SimpleGPIO.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

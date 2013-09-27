@@ -16,8 +16,8 @@ typedef enum spi_errCode SPI_errCode;
 
 
 
-const char spidev[] = "/dev/spidev1.0";
-const char spidev1[] = "/dev/spidev1.1";
+//const char spidev[] = "/dev/spidev1.0";
+//const char spidev1[] = "/dev/spidev1.1";
 
 /********************************
  * PROTOTYPES PUBLIC
